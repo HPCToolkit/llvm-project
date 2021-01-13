@@ -144,9 +144,9 @@ int32_t __tgt_rtl_is_valid_binary(__tgt_device_image *image) {
 
 int32_t __tgt_rtl_number_of_devices() { return NUMBER_OF_DEVICES; }
 
-int32_t __tgt_rtl_init_device(int32_t device_id) { return OFFLOAD_SUCCESS; }
+int32_t __tgt_rtl_init_device(int32_t device_id, int32_t omp_device_id) { return OFFLOAD_SUCCESS; }
 
-__tgt_target_table *__tgt_rtl_load_binary(int32_t device_id,
+__tgt_target_table *__tgt_rtl_load_binary(int32_t device_id, const char *file_name,
                                           __tgt_device_image *image) {
 
   DP("Dev %d: load binary from " DPxMOD " image\n", device_id,

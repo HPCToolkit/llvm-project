@@ -26,8 +26,8 @@ struct __tgt_bin_desc;
 struct RTLInfoTy {
   typedef int32_t(is_valid_binary_ty)(void *);
   typedef int32_t(number_of_devices_ty)();
-  typedef int32_t(init_device_ty)(int32_t);
-  typedef __tgt_target_table *(load_binary_ty)(int32_t, void *);
+  typedef int32_t(init_device_ty)(int32_t, int32_t);
+  typedef __tgt_target_table *(load_binary_ty)(int32_t, const char *, __tgt_device_image *);
   typedef void *(data_alloc_ty)(int32_t, int64_t, void *);
   typedef int32_t(data_submit_ty)(int32_t, void *, void *, int64_t);
   typedef int32_t(data_retrieve_ty)(int32_t, void *, void *, int64_t);

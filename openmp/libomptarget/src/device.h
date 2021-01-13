@@ -20,6 +20,8 @@
 #include <mutex>
 #include <vector>
 
+#include "omptarget.h"
+
 // Forward declarations.
 struct RTLInfoTy;
 struct __tgt_bin_desc;
@@ -147,8 +149,10 @@ struct DeviceTy {
 
   // calls to RTL
   int32_t initOnce();
-  __tgt_target_table *load_binary(void *Img);
+  __tgt_target_table *load_binary(__tgt_device_image *Img);
 
+  void *data_alloc(int64_t Size, void *HstPtrBegin); 
+  int32_t data_delete(void *TgtPtr);
   int32_t data_submit(void *TgtPtrBegin, void *HstPtrBegin, int64_t Size);
   int32_t data_retrieve(void *HstPtrBegin, void *TgtPtrBegin, int64_t Size);
 

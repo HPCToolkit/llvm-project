@@ -76,7 +76,11 @@ if(LIBOMPTARGET_DEP_CUDA_FOUND)
   set(LIBOMPTARGET_NVPTX_DEBUG FALSE CACHE BOOL
     "Activate NVPTX device RTL debug messages.")
   if(${LIBOMPTARGET_NVPTX_DEBUG})
-    set(CUDA_DEBUG -DOMPTARGET_NVPTX_DEBUG=-1 -g --ptxas-options=-v)
+    set(CUDA_DEBUG -DOMPTARGET_NVPTX_DEBUG=-1 -g --ptxas-options=-v -lineinfo)
+  endif()
+
+  if(${LIBOMPTARGET_NVPTX_LINEINFO})
+    set(CUDA_DEBUG -DOMPTARGET_NVPTX_DEBUG=0 -g --ptxas-options=-v -lineinfo -O2)
   endif()
 
   # NVPTX runtime library has to be statically linked. Dynamic linking is not

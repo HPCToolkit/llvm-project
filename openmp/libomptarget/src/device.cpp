@@ -13,6 +13,8 @@
 #include "device.h"
 #include "private.h"
 #include "rtl.h"
+#include "ompt_callback.h"
+#include "loadmap.cpp"
 
 #include <cassert>
 #include <climits>
@@ -256,7 +258,7 @@ int DeviceTy::deallocTgtPtr(void *HstPtrBegin, int64_t Size, bool ForceDelete) {
       assert(HT.RefCount == 0 && "did not expect a negative ref count");
       DP("Deleting tgt data " DPxMOD " of size %ld\n",
           DPxPTR(HT.TgtPtrBegin), Size);
-      RTL->data_delete(RTLDeviceID, (void *)HT.TgtPtrBegin);
+      data_delete((void *)HT.TgtPtrBegin);
       DP("Removing%s mapping with HstPtrBegin=" DPxMOD ", TgtPtrBegin=" DPxMOD
           ", Size=%ld\n", (ForceDelete ? " (forced)" : ""),
           DPxPTR(HT.HstPtrBegin), DPxPTR(HT.TgtPtrBegin), Size);
@@ -278,7 +280,7 @@ void DeviceTy::init() {
   // Make call to init_requires if it exists for this plugin.
   if (RTL->init_requires)
     RTL->init_requires(RTLRequiresFlags);
-  int32_t rc = RTL->init_device(RTLDeviceID);
+  int32_t rc = RTL->init_device(RTLDeviceID, DeviceID);
   if (rc == OFFLOAD_SUCCESS) {
     IsInit = true;
   }
@@ -301,38 +303,81 @@ int32_t DeviceTy::initOnce() {
 }
 
 // Load binary to device.
-__tgt_target_table *DeviceTy::load_binary(void *Img) {
+__tgt_target_table *DeviceTy::load_binary(__tgt_device_image *Img) {
+  DP("enter DeviceTy::load_binary\n");
+  const char *load_module = lm_addr_to_module(Img->ImageStart); 
   RTL->Mtx.lock();
-  __tgt_target_table *rc = RTL->load_binary(RTLDeviceID, Img);
+  __tgt_target_table *rc = RTL->load_binary(RTLDeviceID, load_module, Img);
   RTL->Mtx.unlock();
+  DP("exit DeviceTy::load_inbary\n");
   return rc;
+}
+
+// Allocate device memory
+void *DeviceTy::data_alloc(int64_t Size, void *HstPtrBegin) {
+  DP("enter DeviceTy::data_alloc\n");
+  ompt_interface.target_data_alloc_begin(DeviceID, NULL, Size);
+  void *TgtPtrBegin = RTL->data_alloc(RTLDeviceID, Size, HstPtrBegin);
+  ompt_interface.target_data_alloc_end(DeviceID, TgtPtrBegin, Size);
+  DP("exit DeviceTy::data_alloc\n");
+  return TgtPtrBegin;
 }
 
 // Submit data to device.
 int32_t DeviceTy::data_submit(void *TgtPtrBegin, void *HstPtrBegin,
     int64_t Size) {
-  return RTL->data_submit(RTLDeviceID, TgtPtrBegin, HstPtrBegin, Size);
+  DP("enter DeviceTy::data_submit\n");
+  ompt_interface.target_data_submit_begin(DeviceID, TgtPtrBegin, HstPtrBegin, Size);
+  int32_t result = RTL->data_submit(RTLDeviceID, TgtPtrBegin, HstPtrBegin, Size); 
+  ompt_interface.target_data_submit_end(DeviceID, TgtPtrBegin, HstPtrBegin, Size);
+  DP("exit DeviceTy::data_submit\n");
+  return result;
+}
+
+// Delete device data
+int32_t DeviceTy::data_delete(void *TgtPtrBegin) {
+  DP("enter DeviceTy::data_delete\n");
+  ompt_interface.target_data_delete_begin(DeviceID, TgtPtrBegin);
+  int32_t result = RTL->data_delete(RTLDeviceID, TgtPtrBegin);
+  ompt_interface.target_data_delete_end(DeviceID, TgtPtrBegin);
+  DP("exit DeviceTy::data_delete\n");
+  return result;
 }
 
 // Retrieve data from device.
 int32_t DeviceTy::data_retrieve(void *HstPtrBegin, void *TgtPtrBegin,
     int64_t Size) {
-  return RTL->data_retrieve(RTLDeviceID, HstPtrBegin, TgtPtrBegin, Size);
+  DP("enter DeviceTy::data_retrieve\n");
+  ompt_interface.target_data_retrieve_begin(DeviceID, HstPtrBegin, TgtPtrBegin, Size);
+  int32_t result = RTL->data_retrieve(RTLDeviceID, HstPtrBegin, TgtPtrBegin, Size);
+  ompt_interface.target_data_retrieve_end(DeviceID, HstPtrBegin, TgtPtrBegin, Size);
+  DP("exit DeviceTy::data_retrieve\n");
+  return result;
 }
 
 // Run region on device
 int32_t DeviceTy::run_region(void *TgtEntryPtr, void **TgtVarsPtr,
     ptrdiff_t *TgtOffsets, int32_t TgtVarsSize) {
-  return RTL->run_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets,
+  DP("enter DeviceTy::run_region\n");
+  ompt_interface.target_submit_begin();
+  int32_t result = RTL->run_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets,
       TgtVarsSize);
+  ompt_interface.target_submit_end();
+  DP("exit DeviceTy::run_region\n");
+  return result;
 }
 
 // Run team region on device.
 int32_t DeviceTy::run_team_region(void *TgtEntryPtr, void **TgtVarsPtr,
     ptrdiff_t *TgtOffsets, int32_t TgtVarsSize, int32_t NumTeams,
     int32_t ThreadLimit, uint64_t LoopTripCount) {
-  return RTL->run_team_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets,
+  DP("enter DeviceTy::run_team_region\n");
+  ompt_interface.target_submit_begin(NumTeams);
+  int32_t result = RTL->run_team_region(RTLDeviceID, TgtEntryPtr, TgtVarsPtr, TgtOffsets,
       TgtVarsSize, NumTeams, ThreadLimit, LoopTripCount);
+  ompt_interface.target_submit_end(NumTeams);
+  DP("exit DeviceTy::run_team_region\n");
+  return result;
 }
 
 /// Check whether a device has an associated RTL and initialize it if it's not

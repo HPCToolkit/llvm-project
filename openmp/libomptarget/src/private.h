@@ -15,6 +15,8 @@
 
 #include <omptarget.h>
 
+#include "device.h"
+
 #include <cstdint>
 
 extern int target_data_begin(DeviceTy &Device, int32_t arg_num,

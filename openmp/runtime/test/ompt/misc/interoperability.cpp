@@ -56,7 +56,6 @@ int main() {
 // CHECK: {{^}}[[MASTER_ID_1:[0-9]+]]: ompt_event_thread_begin:
 // CHECK-SAME: thread_type=ompt_thread_initial=1, thread_id=[[MASTER_ID_1]]
 
-
 // CHECK: {{^}}[[MASTER_ID:[0-9]+]]: ompt_event_initial_task_begin: parallel_id={{[0-9]+}}
 // CHECK-SAME: task_id=[[PARENT_TASK_ID_1:[0-9]+]], actual_parallelism=1, index=1, flags=1 
 

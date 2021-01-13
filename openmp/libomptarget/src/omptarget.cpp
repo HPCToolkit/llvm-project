@@ -25,7 +25,6 @@ int DebugLevel = 0;
 #endif // OMPTARGET_DEBUG
 
 
-
 /* All begin addresses for partially mapped structs must be 8-aligned in order
  * to ensure proper alignment of members. E.g.
  *
@@ -676,8 +675,7 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
       TgtBaseOffset = 0;
     } else if (arg_types[i] & OMP_TGT_MAPTYPE_PRIVATE) {
       // Allocate memory for (first-)private array
-      TgtPtrBegin = Device.RTL->data_alloc(Device.RTLDeviceID,
-          arg_sizes[i], HstPtrBegin);
+      TgtPtrBegin = Device.data_alloc(arg_sizes[i], HstPtrBegin);
       if (!TgtPtrBegin) {
         DP ("Data allocation for %sprivate array " DPxMOD " failed, "
             "abort target.\n",
@@ -758,7 +756,7 @@ int target(int64_t device_id, void *host_ptr, int32_t arg_num,
 
   // Deallocate (first-)private arrays
   for (auto it : fpArrays) {
-    int rt = Device.RTL->data_delete(Device.RTLDeviceID, it);
+    int rt = Device.data_delete(it);
     if (rt != OFFLOAD_SUCCESS) {
       DP("Deallocation of (first-)private arrays failed.\n");
       return OFFLOAD_FAIL;

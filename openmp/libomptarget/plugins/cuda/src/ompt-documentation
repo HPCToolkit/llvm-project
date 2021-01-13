@@ -1,0 +1,198 @@
+--------------------------------------------------------------------------------
+
+  Function: ompt_get_device_time
+
+  Type Signature:
+
+    ompt_device_time_t ompt_get_device_time
+    (
+      ompt_device_t *device
+    )
+
+  Description:
+
+    Return the current time on the specified device context using
+    cuptiDeviceGetTimestamp.
+
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_translate_time
+
+  Type Signature:
+
+    double ompt_translate_time
+    (
+      ompt_device_t *device,
+      ompt_device_time_t time
+    )
+
+  Description:
+
+    Translate the time on the specified device context into a corresponding
+    time value on the host device that is comparable with values returned by
+    omp_get_wtime.
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_set_trace_native
+
+  Type Signature:
+
+    int ompt_set_trace_native
+    (
+      ompt_device_t *device,
+      int enable,
+      int flags
+    )
+
+  Description:
+
+    Enable or disable collection of a specific kind of activity
+    record for a context using cuptiActivityEnableContext or
+    cuptiActivityDisableContext.
+
+    The return codes for this routine have the following meaning:
+        0	error
+    	1	event will never occur
+    	2	event may occur but no tracing is possible
+    	3	event may occur and will be traced when convenient
+    	4	event may occur and will be always be traced if event occurs
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_start_trace
+
+  Type Signature:
+
+    int ompt_start_trace
+    (
+      ompt_device_t *device,
+      ompt_callback_buffer_request_t request,
+      ompt_callback_buffer_complete_t complete
+    )
+
+  Description:
+
+    Register a buffer request callback and a buffer complete
+    callback using cuptiActivityRegisterCallbacks. Enable and start
+    trace collection.
+
+    This routine will return 1 if the operation succeeded and 0 otherwise.
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_pause_trace
+
+  Type Signature:
+
+    int ompt_pause_trace
+    (
+      ompt_device_t *device,
+      int begin_pause
+    )
+
+  Description:
+
+    If begin_pause is non-zero, pause trace collection. Otherwise, resume
+    trace collection. Note: an invocation of this routine will fail if trace
+    collection was not previously enabled by ompt_start_trace.
+
+    This routine will return 1 if the operation succeeded and 0 otherwise.
+
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_stop_trace
+
+  Type Signature:
+
+    int ompt_stop_trace
+    (
+      ompt_device_t *device
+    )
+
+  Description:
+
+    Stop trace collection. Note: an invocation of this routine will fail if
+    trace collection was not previously enabled by ompt_start_trace.
+
+    This routine will return 1 if the operation succeeded and 0 otherwise.
+
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_get_record_type
+
+  Type Signature:
+
+    ompt_record_type_t ompt_get_record_type
+    (
+      ompt_buffer_t *buffer,
+      ompt_buffer_cursor_t current
+    )
+
+  Description:
+
+    Return an enumeration type that indicates whether the record at the
+    current cursor position in the buffer is a native trace record,
+    an OMPT trace record, or an invalid trace record.
+
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_get_record_native
+
+  Type Signature:
+
+    void *ompt_get_record_native
+    (
+      ompt_buffer_t *buffer,
+      ompt_buffer_cursor_t current,
+      ompt_id_t *host_op_id
+    )
+
+  Description:
+
+    If the buffer contains a native trace record at the cursor position, this
+    routine will return a pointer to a native record structure. If the function
+    returns a non-null result, it will also set *host_op_id to the host-side
+    identifier for the operation associated with the record.
+
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_get_record_abstract
+
+  Type Signature:
+
+    ompt_record_abstract_t *ompt_get_record_abstract
+    (
+      void *native_record
+    )
+
+  Description:
+
+    Prepare an abstract that summarizes the information in a native trace
+    record.
+
+--------------------------------------------------------------------------------
+
+  Function: ompt_advance_buffer_cursor
+
+  Type Signature:
+
+    int ompt_advance_buffer_cursor
+    (
+      ompt_buffer_t *buffer,
+      size_t size,
+      ompt_buffer_cursor_t current,
+      ompt_buffer_cursor_t *next
+    )
+
+  Description:
+
+    Return a cursor for the next record in the specified buffer
+    given a cursor for the current record using cuptiActivityGetNextRecord.
+
+--------------------------------------------------------------------------------

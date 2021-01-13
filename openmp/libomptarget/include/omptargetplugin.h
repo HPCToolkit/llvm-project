@@ -36,14 +36,14 @@ int64_t __tgt_rtl_init_requires(int64_t RequiresFlags);
 
 // Initialize the specified device. In case of success return 0; otherwise
 // return an error code.
-int32_t __tgt_rtl_init_device(int32_t ID);
+int32_t __tgt_rtl_init_device(int32_t ID, int32_t omp_device_id);
 
 // Pass an executable image section described by image to the specified
 // device and prepare an address table of target entities. In case of error,
 // return NULL. Otherwise, return a pointer to the built address table.
 // Individual entries in the table may also be NULL, when the corresponding
 // offload region is not supported on the target device.
-__tgt_target_table *__tgt_rtl_load_binary(int32_t ID,
+__tgt_target_table *__tgt_rtl_load_binary(int32_t ID, const char *file_name,
                                           __tgt_device_image *Image);
 
 // Allocate data on the particular target device, of the specified size.

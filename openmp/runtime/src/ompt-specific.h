@@ -19,7 +19,12 @@
  * forward declarations
  ****************************************************************************/
 
+void __ompt_force_initialization();
+
+int __ompt_set_frame_enter_internal(void *addr, int flags, int state);
+
 void __ompt_team_assign_id(kmp_team_t *team, ompt_data_t ompt_pid);
+
 void __ompt_thread_assign_wait_id(void *variable);
 
 void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
@@ -56,12 +61,12 @@ ompt_sync_region_t __ompt_get_barrier_kind(enum barrier_type, kmp_info_t *);
  * macros
  ****************************************************************************/
 
-#define OMPT_CUR_TASK_INFO(thr) (&(thr->th.th_current_task->ompt_task_info))
+#define OMPT_CUR_TASK_INFO(thr) (&((thr)->th.th_current_task->ompt_task_info))
 #define OMPT_CUR_TASK_DATA(thr)                                                \
-  (&(thr->th.th_current_task->ompt_task_info.task_data))
-#define OMPT_CUR_TEAM_INFO(thr) (&(thr->th.th_team->t.ompt_team_info))
+  (&((thr)->th.th_current_task->ompt_task_info.task_data))
+#define OMPT_CUR_TEAM_INFO(thr) (&((thr)->th.th_team->t.ompt_team_info))
 #define OMPT_CUR_TEAM_DATA(thr)                                                \
-  (&(thr->th.th_team->t.ompt_team_info.parallel_data))
+  (&((thr)->th.th_team->t.ompt_team_info.parallel_data))
 
 #define OMPT_HAVE_WEAK_ATTRIBUTE KMP_HAVE_WEAK_ATTRIBUTE
 #define OMPT_HAVE_PSAPI KMP_HAVE_PSAPI
@@ -74,12 +79,17 @@ inline void *__ompt_load_return_address(int gtid) {
   return return_address;
 }
 
-#define OMPT_STORE_RETURN_ADDRESS(gtid)                                        \
-  if (ompt_enabled.enabled && gtid >= 0 && __kmp_threads[gtid] &&              \
-      !__kmp_threads[gtid]->th.ompt_thread_info.return_address)                \
-  __kmp_threads[gtid]->th.ompt_thread_info.return_address =                    \
+#define OMPT_STORE_RETURN_ADDRESS(gtid)					\
+  if (ompt_enabled.enabled && gtid >= 0 && __kmp_threads[gtid] &&	\
+      !__kmp_threads[gtid]->th.ompt_thread_info.return_address)		\
+    __kmp_threads[gtid]->th.ompt_thread_info.return_address =		\
       __builtin_return_address(0)
+
 #define OMPT_LOAD_RETURN_ADDRESS(gtid) __ompt_load_return_address(gtid)
+
+#define OMPT_CLEAR_RETURN_ADDRESS(gtid)					\
+  if (ompt_enabled.enabled && gtid >= 0 && __kmp_threads[gtid])		\
+    __kmp_threads[gtid]->th.ompt_thread_info.return_address = 0
 
 //******************************************************************************
 // inline functions

@@ -13,6 +13,7 @@
 #include "device.h"
 #include "private.h"
 #include "rtl.h"
+#include "ompt_callback.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -49,6 +50,9 @@ void RTLsTy::LoadRTLs() {
   if (TargetOffloadPolicy == tgt_disabled) {
     return;
   }
+
+  // initialize the OMPT tools interface
+  ompt_init();
 
   DP("Loading RTLs...\n");
 
@@ -354,6 +358,7 @@ void RTLsTy::UnregisterLib(__tgt_bin_desc *desc) {
         Device.PendingGlobalsMtx.lock();
         if (Device.PendingCtorsDtors[desc].PendingCtors.empty()) {
           for (auto &dtor : Device.PendingCtorsDtors[desc].PendingDtors) {
+            // TODO(Keren): do not monitor these ctors?
             int rc = target(Device.DeviceID, dtor, 0, NULL, NULL, NULL, NULL, 1,
                 1, true /*team*/);
             if (rc != OFFLOAD_SUCCESS) {

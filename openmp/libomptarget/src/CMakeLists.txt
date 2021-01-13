@@ -18,6 +18,7 @@ set(src_files
   interface.cpp
   rtl.cpp
   omptarget.cpp
+  ompt_callback.cpp
 )
 
 # Build libomptarget library with libdl dependency.

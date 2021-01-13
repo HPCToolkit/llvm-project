@@ -22,6 +22,7 @@ VERS1.0 {
     omp_target_memcpy_rect;
     omp_target_associate_ptr;
     omp_target_disassociate_ptr;
+    libomptarget_rtl_ompt_init;
     __kmpc_push_target_tripcount;
   local:
     *;

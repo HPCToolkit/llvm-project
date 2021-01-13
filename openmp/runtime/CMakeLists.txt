@@ -226,9 +226,9 @@ include(config-ix)
 # TODO: Make this a real feature check
 set(LIBOMP_USE_QUAD_PRECISION "${LIBOMP_HAVE_QUAD_PRECISION}" CACHE BOOL
   "Should 128-bit precision entry points be built?")
-if(LIBOMP_USE_QUAD_PRECISION AND (NOT LIBOMP_HAVE_QUAD_PRECISION))
-  libomp_error_say("128-bit quad precision functionality requested but not available")
-endif()
+#if(LIBOMP_USE_QUAD_PRECISION AND (NOT LIBOMP_HAVE_QUAD_PRECISION))
+#  libomp_error_say("128-bit quad precision functionality requested but not available")
+#endif()
 
 # libgomp drop-in compatibility requires versioned symbols
 set(LIBOMP_USE_VERSION_SYMBOLS "${LIBOMP_HAVE_VERSION_SYMBOLS}" CACHE BOOL

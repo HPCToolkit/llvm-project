@@ -9,10 +9,11 @@
 # Build a plugin for a CUDA machine if available.
 #
 ##===----------------------------------------------------------------------===##
+
 if (NOT(CMAKE_SYSTEM_PROCESSOR MATCHES "(x86_64)|(ppc64le)$" AND CMAKE_SYSTEM_NAME MATCHES "Linux"))
   libomptarget_say("Not building CUDA offloading plugin: only support CUDA in Linux x86_64 or ppc64le hosts.")
   return()
-elseif (NOT LIBOMPTARGET_DEP_LIBELF_FOUND)
+elseif(NOT LIBOMPTARGET_DEP_LIBELF_FOUND)
   libomptarget_say("Not building CUDA offloading plugin: libelf dependency not found.")
   return()
 elseif(NOT LIBOMPTARGET_DEP_CUDA_FOUND)
@@ -34,14 +35,25 @@ endif()
 
 include_directories(${LIBOMPTARGET_DEP_CUDA_INCLUDE_DIRS})
 include_directories(${LIBOMPTARGET_DEP_LIBELF_INCLUDE_DIRS})
+include_directories(${CUDA_TOOLKIT_ROOT_DIR}/extras/CUPTI/include)
 
-add_library(omptarget.rtl.cuda SHARED src/rtl.cpp)
+set(CUDA_SRCFILES
+  src/cuda.cpp
+  src/cupti.cpp
+  src/ompt-cupti.cpp
+  src/rtl.cpp
+  )
+
+add_library(omptarget.rtl.cuda SHARED ${CUDA_SRCFILES})
 
 # Install plugin under the lib destination folder.
 install(TARGETS omptarget.rtl.cuda LIBRARY DESTINATION "${OPENMP_INSTALL_LIBDIR}")
 
 target_link_libraries(omptarget.rtl.cuda
   ${LIBOMPTARGET_DEP_CUDA_DRIVER_LIBRARIES}
+  cuda 
+  ${CUDA_TOOLKIT_ROOT_DIR}/extras/CUPTI/lib64/libcupti.so
+  ${CUDA_TOOLKIT_ROOT_DIR}/lib64/libcudart.so
   ${LIBOMPTARGET_DEP_LIBELF_LIBRARIES}
   "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/../exports")
 

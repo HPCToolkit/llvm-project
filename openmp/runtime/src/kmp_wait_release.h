@@ -128,11 +128,15 @@ static void __ompt_implicit_task_end(kmp_info_t *this_thr,
 #if OMPT_OPTIONAL
     void *codeptr = NULL;
     if (ompt_enabled.ompt_callback_sync_region_wait) {
+      if (this_thr->th.th_team) 
+        codeptr = OMPT_CUR_TEAM_INFO(this_thr)->master_return_address;
       ompt_callbacks.ompt_callback(ompt_callback_sync_region_wait)(
           ompt_sync_region_barrier_implicit, ompt_scope_end, NULL, tId,
           codeptr);
     }
     if (ompt_enabled.ompt_callback_sync_region) {
+      if (this_thr->th.th_team) 
+        codeptr = OMPT_CUR_TEAM_INFO(this_thr)->master_return_address;
       ompt_callbacks.ompt_callback(ompt_callback_sync_region)(
           ompt_sync_region_barrier_implicit, ompt_scope_end, NULL, tId,
           codeptr);
@@ -140,8 +144,19 @@ static void __ompt_implicit_task_end(kmp_info_t *this_thr,
 #endif
     if (!KMP_MASTER_TID(ds_tid)) {
       if (ompt_enabled.ompt_callback_implicit_task) {
+        kmp_taskdata_t *task = this_thr->th.th_current_task;
+	ompt_frame_t *task_frame;
+	// task might be NULL for a task that's ending
+	if (task) {
+          task_frame = &task->ompt_task_info.frame;
+          OMPT_FRAME_SET(task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
+                         (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
+	}
         ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
             ompt_scope_end, NULL, tId, 0, ds_tid, ompt_task_implicit);
+	if (task) {
+          OMPT_FRAME_CLEAR(task_frame, exit);
+	}
       }
       // return to idle state
       this_thr->th.ompt_thread_info.state = ompt_state_idle;
