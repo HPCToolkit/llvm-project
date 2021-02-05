@@ -1,5 +1,8 @@
 // RUN: %libomp-compile-and-run | %sort-threads | FileCheck %s
 // REQUIRES: ompt
+// XFAIL: gcc-4
+// gcc-4 manages frame pointers for parallel regions differently than other APIs. the parallel region's enter_frame.ptr 
+//       matches the implicit task's exit_frame.ptr. for that reason, this test will fail.
 #define TEST_NEED_PRINT_FRAME_FROM_OUTLINED_FN
 #include "callback.h"
 #include <omp.h> 

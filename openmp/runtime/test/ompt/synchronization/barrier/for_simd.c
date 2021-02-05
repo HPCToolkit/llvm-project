@@ -24,10 +24,10 @@ int main()
   // CHECK: 0: NULL_POINTER=[[NULL:.*$]]
 
   // master thread implicit barrier at simd loop end 
-  // CHECK: {{^}}[[MASTER_ID:[0-9]+]]: ompt_event_barrier_begin: parallel_id={{[0-9]+}}, task_id={{[0-9]+}}, codeptr_ra={{0x[0-f]+}}
-  // CHECK: {{^}}[[MASTER_ID]]: ompt_event_wait_barrier_begin: parallel_id={{[0-9]+}}, task_id={{[0-9]+}}, codeptr_ra={{0x[0-f]+}}
-  // CHECK: {{^}}[[MASTER_ID]]: ompt_event_wait_barrier_end: parallel_id={{[0-9]+}}, task_id={{[0-9]+}}, codeptr_ra={{0x[0-f]+}}
-  // CHECK: {{^}}[[MASTER_ID]]: ompt_event_barrier_end: parallel_id={{[0-9]+}}, task_id={{[0-9]+}}, codeptr_ra={{0x[0-f]+}}
+  // CHECK: {{^}}[[MASTER_ID:[0-9]+]]: ompt_event_barrier_begin: parallel_id=[[PARALLELID:[0-9]+]], task_id=[[TASKID:[0-9]+]], codeptr_ra=[[CODEPTR:0x[0-f]+]]
+  // CHECK: {{^}}[[MASTER_ID]]: ompt_event_wait_barrier_begin: parallel_id=[[PARALLELID]], task_id=[[TASKID]], codeptr_ra=[[CODEPTR]]
+  // CHECK: {{^}}[[MASTER_ID]]: ompt_event_wait_barrier_end: parallel_id=[[PARALLELID]], task_id=[[TASKID]], codeptr_ra=[[CODEPTR]]
+  // CHECK: {{^}}[[MASTER_ID]]: ompt_event_barrier_end: parallel_id=[[PARALLELID]], task_id=[[TASKID]], codeptr_ra=[[CODEPTR]]
 
   return 0;
 }
