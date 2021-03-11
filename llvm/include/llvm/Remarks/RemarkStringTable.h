@@ -17,15 +17,18 @@
 #define LLVM_REMARKS_REMARK_STRING_TABLE_H
 
 #include "llvm/ADT/StringMap.h"
-#include "llvm/ADT/StringRef.h"
-#include "llvm/Remarks/RemarkParser.h"
+#include "llvm/Support/Allocator.h"
 #include <vector>
 
 namespace llvm {
 
 class raw_ostream;
+class StringRef;
 
 namespace remarks {
+
+struct ParsedStringTable;
+struct Remark;
 
 /// The string table used for serializing remarks.
 /// This table can be for example serialized in a section to be consumed after
@@ -51,6 +54,9 @@ struct StringTable {
 
   /// Add a string to the table. It returns an unique ID of the string.
   std::pair<unsigned, StringRef> add(StringRef Str);
+  /// Modify \p R to use strings from this string table. If the string table
+  /// does not contain the strings, it adds them.
+  void internalize(Remark &R);
   /// Serialize the string table to a stream. It is serialized as a little
   /// endian uint64 (the size of the table in bytes) followed by a sequence of
   /// NULL-terminated strings, where the N-th string is the string with the ID N

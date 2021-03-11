@@ -83,20 +83,15 @@ TEST(RelationSlab, Lookup) {
   SymbolID D{"D"};
 
   RelationSlab::Builder Builder;
-  Builder.insert(Relation{A, index::SymbolRole::RelationBaseOf, B});
-  Builder.insert(Relation{A, index::SymbolRole::RelationBaseOf, C});
-  Builder.insert(Relation{B, index::SymbolRole::RelationBaseOf, D});
-  Builder.insert(Relation{C, index::SymbolRole::RelationBaseOf, D});
-  Builder.insert(Relation{B, index::SymbolRole::RelationChildOf, A});
-  Builder.insert(Relation{C, index::SymbolRole::RelationChildOf, A});
-  Builder.insert(Relation{D, index::SymbolRole::RelationChildOf, B});
-  Builder.insert(Relation{D, index::SymbolRole::RelationChildOf, C});
+  Builder.insert(Relation{A, RelationKind::BaseOf, B});
+  Builder.insert(Relation{A, RelationKind::BaseOf, C});
+  Builder.insert(Relation{B, RelationKind::BaseOf, D});
+  Builder.insert(Relation{C, RelationKind::BaseOf, D});
 
   RelationSlab Slab = std::move(Builder).build();
-  EXPECT_THAT(
-      Slab.lookup(A, index::SymbolRole::RelationBaseOf),
-      UnorderedElementsAre(Relation{A, index::SymbolRole::RelationBaseOf, B},
-                           Relation{A, index::SymbolRole::RelationBaseOf, C}));
+  EXPECT_THAT(Slab.lookup(A, RelationKind::BaseOf),
+              UnorderedElementsAre(Relation{A, RelationKind::BaseOf, B},
+                                   Relation{A, RelationKind::BaseOf, C}));
 }
 
 TEST(RelationSlab, Duplicates) {
@@ -105,25 +100,24 @@ TEST(RelationSlab, Duplicates) {
   SymbolID C{"C"};
 
   RelationSlab::Builder Builder;
-  Builder.insert(Relation{A, index::SymbolRole::RelationBaseOf, B});
-  Builder.insert(Relation{A, index::SymbolRole::RelationBaseOf, C});
-  Builder.insert(Relation{A, index::SymbolRole::RelationBaseOf, B});
+  Builder.insert(Relation{A, RelationKind::BaseOf, B});
+  Builder.insert(Relation{A, RelationKind::BaseOf, C});
+  Builder.insert(Relation{A, RelationKind::BaseOf, B});
 
   RelationSlab Slab = std::move(Builder).build();
-  EXPECT_THAT(Slab, UnorderedElementsAre(
-                        Relation{A, index::SymbolRole::RelationBaseOf, B},
-                        Relation{A, index::SymbolRole::RelationBaseOf, C}));
+  EXPECT_THAT(Slab, UnorderedElementsAre(Relation{A, RelationKind::BaseOf, B},
+                                         Relation{A, RelationKind::BaseOf, C}));
 }
 
 TEST(SwapIndexTest, OldIndexRecycled) {
   auto Token = std::make_shared<int>();
   std::weak_ptr<int> WeakToken = Token;
 
-  SwapIndex S(llvm::make_unique<MemIndex>(SymbolSlab(), RefSlab(),
+  SwapIndex S(std::make_unique<MemIndex>(SymbolSlab(), RefSlab(),
                                           RelationSlab(), std::move(Token),
                                           /*BackingDataSize=*/0));
   EXPECT_FALSE(WeakToken.expired());      // Current MemIndex keeps it alive.
-  S.reset(llvm::make_unique<MemIndex>()); // Now the MemIndex is destroyed.
+  S.reset(std::make_unique<MemIndex>()); // Now the MemIndex is destroyed.
   EXPECT_TRUE(WeakToken.expired());       // So the token is too.
 }
 
@@ -230,6 +224,20 @@ TEST(MemIndexTest, Lookup) {
   EXPECT_THAT(lookup(*I, SymbolID("ns::nonono")), UnorderedElementsAre());
 }
 
+TEST(MemIndexTest, IndexedFiles) {
+  SymbolSlab Symbols;
+  RefSlab Refs;
+  auto Size = Symbols.bytes() + Refs.bytes();
+  auto Data = std::make_pair(std::move(Symbols), std::move(Refs));
+  llvm::StringSet<> Files = {testPath("foo.cc"), testPath("bar.cc")};
+  MemIndex I(std::move(Data.first), std::move(Data.second), RelationSlab(),
+             std::move(Files), std::move(Data), Size);
+  auto ContainsFile = I.indexedFiles();
+  EXPECT_TRUE(ContainsFile("unittest:///foo.cc"));
+  EXPECT_TRUE(ContainsFile("unittest:///bar.cc"));
+  EXPECT_FALSE(ContainsFile("unittest:///foobar.cc"));
+}
+
 TEST(MemIndexTest, TemplateSpecialization) {
   SymbolSlab::Builder B;
 
@@ -282,6 +290,40 @@ TEST(MergeIndexTest, Lookup) {
   EXPECT_THAT(lookup(M, {}), UnorderedElementsAre());
 }
 
+TEST(MergeIndexTest, LookupRemovedDefinition) {
+  FileIndex DynamicIndex, StaticIndex;
+  MergedIndex Merge(&DynamicIndex, &StaticIndex);
+
+  const char *HeaderCode = "class Foo;";
+  auto HeaderSymbols = TestTU::withHeaderCode(HeaderCode).headerSymbols();
+  auto Foo = findSymbol(HeaderSymbols, "Foo");
+
+  // Build static index for test.cc with Foo definition
+  TestTU Test;
+  Test.HeaderCode = HeaderCode;
+  Test.Code = "class Foo {};";
+  Test.Filename = "test.cc";
+  auto AST = Test.build();
+  StaticIndex.updateMain(testPath(Test.Filename), AST);
+
+  // Remove Foo definition from test.cc, i.e. build dynamic index for test.cc
+  // without Foo definition.
+  Test.Code = "class Foo;";
+  AST = Test.build();
+  DynamicIndex.updateMain(testPath(Test.Filename), AST);
+
+  // Merged index should not return the symbol definition if this definition
+  // location is inside a file from the dynamic index.
+  LookupRequest LookupReq;
+  LookupReq.IDs = {Foo.ID};
+  unsigned SymbolCounter = 0;
+  Merge.lookup(LookupReq, [&](const Symbol &Sym) {
+    ++SymbolCounter;
+    EXPECT_FALSE(Sym.Definition);
+  });
+  EXPECT_EQ(SymbolCounter, 1u);
+}
+
 TEST(MergeIndexTest, FuzzyFind) {
   auto I = MemIndex::build(generateSymbols({"ns::A", "ns::B"}), RefSlab(),
                            RelationSlab()),
@@ -291,6 +333,39 @@ TEST(MergeIndexTest, FuzzyFind) {
   Req.Scopes = {"ns::"};
   EXPECT_THAT(match(MergedIndex(I.get(), J.get()), Req),
               UnorderedElementsAre("ns::A", "ns::B", "ns::C"));
+}
+
+TEST(MergeIndexTest, FuzzyFindRemovedSymbol) {
+  FileIndex DynamicIndex, StaticIndex;
+  MergedIndex Merge(&DynamicIndex, &StaticIndex);
+
+  const char *HeaderCode = "class Foo;";
+  auto HeaderSymbols = TestTU::withHeaderCode(HeaderCode).headerSymbols();
+  auto Foo = findSymbol(HeaderSymbols, "Foo");
+
+  // Build static index for test.cc with Foo symbol
+  TestTU Test;
+  Test.HeaderCode = HeaderCode;
+  Test.Code = "class Foo {};";
+  Test.Filename = "test.cc";
+  auto AST = Test.build();
+  StaticIndex.updateMain(testPath(Test.Filename), AST);
+
+  // Remove Foo symbol, i.e. build dynamic index for test.cc, which is empty.
+  Test.HeaderCode = "";
+  Test.Code = "";
+  AST = Test.build();
+  DynamicIndex.updateMain(testPath(Test.Filename), AST);
+
+  // Merged index should not return removed symbol.
+  FuzzyFindRequest Req;
+  Req.AnyScope = true;
+  Req.Query = "Foo";
+  unsigned SymbolCounter = 0;
+  bool IsIncomplete =
+      Merge.fuzzyFind(Req, [&](const Symbol &) { ++SymbolCounter; });
+  EXPECT_FALSE(IsIncomplete);
+  EXPECT_EQ(SymbolCounter, 0u);
 }
 
 TEST(MergeTest, Merge) {
@@ -370,10 +445,10 @@ TEST(MergeIndexTest, Refs) {
   Annotations Test1Code(R"(class $Foo[[Foo]];)");
   TestTU Test;
   Test.HeaderCode = HeaderCode;
-  Test.Code = Test1Code.code();
+  Test.Code = std::string(Test1Code.code());
   Test.Filename = "test.cc";
   auto AST = Test.build();
-  Dyn.updateMain(Test.Filename, AST);
+  Dyn.updateMain(testPath(Test.Filename), AST);
 
   // Build static index for test.cc.
   Test.HeaderCode = HeaderCode;
@@ -381,21 +456,22 @@ TEST(MergeIndexTest, Refs) {
   Test.Filename = "test.cc";
   auto StaticAST = Test.build();
   // Add stale refs for test.cc.
-  StaticIndex.updateMain(Test.Filename, StaticAST);
+  StaticIndex.updateMain(testPath(Test.Filename), StaticAST);
 
   // Add refs for test2.cc
   Annotations Test2Code(R"(class $Foo[[Foo]] {};)");
   TestTU Test2;
   Test2.HeaderCode = HeaderCode;
-  Test2.Code = Test2Code.code();
+  Test2.Code = std::string(Test2Code.code());
   Test2.Filename = "test2.cc";
   StaticAST = Test2.build();
-  StaticIndex.updateMain(Test2.Filename, StaticAST);
+  StaticIndex.updateMain(testPath(Test2.Filename), StaticAST);
 
   RefsRequest Request;
   Request.IDs = {Foo.ID};
   RefSlab::Builder Results;
-  Merge.refs(Request, [&](const Ref &O) { Results.insert(Foo.ID, O); });
+  EXPECT_FALSE(
+      Merge.refs(Request, [&](const Ref &O) { Results.insert(Foo.ID, O); }));
   EXPECT_THAT(
       std::move(Results).build(),
       ElementsAre(Pair(
@@ -406,11 +482,66 @@ TEST(MergeIndexTest, Refs) {
 
   Request.Limit = 1;
   RefSlab::Builder Results2;
-  Merge.refs(Request, [&](const Ref &O) { Results2.insert(Foo.ID, O); });
-  EXPECT_THAT(std::move(Results2).build(),
-              ElementsAre(Pair(
-                  _, ElementsAre(AnyOf(FileURI("unittest:///test.cc"),
-                                       FileURI("unittest:///test2.cc"))))));
+  EXPECT_TRUE(
+      Merge.refs(Request, [&](const Ref &O) { Results2.insert(Foo.ID, O); }));
+
+  // Remove all refs for test.cc from dynamic index,
+  // merged index should not return results from static index for test.cc.
+  Test.Code = "";
+  AST = Test.build();
+  Dyn.updateMain(testPath(Test.Filename), AST);
+
+  Request.Limit = llvm::None;
+  RefSlab::Builder Results3;
+  EXPECT_FALSE(
+      Merge.refs(Request, [&](const Ref &O) { Results3.insert(Foo.ID, O); }));
+  EXPECT_THAT(std::move(Results3).build(),
+              ElementsAre(Pair(_, UnorderedElementsAre(AllOf(
+                                      RefRange(Test2Code.range("Foo")),
+                                      FileURI("unittest:///test2.cc"))))));
+}
+
+TEST(MergeIndexTest, IndexedFiles) {
+  SymbolSlab DynSymbols;
+  RefSlab DynRefs;
+  auto DynSize = DynSymbols.bytes() + DynRefs.bytes();
+  auto DynData = std::make_pair(std::move(DynSymbols), std::move(DynRefs));
+  llvm::StringSet<> DynFiles = {testPath("foo.cc")};
+  MemIndex DynIndex(std::move(DynData.first), std::move(DynData.second),
+                    RelationSlab(), std::move(DynFiles), std::move(DynData),
+                    DynSize);
+  SymbolSlab StaticSymbols;
+  RefSlab StaticRefs;
+  auto StaticData =
+      std::make_pair(std::move(StaticSymbols), std::move(StaticRefs));
+  llvm::StringSet<> StaticFiles = {testPath("bar.cc")};
+  MemIndex StaticIndex(std::move(StaticData.first),
+                       std::move(StaticData.second), RelationSlab(),
+                       std::move(StaticFiles), std::move(StaticData),
+                       StaticSymbols.bytes() + StaticRefs.bytes());
+  MergedIndex Merge(&DynIndex, &StaticIndex);
+
+  auto ContainsFile = Merge.indexedFiles();
+  EXPECT_TRUE(ContainsFile("unittest:///foo.cc"));
+  EXPECT_TRUE(ContainsFile("unittest:///bar.cc"));
+  EXPECT_FALSE(ContainsFile("unittest:///foobar.cc"));
+}
+
+TEST(MergeIndexTest, NonDocumentation) {
+  using index::SymbolKind;
+  Symbol L, R;
+  L.ID = R.ID = SymbolID("x");
+  L.Definition.FileURI = "file:/x.h";
+  R.Documentation = "Forward declarations because x.h is too big to include";
+  for (auto ClassLikeKind :
+       {SymbolKind::Class, SymbolKind::Struct, SymbolKind::Union}) {
+    L.SymInfo.Kind = ClassLikeKind;
+    EXPECT_EQ(mergeSymbol(L, R).Documentation, "");
+  }
+
+  L.SymInfo.Kind = SymbolKind::Function;
+  R.Documentation = "Documentation from non-class symbols should be included";
+  EXPECT_EQ(mergeSymbol(L, R).Documentation, R.Documentation);
 }
 
 MATCHER_P2(IncludeHeaderWithRef, IncludeHeader, References, "") {

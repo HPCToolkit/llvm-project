@@ -1,5 +1,4 @@
-//===-- AppleGetItemInfoHandler.cpp -------------------------------*- C++
-//-*-===//
+//===-- AppleGetItemInfoHandler.cpp ---------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -9,13 +8,12 @@
 
 #include "AppleGetItemInfoHandler.h"
 
-
+#include "Plugins/TypeSystem/Clang/TypeSystemClang.h"
 #include "lldb/Core/Module.h"
 #include "lldb/Core/Value.h"
 #include "lldb/Expression/DiagnosticManager.h"
 #include "lldb/Expression/FunctionCaller.h"
 #include "lldb/Expression/UtilityFunction.h"
-#include "lldb/Symbol/ClangASTContext.h"
 #include "lldb/Symbol/Symbol.h"
 #include "lldb/Target/ExecutionContext.h"
 #include "lldb/Target/Process.h"
@@ -108,7 +106,7 @@ void AppleGetItemInfoHandler::Detach() {
       m_get_item_info_return_buffer_addr != LLDB_INVALID_ADDRESS) {
     std::unique_lock<std::mutex> lock(m_get_item_info_retbuffer_mutex,
                                       std::defer_lock);
-    lock.try_lock(); // Even if we don't get the lock, deallocate the buffer
+    (void)lock.try_lock(); // Even if we don't get the lock, deallocate the buffer
     m_process->DeallocateMemory(m_get_item_info_return_buffer_addr);
   }
 }
@@ -144,39 +142,33 @@ lldb::addr_t AppleGetItemInfoHandler::SetupGetItemInfoFunction(
 
     if (!m_get_item_info_impl_code) {
       if (g_get_item_info_function_code != nullptr) {
-        Status error;
-        m_get_item_info_impl_code.reset(
-            exe_ctx.GetTargetRef().GetUtilityFunctionForLanguage(
-                g_get_item_info_function_code, eLanguageTypeObjC,
-                g_get_item_info_function_name, error));
-        if (error.Fail()) {
-          LLDB_LOGF(log, "Failed to get utility function: %s.",
-                    error.AsCString());
-          return args_addr;
+        auto utility_fn_or_error = exe_ctx.GetTargetRef().CreateUtilityFunction(
+            g_get_item_info_function_code, g_get_item_info_function_name,
+            eLanguageTypeObjC, exe_ctx);
+        if (!utility_fn_or_error) {
+          LLDB_LOG_ERROR(log, utility_fn_or_error.takeError(),
+                         "Failed to create utility function: {0}.");
         }
-
-        if (!m_get_item_info_impl_code->Install(diagnostics, exe_ctx)) {
-          if (log) {
-            LLDB_LOGF(log, "Failed to install get-item-info introspection.");
-            diagnostics.Dump(log);
-          }
-          m_get_item_info_impl_code.reset();
-          return args_addr;
-        }
+        m_get_item_info_impl_code = std::move(*utility_fn_or_error);
       } else {
         LLDB_LOGF(log, "No get-item-info introspection code found.");
         return LLDB_INVALID_ADDRESS;
       }
 
       // Next make the runner function for our implementation utility function.
-      Status error;
-
-      TypeSystem *type_system =
+      auto type_system_or_err =
           thread.GetProcess()->GetTarget().GetScratchTypeSystemForLanguage(
-              nullptr, eLanguageTypeC);
+              eLanguageTypeC);
+      if (auto err = type_system_or_err.takeError()) {
+        LLDB_LOG_ERROR(log, std::move(err),
+                       "Error inseting get-item-info function");
+        return args_addr;
+      }
       CompilerType get_item_info_return_type =
-          type_system->GetBasicTypeFromAST(eBasicTypeVoid).GetPointerType();
+          type_system_or_err->GetBasicTypeFromAST(eBasicTypeVoid)
+              .GetPointerType();
 
+      Status error;
       get_item_info_caller = m_get_item_info_impl_code->MakeFunctionCaller(
           get_item_info_return_type, get_item_info_arglist,
           thread.shared_from_this(), error);
@@ -224,7 +216,8 @@ AppleGetItemInfoHandler::GetItemInfo(Thread &thread, uint64_t item,
   lldb::StackFrameSP thread_cur_frame = thread.GetStackFrameAtIndex(0);
   ProcessSP process_sp(thread.CalculateProcess());
   TargetSP target_sp(thread.CalculateTarget());
-  ClangASTContext *clang_ast_context = target_sp->GetScratchClangASTContext();
+  TypeSystemClang *clang_ast_context =
+      ScratchTypeSystemClang::GetForTarget(*target_sp);
   Log *log(lldb_private::GetLogIfAllCategoriesSet(LIBLLDB_LOG_SYSTEM_RUNTIME));
 
   GetItemInfoReturnInfo return_value;
@@ -327,6 +320,11 @@ AppleGetItemInfoHandler::GetItemInfo(Thread &thread, uint64_t item,
   options.SetUnwindOnError(true);
   options.SetIgnoreBreakpoints(true);
   options.SetStopOthers(true);
+#if __has_feature(address_sanitizer)
+  options.SetTimeout(process_sp->GetUtilityExpressionTimeout());
+#else
+  options.SetTimeout(std::chrono::milliseconds(500));
+#endif
   options.SetTimeout(process_sp->GetUtilityExpressionTimeout());
   options.SetTryAllThreads(false);
   options.SetIsForUtilityExpr(true);

@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "kmp_config.h"
+#include "kmp_os.h"
 #include "ittnotify_config.h"
 
 #if ITT_PLATFORM==ITT_PLATFORM_WIN
@@ -226,8 +227,6 @@ static __itt_api_info api_list[] = {
 #pragma warning(pop)
 #endif /* ITT_PLATFORM==ITT_PLATFORM_WIN */
 
-static char dll_path[PATH_MAX] = { 0 };
-
 /* static part descriptor which handles. all notification api attributes. */
 __itt_global _N_(_ittapi_global) = {
     ITT_MAGIC,                                     /* identification info */
@@ -238,7 +237,7 @@ __itt_global _N_(_ittapi_global) = {
     MUTEX_INITIALIZER,                             /* mutex */
     NULL,                                          /* dynamic library handle */
     NULL,                                          /* error_handler */
-    (const char**)&dll_path,                       /* dll_path_ptr */
+    NULL,                                          /* dll_path_ptr */
     (__itt_api_info*)&api_list,                    /* api_list_ptr */
     NULL,                                          /* next __itt_global */
     NULL,                                          /* thread_list */
@@ -763,7 +762,7 @@ static const char* __itt_fsplit(const char* s, const char* sep, const char** out
 
 /* This function return value of env variable that placed into static buffer.
  * !!! The same static buffer is used for subsequent calls. !!!
- * This was done to aviod dynamic allocation for few calls.
+ * This was done to avoid dynamic allocation for few calls.
  * Actually we need this function only four times.
  */
 static const char* __itt_get_env_var(const char* name)
@@ -787,7 +786,7 @@ static const char* __itt_get_env_var(const char* name)
         }
         else
         {
-            /* If environment variable is empty, GetEnvirornmentVariables()
+            /* If environment variable is empty, GetEnvironmentVariables()
              * returns zero (number of characters (not including terminating null),
              * and GetLastError() returns ERROR_SUCCESS. */
             DWORD err = GetLastError();
@@ -1013,7 +1012,7 @@ static void __itt_reinit_all_pointers(void)
 static void __itt_nullify_all_pointers(void)
 {
     int i;
-    /* Nulify all pointers except domain_create, string_handle_create  and counter_create */
+    /* Nullify all pointers except domain_create, string_handle_create  and counter_create */
     for (i = 0; _N_(_ittapi_global).api_list_ptr[i].name != NULL; i++)
         *_N_(_ittapi_global).api_list_ptr[i].func_ptr = _N_(_ittapi_global).api_list_ptr[i].null_func;
 }
@@ -1098,6 +1097,7 @@ ITT_EXTERN_C int _N_(init_ittlib)(const char* lib_name, __itt_group_id init_grou
                         switch (lib_version) {
                         case 0:
                             groups = __itt_group_legacy;
+                            KMP_FALLTHROUGH();
                         case 1:
                             /* Fill all pointers from dynamic library */
                             for (i = 0; _N_(_ittapi_global).api_list_ptr[i].name != NULL; i++)

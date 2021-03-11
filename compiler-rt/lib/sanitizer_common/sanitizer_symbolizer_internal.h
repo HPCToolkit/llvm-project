@@ -69,6 +69,14 @@ class SymbolizerTool {
   virtual const char *Demangle(const char *name) {
     return nullptr;
   }
+
+  // Called during the LateInitialize phase of Sanitizer initialization.
+  // Usually this is a safe place to call code that might need to use user
+  // memory allocators.
+  virtual void LateInitialize() {}
+
+ protected:
+  ~SymbolizerTool() {}
 };
 
 // SymbolizerProcess encapsulates communication between the tool and
@@ -76,16 +84,20 @@ class SymbolizerTool {
 // SymbolizerProcess may not be used from two threads simultaneously.
 class SymbolizerProcess {
  public:
-  explicit SymbolizerProcess(const char *path, bool use_forkpty = false);
+  explicit SymbolizerProcess(const char *path, bool use_posix_spawn = false);
   const char *SendCommand(const char *command);
 
  protected:
+  ~SymbolizerProcess() {}
+
   /// The maximum number of arguments required to invoke a tool process.
   static const unsigned kArgVMax = 6;
 
   // Customizable by subclasses.
   virtual bool StartSymbolizerSubprocess();
   virtual bool ReadFromSymbolizer(char *buffer, uptr max_length);
+  // Return the environment to run the symbolizer in.
+  virtual char **GetEnvP() { return GetEnviron(); }
 
  private:
   virtual bool ReachedEndOfOutput(const char *buffer, uptr length) const {
@@ -114,14 +126,14 @@ class SymbolizerProcess {
   uptr times_restarted_;
   bool failed_to_start_;
   bool reported_invalid_path_;
-  bool use_forkpty_;
+  bool use_posix_spawn_;
 };
 
 class LLVMSymbolizerProcess;
 
 // This tool invokes llvm-symbolizer in a subprocess. It should be as portable
 // as the llvm-symbolizer tool is.
-class LLVMSymbolizer : public SymbolizerTool {
+class LLVMSymbolizer final : public SymbolizerTool {
  public:
   explicit LLVMSymbolizer(const char *path, LowLevelAllocator *allocator);
 

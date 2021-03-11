@@ -1,4 +1,4 @@
-//===-- StructuredDataDarwinLog.cpp -----------------------------*- C++ -*-===//
+//===-- StructuredDataDarwinLog.cpp ---------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -35,6 +35,8 @@
 
 using namespace lldb;
 using namespace lldb_private;
+
+LLDB_PLUGIN_DEFINE(StructuredDataDarwinLog)
 
 #pragma mark -
 #pragma mark Anonymous Namespace
@@ -288,11 +290,8 @@ private:
 
     // Instantiate the regex so we can report any errors.
     auto regex = RegularExpression(op_arg);
-    if (!regex.IsValid()) {
-      char error_text[256];
-      error_text[0] = '\0';
-      regex.GetErrorAsCString(error_text, sizeof(error_text));
-      error.SetErrorString(error_text);
+    if (llvm::Error err = regex.GetError()) {
+      error.SetErrorString(llvm::toString(std::move(err)));
       return FilterRuleSP();
     }
 
@@ -667,7 +666,7 @@ private:
     //   regex {search-regex}
 
     // Parse action.
-    auto action_end_pos = rule_text.find(" ");
+    auto action_end_pos = rule_text.find(' ');
     if (action_end_pos == std::string::npos) {
       error.SetErrorStringWithFormat("could not parse filter rule "
                                      "action from \"%s\"",
@@ -709,9 +708,9 @@ private:
         attribute_end_pos + 1, operation_end_pos - (attribute_end_pos + 1));
 
     // add filter spec
-    auto rule_sp =
-        FilterRule::CreateRule(accept, attribute_index, ConstString(operation),
-                               rule_text.substr(operation_end_pos + 1), error);
+    auto rule_sp = FilterRule::CreateRule(
+        accept, attribute_index, ConstString(operation),
+        std::string(rule_text.substr(operation_end_pos + 1)), error);
 
     if (rule_sp && error.Success())
       m_filter_rules.push_back(rule_sp);
@@ -790,15 +789,10 @@ protected:
 
     // Now check if we have a running process.  If so, we should instruct the
     // process monitor to enable/disable DarwinLog support now.
-    Target *target = GetSelectedOrDummyTarget();
-    if (!target) {
-      // No target, so there is nothing more to do right now.
-      result.SetStatus(eReturnStatusSuccessFinishNoResult);
-      return true;
-    }
+    Target &target = GetSelectedOrDummyTarget();
 
     // Grab the active process.
-    auto process_sp = target->GetProcessSP();
+    auto process_sp = target.GetProcessSP();
     if (!process_sp) {
       // No active process, so there is nothing more to do right now.
       result.SetStatus(eReturnStatusSuccessFinishNoResult);
@@ -880,9 +874,9 @@ protected:
 
     // Figure out if we've got a process.  If so, we can tell if DarwinLog is
     // available for that process.
-    Target *target = GetSelectedOrDummyTarget();
-    auto process_sp = target ? target->GetProcessSP() : ProcessSP();
-    if (!target || !process_sp) {
+    Target &target = GetSelectedOrDummyTarget();
+    auto process_sp = target.GetProcessSP();
+    if (!process_sp) {
       stream.PutCString("Availability: unknown (requires process)\n");
       stream.PutCString("Enabled: not applicable "
                         "(requires process)\n");
@@ -987,7 +981,7 @@ EnableOptionsSP ParseAutoEnableOptions(Status &error, Debugger &debugger) {
   EnableOptionsSP options_sp(new EnableOptions());
   options_sp->NotifyOptionParsingStarting(&exe_ctx);
 
-  CommandReturnObject result;
+  CommandReturnObject result(debugger.GetUseColor());
 
   // Parse the arguments.
   auto options_property_sp =
@@ -1042,7 +1036,7 @@ bool RunEnableCommand(CommandInterpreter &interpreter) {
   }
 
   // Run the command.
-  CommandReturnObject return_object;
+  CommandReturnObject return_object(interpreter.GetDebugger().GetUseColor());
   interpreter.HandleCommand(command_stream.GetData(), eLazyBoolNo,
                             return_object);
   return return_object.Succeeded();

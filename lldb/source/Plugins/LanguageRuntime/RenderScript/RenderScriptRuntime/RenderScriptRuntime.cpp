@@ -1,4 +1,4 @@
-//===-- RenderScriptRuntime.cpp ---------------------------------*- C++ -*-===//
+//===-- RenderScriptRuntime.cpp -------------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -45,6 +45,8 @@
 using namespace lldb;
 using namespace lldb_private;
 using namespace lldb_renderscript;
+
+LLDB_PLUGIN_DEFINE(RenderScriptRuntime)
 
 #define FMT_COORD "(%" PRIu32 ", %" PRIu32 ", %" PRIu32 ")"
 
@@ -442,28 +444,20 @@ bool ParseCoordinate(llvm::StringRef coord_s, RSCoordinate &coord) {
   // elements fails the contents of &coord are undefined and `false` is
   // returned, `true` otherwise
 
-  RegularExpression regex;
-  RegularExpression::Match regex_match(3);
+  llvm::SmallVector<llvm::StringRef, 4> matches;
 
-  bool matched = false;
-  if (regex.Compile(llvm::StringRef("^([0-9]+),([0-9]+),([0-9]+)$")) &&
-      regex.Execute(coord_s, &regex_match))
-    matched = true;
-  else if (regex.Compile(llvm::StringRef("^([0-9]+),([0-9]+)$")) &&
-           regex.Execute(coord_s, &regex_match))
-    matched = true;
-  else if (regex.Compile(llvm::StringRef("^([0-9]+)$")) &&
-           regex.Execute(coord_s, &regex_match))
-    matched = true;
-
-  if (!matched)
+  if (!RegularExpression("^([0-9]+),([0-9]+),([0-9]+)$")
+           .Execute(coord_s, &matches) &&
+      !RegularExpression("^([0-9]+),([0-9]+)$").Execute(coord_s, &matches) &&
+      !RegularExpression("^([0-9]+)$").Execute(coord_s, &matches))
     return false;
 
-  auto get_index = [&](int idx, uint32_t &i) -> bool {
+  auto get_index = [&](size_t idx, uint32_t &i) -> bool {
     std::string group;
     errno = 0;
-    if (regex_match.GetMatchAtIndex(coord_s.str().c_str(), idx + 1, group))
-      return !llvm::StringRef(group).getAsInteger<uint32_t>(10, i);
+    if (idx + 1 < matches.size()) {
+      return !llvm::StringRef(matches[idx + 1]).getAsInteger<uint32_t>(10, i);
+    }
     return true;
   };
 
@@ -798,7 +792,10 @@ RenderScriptRuntime::CreateInstance(Process *process,
 // symbol.
 Searcher::CallbackReturn
 RSBreakpointResolver::SearchCallback(SearchFilter &filter,
-                                     SymbolContext &context, Address *, bool) {
+                                     SymbolContext &context, Address *) {
+  BreakpointSP breakpoint_sp = GetBreakpoint();
+  assert(breakpoint_sp);
+
   ModuleSP module = context.module_sp;
 
   if (!module || !IsRenderScriptScriptModule(module))
@@ -819,7 +816,7 @@ RSBreakpointResolver::SearchCallback(SearchFilter &filter,
   if (kernel_sym) {
     Address bp_addr = kernel_sym->GetAddress();
     if (filter.AddressPasses(bp_addr))
-      m_breakpoint->AddLocation(bp_addr);
+      breakpoint_sp->AddLocation(bp_addr);
   }
 
   return Searcher::eCallbackReturnContinue;
@@ -828,7 +825,10 @@ RSBreakpointResolver::SearchCallback(SearchFilter &filter,
 Searcher::CallbackReturn
 RSReduceBreakpointResolver::SearchCallback(lldb_private::SearchFilter &filter,
                                            lldb_private::SymbolContext &context,
-                                           Address *, bool) {
+                                           Address *) {
+  BreakpointSP breakpoint_sp = GetBreakpoint();
+  assert(breakpoint_sp);
+
   // We need to have access to the list of reductions currently parsed, as
   // reduce names don't actually exist as symbols in a module. They are only
   // identifiable by parsing the .rs.info packet, or finding the expand symbol.
@@ -875,7 +875,7 @@ RSReduceBreakpointResolver::SearchCallback(lldb_private::SearchFilter &filter,
           if (!SkipPrologue(module, address)) {
             LLDB_LOGF(log, "%s: Error trying to skip prologue", __FUNCTION__);
           }
-          m_breakpoint->AddLocation(address, &new_bp);
+          breakpoint_sp->AddLocation(address, &new_bp);
           LLDB_LOGF(log, "%s: %s reduction breakpoint on %s in %s",
                     __FUNCTION__, new_bp ? "new" : "existing",
                     kernel_name.GetCString(),
@@ -888,10 +888,10 @@ RSReduceBreakpointResolver::SearchCallback(lldb_private::SearchFilter &filter,
 }
 
 Searcher::CallbackReturn RSScriptGroupBreakpointResolver::SearchCallback(
-    SearchFilter &filter, SymbolContext &context, Address *addr,
-    bool containing) {
+    SearchFilter &filter, SymbolContext &context, Address *addr) {
 
-  if (!m_breakpoint)
+  BreakpointSP breakpoint_sp = GetBreakpoint();
+  if (!breakpoint_sp)
     return eCallbackReturnContinue;
 
   Log *log(GetLogIfAllCategoriesSet(LIBLLDB_LOG_BREAKPOINTS));
@@ -901,7 +901,8 @@ Searcher::CallbackReturn RSScriptGroupBreakpointResolver::SearchCallback(
     return Searcher::eCallbackReturnContinue;
 
   std::vector<std::string> names;
-  m_breakpoint->GetNames(names);
+  Breakpoint& breakpoint = *breakpoint_sp;
+  breakpoint.GetNames(names);
   if (names.empty())
     return eCallbackReturnContinue;
 
@@ -941,7 +942,7 @@ Searcher::CallbackReturn RSScriptGroupBreakpointResolver::SearchCallback(
       }
 
       bool new_bp;
-      m_breakpoint->AddLocation(address, &new_bp);
+      breakpoint.AddLocation(address, &new_bp);
 
       LLDB_LOGF(log, "%s: Placed %sbreakpoint on %s", __FUNCTION__,
                 new_bp ? "new " : "", k.m_name.AsCString());
@@ -1038,8 +1039,8 @@ bool RenderScriptRuntime::CouldHaveDynamicValue(ValueObject &in_value) {
 }
 
 lldb::BreakpointResolverSP
-RenderScriptRuntime::CreateExceptionResolver(Breakpoint *bp, bool catch_bp,
-                                             bool throw_bp) {
+RenderScriptRuntime::CreateExceptionResolver(const lldb::BreakpointSP &bp,
+                                             bool catch_bp, bool throw_bp) {
   BreakpointResolverSP resolver_sp;
   return resolver_sp;
 }
@@ -1522,7 +1523,7 @@ void RenderScriptRuntime::CaptureScriptInit(RuntimeHook *hook,
       script->type = ScriptDetails::eScriptC;
       script->cache_dir = cache_dir;
       script->res_name = res_name;
-      script->shared_lib = strm.GetString();
+      script->shared_lib = std::string(strm.GetString());
       script->context = addr_t(args[eRsContext]);
     }
 
@@ -2249,8 +2250,7 @@ void RenderScriptRuntime::FindStructTypeName(Element &elem,
   // Iterate over all the global variables looking for one with a matching type
   // to the Element. We make the assumption a match exists since there needs to
   // be a global variable to reflect the struct type back into java host code.
-  for (uint32_t i = 0; i < var_list.GetSize(); ++i) {
-    const VariableSP var_sp(var_list.GetVariableAtIndex(i));
+  for (const VariableSP &var_sp : var_list) {
     if (!var_sp)
       continue;
 
@@ -2659,14 +2659,14 @@ bool RenderScriptRuntime::SaveAllocation(Stream &strm, const uint32_t alloc_id,
   // Check we can create writable file
   FileSpec file_spec(path);
   FileSystem::Instance().Resolve(file_spec);
-  File file;
-  FileSystem::Instance().Open(file, file_spec,
-                              File::eOpenOptionWrite |
-                                  File::eOpenOptionCanCreate |
-                                  File::eOpenOptionTruncate);
+  auto file = FileSystem::Instance().Open(
+      file_spec, File::eOpenOptionWrite | File::eOpenOptionCanCreate |
+                     File::eOpenOptionTruncate);
 
   if (!file) {
-    strm.Printf("Error: Failed to open '%s' for writing", path);
+    std::string error = llvm::toString(file.takeError());
+    strm.Printf("Error: Failed to open '%s' for writing: %s", path,
+                error.c_str());
     strm.EOL();
     return false;
   }
@@ -2698,7 +2698,7 @@ bool RenderScriptRuntime::SaveAllocation(Stream &strm, const uint32_t alloc_id,
   LLDB_LOGF(log, "%s - writing File Header, 0x%" PRIx64 " bytes", __FUNCTION__,
             (uint64_t)num_bytes);
 
-  Status err = file.Write(&head, num_bytes);
+  Status err = file.get()->Write(&head, num_bytes);
   if (!err.Success()) {
     strm.Printf("Error: '%s' when writing to file '%s'", err.AsCString(), path);
     strm.EOL();
@@ -2723,7 +2723,7 @@ bool RenderScriptRuntime::SaveAllocation(Stream &strm, const uint32_t alloc_id,
   LLDB_LOGF(log, "%s - writing element headers, 0x%" PRIx64 " bytes.",
             __FUNCTION__, (uint64_t)num_bytes);
 
-  err = file.Write(element_header_buffer.get(), num_bytes);
+  err = file.get()->Write(element_header_buffer.get(), num_bytes);
   if (!err.Success()) {
     strm.Printf("Error: '%s' when writing to file '%s'", err.AsCString(), path);
     strm.EOL();
@@ -2735,7 +2735,7 @@ bool RenderScriptRuntime::SaveAllocation(Stream &strm, const uint32_t alloc_id,
   LLDB_LOGF(log, "%s - writing 0x%" PRIx64 " bytes", __FUNCTION__,
             (uint64_t)num_bytes);
 
-  err = file.Write(buffer.get(), num_bytes);
+  err = file.get()->Write(buffer.get(), num_bytes);
   if (!err.Success()) {
     strm.Printf("Error: '%s' when writing to file '%s'", err.AsCString(), path);
     strm.EOL();
@@ -3139,7 +3139,7 @@ void RenderScriptRuntime::DumpKernels(Stream &strm) const {
     strm.Printf("Resource '%s':", module->m_resname.c_str());
     strm.EOL();
     for (const auto &kernel : module->m_kernels) {
-      strm.Indent(kernel.m_name.AsCString());
+      strm.Indent(kernel.m_name.GetStringRef());
       strm.EOL();
     }
   }
@@ -3901,7 +3901,7 @@ void RSModuleDescriptor::Dump(Stream &strm) const {
   int indent = strm.GetIndentLevel();
 
   strm.Indent();
-  m_module->GetFileSpec().Dump(&strm);
+  m_module->GetFileSpec().Dump(strm.AsRawOstream());
   strm.Indent(m_module->GetNumCompileUnits() ? "Debug info loaded."
                                              : "Debug info does not exist.");
   strm.EOL();
@@ -3949,9 +3949,10 @@ void RSModuleDescriptor::Dump(Stream &strm) const {
 }
 
 void RSGlobalDescriptor::Dump(Stream &strm) const {
-  strm.Indent(m_name.AsCString());
+  strm.Indent(m_name.GetStringRef());
   VariableList var_list;
-  m_module->m_module->FindGlobalVariables(m_name, nullptr, 1U, var_list);
+  m_module->m_module->FindGlobalVariables(m_name, CompilerDeclContext(), 1U,
+                                          var_list);
   if (var_list.GetSize() == 1) {
     auto var = var_list.GetVariableAtIndex(0);
     auto type = var->GetType();
@@ -3974,12 +3975,12 @@ void RSGlobalDescriptor::Dump(Stream &strm) const {
 }
 
 void RSKernelDescriptor::Dump(Stream &strm) const {
-  strm.Indent(m_name.AsCString());
+  strm.Indent(m_name.GetStringRef());
   strm.EOL();
 }
 
 void RSReductionDescriptor::Dump(lldb_private::Stream &stream) const {
-  stream.Indent(m_reduce_name.AsCString());
+  stream.Indent(m_reduce_name.GetStringRef());
   stream.IndentMore();
   stream.EOL();
   stream.Indent();
@@ -4147,13 +4148,12 @@ public:
       // Matching a comma separated list of known words is fairly
       // straightforward with PCRE, but we're using ERE, so we end up with a
       // little ugliness...
-      RegularExpression::Match match(/* max_matches */ 5);
       RegularExpression match_type_list(
           llvm::StringRef("^([[:alpha:]]+)(,[[:alpha:]]+){0,4}$"));
 
       assert(match_type_list.IsValid());
 
-      if (!match_type_list.Execute(option_val, &match)) {
+      if (!match_type_list.Execute(option_val)) {
         err_str.PutCString(
             "a comma-separated list of kernel types is required");
         return false;
@@ -4587,32 +4587,36 @@ public:
       return false;
     }
 
-    Stream *output_strm = nullptr;
-    StreamFile outfile_stream;
+    Stream *output_stream_p = nullptr;
+    std::unique_ptr<Stream> output_stream_storage;
+
     const FileSpec &outfile_spec =
         m_options.m_outfile; // Dump allocation to file instead
     if (outfile_spec) {
       // Open output file
       std::string path = outfile_spec.GetPath();
-      auto error = FileSystem::Instance().Open(
-          outfile_stream.GetFile(), outfile_spec,
-          File::eOpenOptionWrite | File::eOpenOptionCanCreate);
-      if (error.Success()) {
-        output_strm = &outfile_stream;
+      auto file = FileSystem::Instance().Open(
+          outfile_spec, File::eOpenOptionWrite | File::eOpenOptionCanCreate);
+      if (file) {
+        output_stream_storage =
+            std::make_unique<StreamFile>(std::move(file.get()));
+        output_stream_p = output_stream_storage.get();
         result.GetOutputStream().Printf("Results written to '%s'",
                                         path.c_str());
         result.GetOutputStream().EOL();
       } else {
-        result.AppendErrorWithFormat("Couldn't open file '%s'", path.c_str());
+        std::string error = llvm::toString(file.takeError());
+        result.AppendErrorWithFormat("Couldn't open file '%s': %s",
+                                     path.c_str(), error.c_str());
         result.SetStatus(eReturnStatusFailed);
         return false;
       }
     } else
-      output_strm = &result.GetOutputStream();
+      output_stream_p = &result.GetOutputStream();
 
-    assert(output_strm != nullptr);
+    assert(output_stream_p != nullptr);
     bool dumped =
-        runtime->DumpAllocation(*output_strm, m_exe_ctx.GetFramePtr(), id);
+        runtime->DumpAllocation(*output_stream_p, m_exe_ctx.GetFramePtr(), id);
 
     if (dumped)
       result.SetStatus(eReturnStatusSuccessFinishResult);

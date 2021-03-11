@@ -10,16 +10,16 @@
 #ifndef _PSTL_CONFIG_H
 #define _PSTL_CONFIG_H
 
+#include <__pstl_config_site>
+
 // The version is XYYZ, where X is major, YY is minor, and Z is patch (i.e. X.YY.Z)
-#define _PSTL_VERSION 10000
+#define _PSTL_VERSION 12000
 #define _PSTL_VERSION_MAJOR (_PSTL_VERSION / 1000)
 #define _PSTL_VERSION_MINOR ((_PSTL_VERSION % 1000) / 10)
 #define _PSTL_VERSION_PATCH (_PSTL_VERSION % 10)
 
 #if !defined(_PSTL_PAR_BACKEND_SERIAL) && !defined(_PSTL_PAR_BACKEND_TBB)
-// TODO: In the future, we need to handle this setting using a configure-time
-//       option and something like a __config_site header.
-#    define _PSTL_PAR_BACKEND_SERIAL
+#    error "A parallel backend must be specified"
 #endif
 
 // Check the user-defined macro for warnings
@@ -29,6 +29,11 @@
 // Check the internal macro for warnings
 #elif !defined(_PSTL_USAGE_WARNINGS)
 #    define _PSTL_USAGE_WARNINGS 0
+#endif
+
+#if !defined(_PSTL_ASSERT)
+#    include <cassert>
+#    define _PSTL_ASSERT(pred) (assert((pred)))
 #endif
 
 // Portability "#pragma" definition
@@ -41,6 +46,15 @@
 #define _PSTL_STRING_AUX(x) #x
 #define _PSTL_STRING(x) _PSTL_STRING_AUX(x)
 #define _PSTL_STRING_CONCAT(x, y) x #y
+
+#ifdef _PSTL_HIDE_FROM_ABI_PER_TU
+#    define _PSTL_HIDE_FROM_ABI_PUSH                                                                                   \
+        _Pragma("clang attribute push(__attribute__((internal_linkage)), apply_to=any(function,record))")
+#    define _PSTL_HIDE_FROM_ABI_POP _Pragma("clang attribute pop")
+#else
+#    define _PSTL_HIDE_FROM_ABI_PUSH /* nothing */
+#    define _PSTL_HIDE_FROM_ABI_POP  /* nothing */
+#endif
 
 // note that when ICC or Clang is in use, _PSTL_GCC_VERSION might not fully match
 // the actual GCC version on the system.

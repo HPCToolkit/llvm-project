@@ -6,7 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++98, c++03
+// UNSUPPORTED: c++03
+
+// These tests require locale for non-char paths
+// UNSUPPORTED: libcpp-has-no-localization
 
 // <filesystem>
 
@@ -17,15 +20,15 @@
 // basic_string<ECharT, Traits, Allocator>
 // generic_string(const Allocator& a = Allocator()) const;
 
-#include "filesystem_include.hpp"
+#include "filesystem_include.h"
 #include <type_traits>
 #include <cassert>
 
 #include "test_macros.h"
 #include "test_iterators.h"
-#include "count_new.hpp"
+#include "count_new.h"
 #include "min_allocator.h"
-#include "filesystem_test_helper.hpp"
+#include "filesystem_test_helper.h"
 
 MultiStringType longString = MKSTR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/123456789/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 

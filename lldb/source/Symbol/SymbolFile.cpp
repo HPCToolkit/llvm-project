@@ -1,4 +1,4 @@
-//===-- SymbolFile.cpp ------------------------------------------*- C++ -*-===//
+//===-- SymbolFile.cpp ----------------------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -24,6 +24,8 @@
 using namespace lldb_private;
 using namespace lldb;
 
+char SymbolFile::ID;
+
 void SymbolFile::PreloadSymbols() {
   // No-op for most implementations.
 }
@@ -32,23 +34,23 @@ std::recursive_mutex &SymbolFile::GetModuleMutex() const {
   return GetObjectFile()->GetModule()->GetMutex();
 }
 ObjectFile *SymbolFile::GetMainObjectFile() {
-  return m_obj_file->GetModule()->GetObjectFile();
+  return m_objfile_sp->GetModule()->GetObjectFile();
 }
 
-SymbolFile *SymbolFile::FindPlugin(ObjectFile *obj_file) {
+SymbolFile *SymbolFile::FindPlugin(ObjectFileSP objfile_sp) {
   std::unique_ptr<SymbolFile> best_symfile_up;
-  if (obj_file != nullptr) {
+  if (objfile_sp != nullptr) {
 
     // We need to test the abilities of this section list. So create what it
-    // would be with this new obj_file.
-    lldb::ModuleSP module_sp(obj_file->GetModule());
+    // would be with this new objfile_sp.
+    lldb::ModuleSP module_sp(objfile_sp->GetModule());
     if (module_sp) {
       // Default to the main module section list.
       ObjectFile *module_obj_file = module_sp->GetObjectFile();
-      if (module_obj_file != obj_file) {
+      if (module_obj_file != objfile_sp.get()) {
         // Make sure the main object file's sections are created
         module_obj_file->GetSectionList();
-        obj_file->CreateSections(*module_sp->GetUnifiedSectionList());
+        objfile_sp->CreateSections(*module_sp->GetUnifiedSectionList());
       }
     }
 
@@ -62,7 +64,7 @@ SymbolFile *SymbolFile::FindPlugin(ObjectFile *obj_file) {
          (create_callback = PluginManager::GetSymbolFileCreateCallbackAtIndex(
               idx)) != nullptr;
          ++idx) {
-      std::unique_ptr<SymbolFile> curr_symfile_up(create_callback(obj_file));
+      std::unique_ptr<SymbolFile> curr_symfile_up(create_callback(objfile_sp));
 
       if (curr_symfile_up) {
         const uint32_t sym_file_abilities = curr_symfile_up->GetAbilities();
@@ -85,12 +87,14 @@ SymbolFile *SymbolFile::FindPlugin(ObjectFile *obj_file) {
   return best_symfile_up.release();
 }
 
-TypeSystem *SymbolFile::GetTypeSystemForLanguage(lldb::LanguageType language) {
-  TypeSystem *type_system =
-      m_obj_file->GetModule()->GetTypeSystemForLanguage(language);
-  if (type_system)
-    type_system->SetSymbolFile(this);
-  return type_system;
+llvm::Expected<TypeSystem &>
+SymbolFile::GetTypeSystemForLanguage(lldb::LanguageType language) {
+  auto type_system_or_err =
+      m_objfile_sp->GetModule()->GetTypeSystemForLanguage(language);
+  if (type_system_or_err) {
+    type_system_or_err->SetSymbolFile(this);
+  }
+  return type_system_or_err;
 }
 
 uint32_t SymbolFile::ResolveSymbolContext(const FileSpec &file_spec,
@@ -100,36 +104,24 @@ uint32_t SymbolFile::ResolveSymbolContext(const FileSpec &file_spec,
   return 0;
 }
 
-uint32_t
-SymbolFile::FindGlobalVariables(ConstString name,
-                                const CompilerDeclContext *parent_decl_ctx,
-                                uint32_t max_matches, VariableList &variables) {
-  return 0;
-}
+void SymbolFile::FindGlobalVariables(ConstString name,
+                                     const CompilerDeclContext &parent_decl_ctx,
+                                     uint32_t max_matches,
+                                     VariableList &variables) {}
 
-uint32_t SymbolFile::FindGlobalVariables(const RegularExpression &regex,
-                                         uint32_t max_matches,
-                                         VariableList &variables) {
-  return 0;
-}
+void SymbolFile::FindGlobalVariables(const RegularExpression &regex,
+                                     uint32_t max_matches,
+                                     VariableList &variables) {}
 
-uint32_t SymbolFile::FindFunctions(ConstString name,
-                                   const CompilerDeclContext *parent_decl_ctx,
-                                   lldb::FunctionNameType name_type_mask,
-                                   bool include_inlines, bool append,
-                                   SymbolContextList &sc_list) {
-  if (!append)
-    sc_list.Clear();
-  return 0;
-}
+void SymbolFile::FindFunctions(ConstString name,
+                               const CompilerDeclContext &parent_decl_ctx,
+                               lldb::FunctionNameType name_type_mask,
+                               bool include_inlines,
+                               SymbolContextList &sc_list) {}
 
-uint32_t SymbolFile::FindFunctions(const RegularExpression &regex,
-                                   bool include_inlines, bool append,
-                                   SymbolContextList &sc_list) {
-  if (!append)
-    sc_list.Clear();
-  return 0;
-}
+void SymbolFile::FindFunctions(const RegularExpression &regex,
+                               bool include_inlines,
+                               SymbolContextList &sc_list) {}
 
 void SymbolFile::GetMangledNamesForFunction(
     const std::string &scope_qualified_name,
@@ -137,22 +129,16 @@ void SymbolFile::GetMangledNamesForFunction(
   return;
 }
 
-uint32_t SymbolFile::FindTypes(
-    ConstString name, const CompilerDeclContext *parent_decl_ctx,
-    bool append, uint32_t max_matches,
+void SymbolFile::FindTypes(
+    ConstString name, const CompilerDeclContext &parent_decl_ctx,
+    uint32_t max_matches,
     llvm::DenseSet<lldb_private::SymbolFile *> &searched_symbol_files,
-    TypeMap &types) {
-  if (!append)
-    types.Clear();
-  return 0;
-}
+    TypeMap &types) {}
 
-size_t SymbolFile::FindTypes(const std::vector<CompilerContext> &context,
-                             bool append, TypeMap &types) {
-  if (!append)
-    types.Clear();
-  return 0;
-}
+void SymbolFile::FindTypes(llvm::ArrayRef<CompilerContext> pattern,
+                           LanguageSet languages,
+                           llvm::DenseSet<SymbolFile *> &searched_symbol_files,
+                           TypeMap &types) {}
 
 void SymbolFile::AssertModuleLock() {
   // The code below is too expensive to leave enabled in release builds. It's
@@ -229,6 +215,8 @@ void SymbolFile::SectionFileAddressesChanged() {
 }
 
 void SymbolFile::Dump(Stream &s) {
+  s.Format("SymbolFile {0} ({1})\n", GetPluginName(),
+           GetMainObjectFile()->GetFileSpec());
   s.PutCString("Types:\n");
   m_type_list.Dump(&s, /*show_context*/ false);
   s.PutChar('\n');
@@ -242,6 +230,9 @@ void SymbolFile::Dump(Stream &s) {
     }
   }
   s.PutChar('\n');
+
+  if (Symtab *symtab = GetSymtab())
+    symtab->Dump(&s, nullptr, eSortOrderNone);
 }
 
 SymbolFile::RegisterInfoResolver::~RegisterInfoResolver() = default;

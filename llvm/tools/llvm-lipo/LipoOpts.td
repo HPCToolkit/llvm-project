@@ -6,6 +6,16 @@ def h : Flag<["-"], "h">, Alias<help>;
 def version : Flag<["-", "--"], "version">,
               HelpText<"Print the version and exit.">;
 
+def segalign
+    : MultiArg<["-", "--"], "segalign", 2>,
+      HelpText<"Specifies the segment alignment for the specified "
+               "architecture when creating a universal binary file. The "
+               "alignment is a hexadecimal number that is a power of 2.">;
+
+def arch
+    : MultiArg<["-", "--"], "arch", 2>,
+      HelpText<"Specifies the architecture and the corresponding input file">;
+
 def action_group : OptionGroup<"action group">;
 
 def verify_arch
@@ -28,6 +38,11 @@ def thin : Option<["-", "--"], "thin", KIND_SEPARATE>,
            Group<action_group>,
            HelpText<"Create a thin output file of specified arch_type from the "
                     "fat input file. Requires -output option">;
+
+def extract : Option<["-", "--"], "extract", KIND_SEPARATE>,
+           Group<action_group>,
+           HelpText<"Create a universal output file containing only the specified "
+                    "arch_type from the fat input file. Requires -output option">;
 
 def create : Option<["-", "--"], "create", KIND_FLAG>,
              Group<action_group>,

@@ -7,9 +7,9 @@
 target datalayout = "E-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-f128:128:128-v128:128:128-n32:64"
 target triple = "powerpc64-unknown-linux-gnu"
 
-@gi = global i32 5, align 4
+@gi = dso_local global i32 5, align 4
 
-define signext i32 @test_file_static() nounwind {
+define dso_local signext i32 @test_file_static() nounwind {
 entry:
   %0 = load i32, i32* @gi, align 4
   %inc = add nsw i32 %0, 1
@@ -33,11 +33,13 @@ entry:
 ; LARGE: ld [[REG2:[0-9]+]], [[VAR]]@toc@l([[REG1]])
 ; LARGE: lwz {{[0-9]+}}, 0([[REG2]])
 ; LARGE: stw {{[0-9]+}}, 0([[REG2]])
-; LARGE: [[VAR]]:
-; LARGE: .tc [[VAR2:[a-z0-9A-Z_.]+]][TC],[[VAR2]]
-; LARGE: .type [[VAR2]],@object
-; LARGE: .data
-; LARGE: .globl [[VAR2]]
-; LARGE: [[VAR2]]:
-; LARGE: .long 5
+; LARGE:      .type gi,@object
+; LARGE-NEXT: .data
+; LARGE-NEXT: .globl gi
+; LARGE-NEXT: .p2align 2
+; LARGE-NEXT: gi:
+; LARGE-NEXT: .long 5
 
+; LARGE:      .section .toc,"aw",@progbits
+; LARGE-NEXT: [[VAR]]:
+; LARGE-NEXT: .tc gi[TC],gi

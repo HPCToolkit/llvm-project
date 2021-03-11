@@ -23,7 +23,9 @@
 using namespace llvm;
 
 void llvm::initializeIPO(PassRegistry &Registry) {
+  initializeOpenMPOptLegacyPassPass(Registry);
   initializeArgPromotionPass(Registry);
+  initializeAnnotation2MetadataLegacyPass(Registry);
   initializeCalledValuePropagationLegacyPassPass(Registry);
   initializeConstantMergeLegacyPassPass(Registry);
   initializeCrossDSOCFIPass(Registry);
@@ -34,18 +36,19 @@ void llvm::initializeIPO(PassRegistry &Registry) {
   initializeGlobalOptLegacyPassPass(Registry);
   initializeGlobalSplitPass(Registry);
   initializeHotColdSplittingLegacyPassPass(Registry);
-  initializeIPCPPass(Registry);
+  initializeIROutlinerLegacyPassPass(Registry);
   initializeAlwaysInlinerLegacyPassPass(Registry);
   initializeSimpleInlinerPass(Registry);
   initializeInferFunctionAttrsLegacyPassPass(Registry);
   initializeInternalizeLegacyPassPass(Registry);
-  initializeLoopExtractorPass(Registry);
-  initializeBlockExtractorPass(Registry);
+  initializeLoopExtractorLegacyPassPass(Registry);
+  initializeBlockExtractorLegacyPassPass(Registry);
   initializeSingleLoopExtractorPass(Registry);
   initializeLowerTypeTestsPass(Registry);
-  initializeMergeFunctionsPass(Registry);
+  initializeMergeFunctionsLegacyPassPass(Registry);
   initializePartialInlinerLegacyPassPass(Registry);
   initializeAttributorLegacyPassPass(Registry);
+  initializeAttributorCGSCCLegacyPassPass(Registry);
   initializePostOrderFunctionAttrsLegacyPassPass(Registry);
   initializeReversePostOrderFunctionAttrsLegacyPassPass(Registry);
   initializePruneEHPass(Registry);
@@ -102,16 +105,16 @@ void LLVMAddGlobalOptimizerPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createGlobalOptimizerPass());
 }
 
-void LLVMAddIPConstantPropagationPass(LLVMPassManagerRef PM) {
-  unwrap(PM)->add(createIPConstantPropagationPass());
-}
-
 void LLVMAddPruneEHPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createPruneEHPass());
 }
 
 void LLVMAddIPSCCPPass(LLVMPassManagerRef PM) {
   unwrap(PM)->add(createIPSCCPPass());
+}
+
+void LLVMAddMergeFunctionsPass(LLVMPassManagerRef PM) {
+  unwrap(PM)->add(createMergeFunctionsPass());
 }
 
 void LLVMAddInternalizePass(LLVMPassManagerRef PM, unsigned AllButMain) {

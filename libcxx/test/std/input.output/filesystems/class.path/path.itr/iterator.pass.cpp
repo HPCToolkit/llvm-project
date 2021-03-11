@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++98, c++03
+// UNSUPPORTED: c++03
 
 // <filesystem>
 
@@ -18,13 +18,13 @@
 //      path(InputIterator first, InputIterator last);
 
 
-#include "filesystem_include.hpp"
+#include "filesystem_include.h"
 #include <iterator>
 #include <type_traits>
 #include <cassert>
 
 #include "test_macros.h"
-#include "filesystem_test_helper.hpp"
+#include "filesystem_test_helper.h"
 
 
 
@@ -49,7 +49,11 @@ void checkIteratorConcepts() {
     ASSERT_SAME_TYPE(It, decltype(it--));
     ASSERT_SAME_TYPE(Traits::reference, decltype(*it));
     ASSERT_SAME_TYPE(Traits::pointer, decltype(it.operator->()));
+#ifdef _WIN32
+    ASSERT_SAME_TYPE(std::wstring const&, decltype(it->native()));
+#else
     ASSERT_SAME_TYPE(std::string const&, decltype(it->native()));
+#endif
     ASSERT_SAME_TYPE(bool, decltype(it == it));
     ASSERT_SAME_TYPE(bool, decltype(it != it));
   }

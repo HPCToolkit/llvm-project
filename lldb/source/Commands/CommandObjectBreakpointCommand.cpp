@@ -1,4 +1,4 @@
-//===-- CommandObjectBreakpointCommand.cpp ----------------------*- C++ -*-===//
+//===-- CommandObjectBreakpointCommand.cpp --------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -11,34 +11,42 @@
 #include "lldb/Breakpoint/Breakpoint.h"
 #include "lldb/Breakpoint/BreakpointIDList.h"
 #include "lldb/Breakpoint/BreakpointLocation.h"
-#include "lldb/Breakpoint/StoppointCallbackContext.h"
 #include "lldb/Core/IOHandler.h"
 #include "lldb/Host/OptionParser.h"
 #include "lldb/Interpreter/CommandInterpreter.h"
 #include "lldb/Interpreter/CommandReturnObject.h"
 #include "lldb/Interpreter/OptionArgParser.h"
+#include "lldb/Interpreter/OptionGroupPythonClassWithDict.h"
 #include "lldb/Target/Target.h"
-#include "lldb/Target/Thread.h"
-#include "lldb/Utility/State.h"
-
-#include "llvm/ADT/STLExtras.h"
 
 using namespace lldb;
 using namespace lldb_private;
 
-// CommandObjectBreakpointCommandAdd
-
 // FIXME: "script-type" needs to have its contents determined dynamically, so
-// somebody can add a new scripting
-// language to lldb and have it pickable here without having to change this
-// enumeration by hand and rebuild lldb proper.
-
+// somebody can add a new scripting language to lldb and have it pickable here
+// without having to change this enumeration by hand and rebuild lldb proper.
 static constexpr OptionEnumValueElement g_script_option_enumeration[] = {
-    {eScriptLanguageNone, "command",
-     "Commands are in the lldb command interpreter language"},
-    {eScriptLanguagePython, "python", "Commands are in the Python language."},
-    {eSortOrderByName, "default-script",
-     "Commands are in the default scripting language."} };
+    {
+        eScriptLanguageNone,
+        "command",
+        "Commands are in the lldb command interpreter language",
+    },
+    {
+        eScriptLanguagePython,
+        "python",
+        "Commands are in the Python language.",
+    },
+    {
+        eScriptLanguageLua,
+        "lua",
+        "Commands are in the Lua language.",
+    },
+    {
+        eScriptLanguageDefault,
+        "default-script",
+        "Commands are in the default scripting language.",
+    },
+};
 
 static constexpr OptionEnumValues ScriptOptionEnum() {
   return OptionEnumValues(g_script_option_enumeration);
@@ -59,7 +67,7 @@ public:
                             nullptr),
         IOHandlerDelegateMultiline("DONE",
                                    IOHandlerDelegate::Completion::LLDBCommand),
-        m_options() {
+        m_options(), m_func_options("breakpoint command", false, 'F') {
     SetHelpLong(
         R"(
 General information about entering breakpoint commands
@@ -133,12 +141,16 @@ Example Python one-line breakpoint command:
 
 (lldb) breakpoint command add -s python 1
 Enter your Python command(s). Type 'DONE' to end.
-> print "Hit this breakpoint!"
-> DONE
+def function (frame, bp_loc, internal_dict):
+    """frame: the lldb.SBFrame for the location at which you stopped
+       bp_loc: an lldb.SBBreakpointLocation for the breakpoint location information
+       internal_dict: an LLDB support object not to be used"""
+    print("Hit this breakpoint!")
+    DONE
 
 As a convenience, this also works for a short Python one-liner:
 
-(lldb) breakpoint command add -s python 1 -o 'import time; print time.asctime()'
+(lldb) breakpoint command add -s python 1 -o 'import time; print(time.asctime())'
 (lldb) run
 Launching '.../a.out'  (x86_64)
 (lldb) Fri Sep 10 12:17:45 2010
@@ -156,21 +168,14 @@ Example multiple line Python breakpoint command:
 
 (lldb) breakpoint command add -s p 1
 Enter your Python command(s). Type 'DONE' to end.
-> global bp_count
-> bp_count = bp_count + 1
-> print "Hit this breakpoint " + repr(bp_count) + " times!"
-> DONE
-
-Example multiple line Python breakpoint command, using function definition:
-
-(lldb) breakpoint command add -s python 1
-Enter your Python command(s). Type 'DONE' to end.
-> def breakpoint_output (bp_no):
->     out_string = "Hit breakpoint number " + repr (bp_no)
->     print out_string
->     return True
-> breakpoint_output (1)
-> DONE
+def function (frame, bp_loc, internal_dict):
+    """frame: the lldb.SBFrame for the location at which you stopped
+       bp_loc: an lldb.SBBreakpointLocation for the breakpoint location information
+       internal_dict: an LLDB support object not to be used"""
+    global bp_count
+    bp_count = bp_count + 1
+    print("Hit this breakpoint " + repr(bp_count) + " times!")
+    DONE
 
 )"
         "In this case, since there is a reference to a global variable, \
@@ -194,6 +199,11 @@ LLDB to stop."
         "Final Note: A warning that no breakpoint command was generated when there \
 are no syntax errors may indicate that a function was declared but never called.");
 
+    m_all_options.Append(&m_options);
+    m_all_options.Append(&m_func_options, LLDB_OPT_SET_2 | LLDB_OPT_SET_3,
+                         LLDB_OPT_SET_2);
+    m_all_options.Finalize();
+
     CommandArgumentEntry arg;
     CommandArgumentData bp_id_arg;
 
@@ -211,10 +221,10 @@ are no syntax errors may indicate that a function was declared but never called.
 
   ~CommandObjectBreakpointCommandAdd() override = default;
 
-  Options *GetOptions() override { return &m_options; }
+  Options *GetOptions() override { return &m_all_options; }
 
   void IOHandlerActivated(IOHandler &io_handler, bool interactive) override {
-    StreamFileSP output_sp(io_handler.GetOutputStreamFile());
+    StreamFileSP output_sp(io_handler.GetOutputStreamFileSP());
     if (output_sp && interactive) {
       output_sp->PutCString(g_reader_instructions);
       output_sp->Flush();
@@ -231,7 +241,7 @@ are no syntax errors may indicate that a function was declared but never called.
       if (!bp_options)
         continue;
 
-      auto cmd_data = llvm::make_unique<BreakpointOptions::CommandData>();
+      auto cmd_data = std::make_unique<BreakpointOptions::CommandData>();
       cmd_data->user_source.SplitIntoLines(line.c_str(), line.size());
       bp_options->SetCommandDataCallback(cmd_data);
     }
@@ -243,7 +253,6 @@ are no syntax errors may indicate that a function was declared but never called.
     m_interpreter.GetLLDBCommandsFromIOHandler(
         "> ",             // Prompt
         *this,            // IOHandlerDelegate
-        true,             // Run IOHandler in async mode
         &bp_options_vec); // Baton for the "io_handler" that will be passed back
                           // into our IOHandlerDelegate functions
   }
@@ -253,7 +262,7 @@ are no syntax errors may indicate that a function was declared but never called.
   SetBreakpointCommandCallback(std::vector<BreakpointOptions *> &bp_options_vec,
                                const char *oneliner) {
     for (auto bp_options : bp_options_vec) {
-      auto cmd_data = llvm::make_unique<BreakpointOptions::CommandData>();
+      auto cmd_data = std::make_unique<BreakpointOptions::CommandData>();
 
       cmd_data->user_source.AppendString(oneliner);
       cmd_data->stop_on_error = m_options.m_stop_on_error;
@@ -262,24 +271,25 @@ are no syntax errors may indicate that a function was declared but never called.
     }
   }
 
-  class CommandOptions : public Options {
+  class CommandOptions : public OptionGroup {
   public:
     CommandOptions()
-        : Options(), m_use_commands(false), m_use_script_language(false),
+        : OptionGroup(), m_use_commands(false), m_use_script_language(false),
           m_script_language(eScriptLanguageNone), m_use_one_liner(false),
-          m_one_liner(), m_function_name() {}
+          m_one_liner() {}
 
     ~CommandOptions() override = default;
 
     Status SetOptionValue(uint32_t option_idx, llvm::StringRef option_arg,
                           ExecutionContext *execution_context) override {
       Status error;
-      const int short_option = m_getopt_table[option_idx].val;
+      const int short_option =
+          g_breakpoint_command_add_options[option_idx].short_option;
 
       switch (short_option) {
       case 'o':
         m_use_one_liner = true;
-        m_one_liner = option_arg;
+        m_one_liner = std::string(option_arg);
         break;
 
       case 's':
@@ -287,12 +297,15 @@ are no syntax errors may indicate that a function was declared but never called.
             option_arg,
             g_breakpoint_command_add_options[option_idx].enum_values,
             eScriptLanguageNone, error);
-
-        if (m_script_language == eScriptLanguagePython ||
-            m_script_language == eScriptLanguageDefault) {
+        switch (m_script_language) {
+        case eScriptLanguagePython:
+        case eScriptLanguageLua:
           m_use_script_language = true;
-        } else {
+          break;
+        case eScriptLanguageNone:
+        case eScriptLanguageUnknown:
           m_use_script_language = false;
+          break;
         }
         break;
 
@@ -306,18 +319,12 @@ are no syntax errors may indicate that a function was declared but never called.
               option_arg.str().c_str());
       } break;
 
-      case 'F':
-        m_use_one_liner = false;
-        m_use_script_language = true;
-        m_function_name.assign(option_arg);
-        break;
-
       case 'D':
         m_use_dummy = true;
         break;
 
       default:
-        break;
+        llvm_unreachable("Unimplemented option");
       }
       return error;
     }
@@ -330,7 +337,6 @@ are no syntax errors may indicate that a function was declared but never called.
       m_use_one_liner = false;
       m_stop_on_error = true;
       m_one_liner.clear();
-      m_function_name.clear();
       m_use_dummy = false;
     }
 
@@ -348,22 +354,14 @@ are no syntax errors may indicate that a function was declared but never called.
     bool m_use_one_liner;
     std::string m_one_liner;
     bool m_stop_on_error;
-    std::string m_function_name;
     bool m_use_dummy;
   };
 
 protected:
   bool DoExecute(Args &command, CommandReturnObject &result) override {
-    Target *target = GetSelectedOrDummyTarget(m_options.m_use_dummy);
+    Target &target = GetSelectedOrDummyTarget(m_options.m_use_dummy);
 
-    if (target == nullptr) {
-      result.AppendError("There is not a current executable; there are no "
-                         "breakpoints to which to add commands");
-      result.SetStatus(eReturnStatusFailed);
-      return false;
-    }
-
-    const BreakpointList &breakpoints = target->GetBreakpointList();
+    const BreakpointList &breakpoints = target.GetBreakpointList();
     size_t num_breakpoints = breakpoints.GetSize();
 
     if (num_breakpoints == 0) {
@@ -372,17 +370,17 @@ protected:
       return false;
     }
 
-    if (!m_options.m_use_script_language &&
-        !m_options.m_function_name.empty()) {
-      result.AppendError("need to enable scripting to have a function run as a "
-                         "breakpoint command");
-      result.SetStatus(eReturnStatusFailed);
-      return false;
+    if (!m_func_options.GetName().empty()) {
+      m_options.m_use_one_liner = false;
+      if (!m_options.m_use_script_language) {
+        m_options.m_script_language = GetDebugger().GetScriptLanguage();
+        m_options.m_use_script_language = true;
+      }
     }
 
     BreakpointIDList valid_bp_ids;
     CommandObjectMultiwordBreakpoint::VerifyBreakpointOrLocationIDs(
-        command, target, result, &valid_bp_ids,
+        command, &target, result, &valid_bp_ids,
         BreakpointName::Permissions::PermissionKinds::listPerm);
 
     m_bp_options_vec.clear();
@@ -394,7 +392,7 @@ protected:
         BreakpointID cur_bp_id = valid_bp_ids.GetBreakpointIDAtIndex(i);
         if (cur_bp_id.GetBreakpointID() != LLDB_INVALID_BREAK_ID) {
           Breakpoint *bp =
-              target->GetBreakpointByID(cur_bp_id.GetBreakpointID()).get();
+              target.GetBreakpointByID(cur_bp_id.GetBreakpointID()).get();
           BreakpointOptions *bp_options = nullptr;
           if (cur_bp_id.GetLocationID() == LLDB_INVALID_BREAK_ID) {
             // This breakpoint does not have an associated location.
@@ -416,18 +414,23 @@ protected:
       // to set or collect command callback.  Otherwise, call the methods
       // associated with this object.
       if (m_options.m_use_script_language) {
-        ScriptInterpreter *script_interp = GetDebugger().GetScriptInterpreter();
+        Status error;
+        ScriptInterpreter *script_interp = GetDebugger().GetScriptInterpreter(
+            /*can_create=*/true, m_options.m_script_language);
         // Special handling for one-liner specified inline.
         if (m_options.m_use_one_liner) {
-          script_interp->SetBreakpointCommandCallback(
+          error = script_interp->SetBreakpointCommandCallback(
               m_bp_options_vec, m_options.m_one_liner.c_str());
-        } else if (!m_options.m_function_name.empty()) {
-          script_interp->SetBreakpointCommandCallbackFunction(
-              m_bp_options_vec, m_options.m_function_name.c_str());
+        } else if (!m_func_options.GetName().empty()) {
+          error = script_interp->SetBreakpointCommandCallbackFunction(
+              m_bp_options_vec, m_func_options.GetName().c_str(),
+              m_func_options.GetStructuredData());
         } else {
           script_interp->CollectDataForBreakpointCommandCallback(
               m_bp_options_vec, result);
         }
+        if (!error.Success())
+          result.SetError(error);
       } else {
         // Special handling for one-liner specified inline.
         if (m_options.m_use_one_liner)
@@ -443,6 +446,9 @@ protected:
 
 private:
   CommandOptions m_options;
+  OptionGroupPythonClassWithDict m_func_options;
+  OptionGroupOptions m_all_options;
+
   std::vector<BreakpointOptions *> m_bp_options_vec; // This stores the
                                                      // breakpoint options that
                                                      // we are currently
@@ -509,9 +515,7 @@ public:
         break;
 
       default:
-        error.SetErrorStringWithFormat("unrecognized option '%c'",
-                                       short_option);
-        break;
+        llvm_unreachable("Unimplemented option");
       }
 
       return error;
@@ -531,16 +535,9 @@ public:
 
 protected:
   bool DoExecute(Args &command, CommandReturnObject &result) override {
-    Target *target = GetSelectedOrDummyTarget(m_options.m_use_dummy);
+    Target &target = GetSelectedOrDummyTarget(m_options.m_use_dummy);
 
-    if (target == nullptr) {
-      result.AppendError("There is not a current executable; there are no "
-                         "breakpoints from which to delete commands");
-      result.SetStatus(eReturnStatusFailed);
-      return false;
-    }
-
-    const BreakpointList &breakpoints = target->GetBreakpointList();
+    const BreakpointList &breakpoints = target.GetBreakpointList();
     size_t num_breakpoints = breakpoints.GetSize();
 
     if (num_breakpoints == 0) {
@@ -558,7 +555,7 @@ protected:
 
     BreakpointIDList valid_bp_ids;
     CommandObjectMultiwordBreakpoint::VerifyBreakpointOrLocationIDs(
-        command, target, result, &valid_bp_ids, 
+        command, &target, result, &valid_bp_ids,
         BreakpointName::Permissions::PermissionKinds::listPerm);
 
     if (result.Succeeded()) {
@@ -567,7 +564,7 @@ protected:
         BreakpointID cur_bp_id = valid_bp_ids.GetBreakpointIDAtIndex(i);
         if (cur_bp_id.GetBreakpointID() != LLDB_INVALID_BREAK_ID) {
           Breakpoint *bp =
-              target->GetBreakpointByID(cur_bp_id.GetBreakpointID()).get();
+              target.GetBreakpointByID(cur_bp_id.GetBreakpointID()).get();
           if (cur_bp_id.GetLocationID() != LLDB_INVALID_BREAK_ID) {
             BreakpointLocationSP bp_loc_sp(
                 bp->FindLocationByID(cur_bp_id.GetLocationID()));
@@ -598,10 +595,10 @@ private:
 class CommandObjectBreakpointCommandList : public CommandObjectParsed {
 public:
   CommandObjectBreakpointCommandList(CommandInterpreter &interpreter)
-      : CommandObjectParsed(interpreter, "list", "List the script or set of "
-                                                 "commands to be executed when "
-                                                 "the breakpoint is hit.",
-                            nullptr) {
+      : CommandObjectParsed(interpreter, "list",
+                            "List the script or set of commands to be "
+                            "executed when the breakpoint is hit.",
+                            nullptr, eCommandRequiresTarget) {
     CommandArgumentEntry arg;
     CommandArgumentData bp_id_arg;
 
@@ -621,14 +618,7 @@ public:
 
 protected:
   bool DoExecute(Args &command, CommandReturnObject &result) override {
-    Target *target = GetDebugger().GetSelectedTarget().get();
-
-    if (target == nullptr) {
-      result.AppendError("There is not a current executable; there are no "
-                         "breakpoints for which to list commands");
-      result.SetStatus(eReturnStatusFailed);
-      return false;
-    }
+    Target *target = &GetSelectedTarget();
 
     const BreakpointList &breakpoints = target->GetBreakpointList();
     size_t num_breakpoints = breakpoints.GetSize();
@@ -648,7 +638,7 @@ protected:
 
     BreakpointIDList valid_bp_ids;
     CommandObjectMultiwordBreakpoint::VerifyBreakpointOrLocationIDs(
-        command, target, result, &valid_bp_ids, 
+        command, target, result, &valid_bp_ids,
         BreakpointName::Permissions::PermissionKinds::listPerm);
 
     if (result.Succeeded()) {
@@ -662,9 +652,8 @@ protected:
           if (bp) {
             BreakpointLocationSP bp_loc_sp;
             if (cur_bp_id.GetLocationID() != LLDB_INVALID_BREAK_ID) {
-                  bp_loc_sp = bp->FindLocationByID(cur_bp_id.GetLocationID());
-              if (!bp_loc_sp)
-              {
+              bp_loc_sp = bp->FindLocationByID(cur_bp_id.GetLocationID());
+              if (!bp_loc_sp) {
                 result.AppendErrorWithFormat("Invalid breakpoint ID: %u.%u.\n",
                                              cur_bp_id.GetBreakpointID(),
                                              cur_bp_id.GetLocationID());
@@ -679,19 +668,20 @@ protected:
                                                 cur_bp_id.GetLocationID());
             const Baton *baton = nullptr;
             if (bp_loc_sp)
-              baton = bp_loc_sp
-               ->GetOptionsSpecifyingKind(BreakpointOptions::eCallback)
-               ->GetBaton();
+              baton =
+                  bp_loc_sp
+                      ->GetOptionsSpecifyingKind(BreakpointOptions::eCallback)
+                      ->GetBaton();
             else
               baton = bp->GetOptions()->GetBaton();
 
             if (baton) {
               result.GetOutputStream().Printf("Breakpoint %s:\n",
                                               id_str.GetData());
-              result.GetOutputStream().IndentMore();
-              baton->GetDescription(&result.GetOutputStream(),
-                                    eDescriptionLevelFull);
-              result.GetOutputStream().IndentLess();
+              baton->GetDescription(result.GetOutputStream().AsRawOstream(),
+                                    eDescriptionLevelFull,
+                                    result.GetOutputStream().GetIndentLevel() +
+                                        2);
             } else {
               result.AppendMessageWithFormat(
                   "Breakpoint %s does not have an associated command.\n",
@@ -716,9 +706,10 @@ protected:
 CommandObjectBreakpointCommand::CommandObjectBreakpointCommand(
     CommandInterpreter &interpreter)
     : CommandObjectMultiword(
-          interpreter, "command", "Commands for adding, removing and listing "
-                                  "LLDB commands executed when a breakpoint is "
-                                  "hit.",
+          interpreter, "command",
+          "Commands for adding, removing and listing "
+          "LLDB commands executed when a breakpoint is "
+          "hit.",
           "command <sub-command> [<sub-command-options>] <breakpoint-id>") {
   CommandObjectSP add_command_object(
       new CommandObjectBreakpointCommandAdd(interpreter));

@@ -16,7 +16,9 @@
 #include "MCTargetDesc/RISCVMCTargetDesc.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSwitch.h"
+#include "llvm/MC/MCInstrDesc.h"
 #include "llvm/MC/SubtargetFeature.h"
+#include "llvm/Support/MachineValueType.h"
 
 namespace llvm {
 
@@ -43,25 +45,82 @@ enum {
   InstFormatCJ = 16,
   InstFormatOther = 17,
 
-  InstFormatMask = 31
+  InstFormatMask = 31,
+
+  ConstraintShift = 5,
+  ConstraintMask = 0b111 << ConstraintShift,
+
+  VLMulShift = ConstraintShift + 3,
+  VLMulMask = 0b111 << VLMulShift,
+
+  // Do we need to add a dummy mask op when converting RVV Pseudo to MCInst.
+  HasDummyMaskOpShift = VLMulShift + 3,
+  HasDummyMaskOpMask = 1 << HasDummyMaskOpShift,
+
+  // Does this instruction only update element 0 the destination register.
+  WritesElement0Shift = HasDummyMaskOpShift + 1,
+  WritesElement0Mask = 1 << WritesElement0Shift,
+
+  // Does this instruction have a merge operand that must be removed when
+  // converting to MCInst. It will be the first explicit use operand. Used by
+  // RVV Pseudos.
+  HasMergeOpShift = WritesElement0Shift + 1,
+  HasMergeOpMask = 1 << HasMergeOpShift,
+
+  // Does this instruction have a SEW operand. It will be the last explicit
+  // operand. Used by RVV Pseudos.
+  HasSEWOpShift = HasMergeOpShift + 1,
+  HasSEWOpMask = 1 << HasSEWOpShift,
+
+  // Does this instruction have a VL operand. It will be the second to last
+  // explicit operand. Used by RVV Pseudos.
+  HasVLOpShift = HasSEWOpShift + 1,
+  HasVLOpMask = 1 << HasVLOpShift,
 };
 
+// Match with the definitions in RISCVInstrFormatsV.td
+enum RVVConstraintType {
+  NoConstraint = 0,
+  VS2Constraint = 0b001,
+  VS1Constraint = 0b010,
+  VMConstraint = 0b100,
+};
+
+// RISC-V Specific Machine Operand Flags
 enum {
-  MO_None,
-  MO_CALL,
-  MO_PLT,
-  MO_LO,
-  MO_HI,
-  MO_PCREL_LO,
-  MO_PCREL_HI,
-  MO_GOT_HI,
-  MO_TPREL_LO,
-  MO_TPREL_HI,
-  MO_TPREL_ADD,
-  MO_TLS_GOT_HI,
-  MO_TLS_GD_HI,
+  MO_None = 0,
+  MO_CALL = 1,
+  MO_PLT = 2,
+  MO_LO = 3,
+  MO_HI = 4,
+  MO_PCREL_LO = 5,
+  MO_PCREL_HI = 6,
+  MO_GOT_HI = 7,
+  MO_TPREL_LO = 8,
+  MO_TPREL_HI = 9,
+  MO_TPREL_ADD = 10,
+  MO_TLS_GOT_HI = 11,
+  MO_TLS_GD_HI = 12,
+
+  // Used to differentiate between target-specific "direct" flags and "bitmask"
+  // flags. A machine operand can only have one "direct" flag, but can have
+  // multiple "bitmask" flags.
+  MO_DIRECT_FLAG_MASK = 15
 };
 } // namespace RISCVII
+
+namespace RISCVOp {
+enum OperandType : unsigned {
+  OPERAND_FIRST_RISCV_IMM = MCOI::OPERAND_FIRST_TARGET,
+  OPERAND_UIMM4 = OPERAND_FIRST_RISCV_IMM,
+  OPERAND_UIMM5,
+  OPERAND_UIMM12,
+  OPERAND_SIMM12,
+  OPERAND_UIMM20,
+  OPERAND_UIMMLOG2XLEN,
+  OPERAND_LAST_RISCV_IMM = OPERAND_UIMMLOG2XLEN
+};
+} // namespace RISCVOp
 
 // Describes the predecessor/successor bits used in the FENCE instruction.
 namespace RISCVFenceField {
@@ -134,6 +193,7 @@ namespace RISCVSysReg {
 struct SysReg {
   const char *Name;
   unsigned Encoding;
+  const char *AltName;
   // FIXME: add these additional fields when needed.
   // Privilege Access: Read, Write, Read-Only.
   // unsigned ReadWrite;
@@ -158,7 +218,7 @@ struct SysReg {
 };
 
 #define GET_SysRegsList_DECL
-#include "RISCVGenSystemOperands.inc"
+#include "RISCVGenSearchableTables.inc"
 } // end namespace RISCVSysReg
 
 namespace RISCVABI {
@@ -179,6 +239,14 @@ enum ABI {
 ABI computeTargetABI(const Triple &TT, FeatureBitset FeatureBits,
                      StringRef ABIName);
 
+ABI getTargetABI(StringRef ABIName);
+
+// Returns the register used to hold the stack pointer after realignment.
+MCRegister getBPReg();
+
+// Returns the register holding shadow call stack pointer.
+MCRegister getSCSPReg();
+
 } // namespace RISCVABI
 
 namespace RISCVFeatures {
@@ -188,6 +256,158 @@ namespace RISCVFeatures {
 void validate(const Triple &TT, const FeatureBitset &FeatureBits);
 
 } // namespace RISCVFeatures
+
+namespace RISCVVMVTs {
+
+constexpr MVT vint8mf8_t = MVT::nxv1i8;
+constexpr MVT vint8mf4_t = MVT::nxv2i8;
+constexpr MVT vint8mf2_t = MVT::nxv4i8;
+constexpr MVT vint8m1_t = MVT::nxv8i8;
+constexpr MVT vint8m2_t = MVT::nxv16i8;
+constexpr MVT vint8m4_t = MVT::nxv32i8;
+constexpr MVT vint8m8_t = MVT::nxv64i8;
+
+constexpr MVT vint16mf4_t = MVT::nxv1i16;
+constexpr MVT vint16mf2_t = MVT::nxv2i16;
+constexpr MVT vint16m1_t = MVT::nxv4i16;
+constexpr MVT vint16m2_t = MVT::nxv8i16;
+constexpr MVT vint16m4_t = MVT::nxv16i16;
+constexpr MVT vint16m8_t = MVT::nxv32i16;
+
+constexpr MVT vint32mf2_t = MVT::nxv1i32;
+constexpr MVT vint32m1_t = MVT::nxv2i32;
+constexpr MVT vint32m2_t = MVT::nxv4i32;
+constexpr MVT vint32m4_t = MVT::nxv8i32;
+constexpr MVT vint32m8_t = MVT::nxv16i32;
+
+constexpr MVT vint64m1_t = MVT::nxv1i64;
+constexpr MVT vint64m2_t = MVT::nxv2i64;
+constexpr MVT vint64m4_t = MVT::nxv4i64;
+constexpr MVT vint64m8_t = MVT::nxv8i64;
+
+constexpr MVT vfloat16mf4_t = MVT::nxv1f16;
+constexpr MVT vfloat16mf2_t = MVT::nxv2f16;
+constexpr MVT vfloat16m1_t = MVT::nxv4f16;
+constexpr MVT vfloat16m2_t = MVT::nxv8f16;
+constexpr MVT vfloat16m4_t = MVT::nxv16f16;
+constexpr MVT vfloat16m8_t = MVT::nxv32f16;
+
+constexpr MVT vfloat32mf2_t = MVT::nxv1f32;
+constexpr MVT vfloat32m1_t = MVT::nxv2f32;
+constexpr MVT vfloat32m2_t = MVT::nxv4f32;
+constexpr MVT vfloat32m4_t = MVT::nxv8f32;
+constexpr MVT vfloat32m8_t = MVT::nxv16f32;
+
+constexpr MVT vfloat64m1_t = MVT::nxv1f64;
+constexpr MVT vfloat64m2_t = MVT::nxv2f64;
+constexpr MVT vfloat64m4_t = MVT::nxv4f64;
+constexpr MVT vfloat64m8_t = MVT::nxv8f64;
+
+constexpr MVT vbool1_t = MVT::nxv64i1;
+constexpr MVT vbool2_t = MVT::nxv32i1;
+constexpr MVT vbool4_t = MVT::nxv16i1;
+constexpr MVT vbool8_t = MVT::nxv8i1;
+constexpr MVT vbool16_t = MVT::nxv4i1;
+constexpr MVT vbool32_t = MVT::nxv2i1;
+constexpr MVT vbool64_t = MVT::nxv1i1;
+
+} // namespace RISCVVMVTs
+
+enum class RISCVVSEW {
+  SEW_8 = 0,
+  SEW_16,
+  SEW_32,
+  SEW_64,
+  SEW_128,
+  SEW_256,
+  SEW_512,
+  SEW_1024,
+};
+
+enum class RISCVVLMUL {
+  LMUL_1 = 0,
+  LMUL_2,
+  LMUL_4,
+  LMUL_8,
+  LMUL_RESERVED,
+  LMUL_F8,
+  LMUL_F4,
+  LMUL_F2
+};
+
+namespace RISCVVType {
+// Is this a SEW value that can be encoded into the VTYPE format.
+inline static bool isValidSEW(unsigned SEW) {
+  return isPowerOf2_32(SEW) && SEW >= 8 && SEW <= 1024;
+}
+
+// Is this a LMUL value that can be encoded into the VTYPE format.
+inline static bool isValidLMUL(unsigned LMUL, bool Fractional) {
+  return isPowerOf2_32(LMUL) && LMUL <= 8 && (!Fractional || LMUL != 1);
+}
+
+// Encode VTYPE into the binary format used by the the VSETVLI instruction which
+// is used by our MC layer representation.
+//
+// Bits | Name       | Description
+// -----+------------+------------------------------------------------
+// 7    | vma        | Vector mask agnostic
+// 6    | vta        | Vector tail agnostic
+// 5    | vlmul[2]   | Fractional lmul?
+// 4:2  | vsew[2:0]  | Standard element width (SEW) setting
+// 1:0  | vlmul[1:0] | Vector register group multiplier (LMUL) setting
+//
+// TODO: This format will change for the V extensions spec v1.0.
+inline static unsigned encodeVTYPE(RISCVVLMUL VLMUL, RISCVVSEW VSEW,
+                                   bool TailAgnostic, bool MaskAgnostic) {
+  unsigned VLMULBits = static_cast<unsigned>(VLMUL);
+  unsigned VSEWBits = static_cast<unsigned>(VSEW);
+  unsigned VTypeI =
+      ((VLMULBits & 0x4) << 3) | (VSEWBits << 2) | (VLMULBits & 0x3);
+  if (TailAgnostic)
+    VTypeI |= 0x40;
+  if (MaskAgnostic)
+    VTypeI |= 0x80;
+
+  return VTypeI;
+}
+
+// TODO: This format will change for the V extensions spec v1.0.
+inline static RISCVVLMUL getVLMUL(unsigned VType) {
+  unsigned VLMUL = (VType & 0x3) | ((VType & 0x20) >> 3);
+  return static_cast<RISCVVLMUL>(VLMUL);
+}
+
+inline static RISCVVSEW getVSEW(unsigned VType) {
+  unsigned VSEW = (VType >> 2) & 0x7;
+  return static_cast<RISCVVSEW>(VSEW);
+}
+
+inline static bool isTailAgnostic(unsigned VType) { return VType & 0x40; }
+
+inline static bool isMaskAgnostic(unsigned VType) { return VType & 0x80; }
+
+void printVType(unsigned VType, raw_ostream &OS);
+
+} // namespace RISCVVType
+
+namespace RISCVVPseudosTable {
+
+// The definition should be consistent with `class RISCVVPseudo` in
+// RISCVInstrInfoVPseudos.td.
+static const uint8_t InvalidIndex = 0x80;
+
+struct PseudoInfo {
+  uint16_t Pseudo;
+  uint16_t BaseInstr;
+};
+
+using namespace RISCV;
+
+#define GET_RISCVVPseudosTable_DECL
+#include "RISCVGenSearchableTables.inc"
+
+} // end namespace RISCVVPseudosTable
 
 } // namespace llvm
 

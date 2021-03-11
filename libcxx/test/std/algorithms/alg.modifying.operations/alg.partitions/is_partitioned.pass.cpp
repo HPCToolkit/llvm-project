@@ -9,7 +9,7 @@
 // <algorithm>
 
 // template <class InputIterator, class Predicate>
-//     constpexr bool       // constexpr after C++17
+//     constexpr bool       // constexpr after C++17
 //     is_partitioned(InputIterator first, InputIterator last, Predicate pred);
 
 #include <algorithm>
@@ -19,7 +19,7 @@
 
 #include "test_macros.h"
 #include "test_iterators.h"
-#include "counting_predicates.hpp"
+#include "counting_predicates.h"
 
 struct is_odd {
   TEST_CONSTEXPR bool operator()(const int &i) const { return i & 1; }

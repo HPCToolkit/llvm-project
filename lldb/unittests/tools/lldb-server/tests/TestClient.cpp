@@ -1,4 +1,4 @@
-//===-- TestClient.cpp ------------------------------------------*- C++ -*-===//
+//===-- TestClient.cpp ----------------------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -25,8 +25,12 @@ using namespace lldb_private;
 using namespace llvm;
 using namespace llgs_tests;
 
+#ifdef SendMessage
+#undef SendMessage
+#endif
+
 TestClient::TestClient(std::unique_ptr<Connection> Conn) {
-  SetConnection(Conn.release());
+  SetConnection(std::move(Conn));
   SetPacketTimeout(std::chrono::seconds(10));
 }
 
@@ -107,7 +111,7 @@ Expected<std::unique_ptr<TestClient>> TestClient::launchCustom(StringRef Log, Ar
 
   Socket *accept_socket;
   listen_socket.Accept(accept_socket);
-  auto Conn = llvm::make_unique<ConnectionFileDescriptor>(accept_socket);
+  auto Conn = std::make_unique<ConnectionFileDescriptor>(accept_socket);
   auto Client = std::unique_ptr<TestClient>(new TestClient(std::move(Conn)));
 
   if (Error E = Client->initializeConnection())
@@ -215,6 +219,7 @@ Error TestClient::qProcessInfo() {
 }
 
 Error TestClient::qRegisterInfos() {
+  uint32_t reg_offset = 0;
   for (unsigned int Reg = 0;; ++Reg) {
     std::string Message = formatv("qRegisterInfo{0:x-}", Reg).str();
     Expected<RegisterInfo> InfoOr = SendMessage<RegisterInfoParser>(Message);
@@ -223,6 +228,12 @@ Error TestClient::qRegisterInfos() {
       break;
     }
     m_register_infos.emplace_back(std::move(*InfoOr));
+
+    if (m_register_infos[Reg].byte_offset == LLDB_INVALID_INDEX32)
+      m_register_infos[Reg].byte_offset = reg_offset;
+
+    reg_offset =
+        m_register_infos[Reg].byte_offset + m_register_infos[Reg].byte_size;
     if (m_register_infos[Reg].kinds[eRegisterKindGeneric] ==
         LLDB_REGNUM_GENERIC_PC)
       m_pc_register = Reg;

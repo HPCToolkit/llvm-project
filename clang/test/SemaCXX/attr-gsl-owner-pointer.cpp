@@ -31,9 +31,11 @@ class [[gsl::Owner(int)]] [[gsl::Pointer(int)]] BothOwnerPointer{};
 // CHECK: OwnerAttr {{.*}} int
 
 class [[gsl::Owner(void)]] OwnerVoidDerefType{};
-// expected-error@-1 {{'void' is an invalid argument to attribute 'Owner'}}
+// CHECK: CXXRecordDecl {{.*}} OwnerVoidDerefType
+// CHECK: OwnerAttr {{.*}} void
 class [[gsl::Pointer(void)]] PointerVoidDerefType{};
-// expected-error@-1 {{'void' is an invalid argument to attribute 'Pointer'}}
+// CHECK: CXXRecordDecl {{.*}} PointerVoidDerefType
+// CHECK: PointerAttr {{.*}} void
 
 class [[gsl::Pointer(int)]] AddConflictLater{};
 // CHECK: CXXRecordDecl {{.*}} AddConflictLater
@@ -105,3 +107,20 @@ class [[gsl::Owner(int)]] AddTheSameLater{};
 class [[gsl::Owner(int)]] AddTheSameLater;
 // CHECK: CXXRecordDecl {{.*}} prev {{.*}} AddTheSameLater
 // CHECK: OwnerAttr {{.*}} int
+
+template <class T>
+class [[gsl::Owner]] ForwardDeclared;
+// CHECK: ClassTemplateDecl {{.*}} ForwardDeclared
+// CHECK: OwnerAttr {{.*}}
+// CHECK: ClassTemplateSpecializationDecl {{.*}} ForwardDeclared
+// CHECK: TemplateArgument type 'int'
+// CHECK: OwnerAttr {{.*}}
+
+template <class T>
+class [[gsl::Owner]] ForwardDeclared {
+// CHECK: ClassTemplateDecl {{.*}} ForwardDeclared
+// CHECK: CXXRecordDecl {{.*}} ForwardDeclared definition
+// CHECK: OwnerAttr {{.*}}
+};
+
+static_assert(sizeof(ForwardDeclared<int>), ""); // Force instantiation.

@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++98, c++03
+// UNSUPPORTED: c++03
 
 // <filesystem>
 
@@ -14,19 +14,23 @@
 
 // path& operator=(path const&);
 
-#include "filesystem_include.hpp"
+#include "filesystem_include.h"
 #include <type_traits>
 #include <cassert>
 
 #include "test_macros.h"
-#include "count_new.hpp"
+#include "count_new.h"
 
 
 int main(int, char**) {
   using namespace fs;
   path p("abc");
   p = {};
+#ifdef _WIN32
+  assert(p.native() == L"");
+#else
   assert(p.native() == "");
+#endif
 
   return 0;
 }

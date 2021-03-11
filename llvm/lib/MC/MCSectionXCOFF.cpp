@@ -15,24 +15,55 @@ using namespace llvm;
 
 MCSectionXCOFF::~MCSectionXCOFF() = default;
 
+void MCSectionXCOFF::printCsectDirective(raw_ostream &OS) const {
+  OS << "\t.csect " << QualName->getName() << "," << Log2_32(getAlignment())
+     << '\n';
+}
+
 void MCSectionXCOFF::PrintSwitchToSection(const MCAsmInfo &MAI, const Triple &T,
                                           raw_ostream &OS,
                                           const MCExpr *Subsection) const {
   if (getKind().isText()) {
     if (getMappingClass() != XCOFF::XMC_PR)
-      llvm_unreachable("Unsupported storage-mapping class for .text csect");
+      report_fatal_error("Unhandled storage-mapping class for .text csect");
 
-    OS << "\t.csect " << getSectionName() << "["
-       << "PR"
-       << "]" << '\n';
+    printCsectDirective(OS);
     return;
   }
 
-  if (getKind().isCommon()) {
-    if (getMappingClass() != XCOFF::XMC_RW)
-      llvm_unreachable("Unsupported storage-mapping class for common csect");
-    if (getCSectType() != XCOFF::XTY_CM)
-      llvm_unreachable("wrong csect type for .bss csect");
+  if (getKind().isReadOnly()) {
+    if (getMappingClass() != XCOFF::XMC_RO)
+      report_fatal_error("Unhandled storage-mapping class for .rodata csect.");
+    printCsectDirective(OS);
+    return;
+  }
+
+  if (getKind().isData()) {
+    switch (getMappingClass()) {
+    case XCOFF::XMC_RW:
+    case XCOFF::XMC_DS:
+      printCsectDirective(OS);
+      break;
+    case XCOFF::XMC_TC:
+    case XCOFF::XMC_TE:
+      break;
+    case XCOFF::XMC_TC0:
+      OS << "\t.toc\n";
+      break;
+    default:
+      report_fatal_error(
+          "Unhandled storage-mapping class for .data csect.");
+    }
+    return;
+  }
+
+  if (getKind().isBSSLocal() || getKind().isCommon()) {
+    assert((getMappingClass() == XCOFF::XMC_RW ||
+            getMappingClass() == XCOFF::XMC_BS) &&
+           "Generated a storage-mapping class for a common/bss csect we don't "
+           "understand how to switch to.");
+    assert(getCSectType() == XCOFF::XTY_CM &&
+           "wrong csect type for .bss csect");
     // Don't have to print a directive for switching to section for commons.
     // '.comm' and '.lcomm' directives for the variable will create the needed
     // csect.

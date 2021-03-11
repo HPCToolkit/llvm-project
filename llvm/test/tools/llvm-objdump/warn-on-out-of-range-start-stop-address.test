@@ -2,10 +2,10 @@
 ## do not intersect with address ranges of sections that have the SHF_ALLOC
 ## flag.
 
-# RUN: yaml2obj --docnum=1 %s > %t
-# RUN: yaml2obj --docnum=2 %s > %t.2
-# RUN: yaml2obj --docnum=3 %s > %t.o
-# RUN: yaml2obj --docnum=4 %s > %t.3
+# RUN: yaml2obj --docnum=1 %s -o %t
+# RUN: yaml2obj --docnum=2 %s -o %t.2
+# RUN: yaml2obj --docnum=3 %s -o %t.o
+# RUN: yaml2obj --docnum=4 %s -o %t.3
 
 ## Warn if no section covers any part of the specified range.
 
@@ -120,12 +120,12 @@
 ## No warning if neither --start-address nor --stop-address are specified.
 # RUN: llvm-objdump --file-headers %t 2>&1 | FileCheck %s --implicit-check-not=warning:
 
-# WARN: warning: no section overlaps the range {{.*}} specified by --start-address/--stop-address
-# WARN-STOP-ONLY: warning: no section has address less than 0x1000 specified by --stop-address
-# WARN-START-ONLY: warning: no section has address greater than or equal to 0x1500 specified by --start-address
+# WARN: warning: {{.*}}: no section overlaps the range {{.*}} specified by --start-address/--stop-address
+# WARN-STOP-ONLY: warning: {{.*}}: no section has address less than 0x1000 specified by --stop-address
+# WARN-START-ONLY: warning: {{.*}}: no section has address greater than or equal to 0x1500 specified by --start-address
 
 # MULTI-INPUT: file format
-# MULTI-INPUT: warning: no section overlaps the range [0x2001,0x2005) specified by --start-address/--stop-address
+# MULTI-INPUT: warning: {{.*}}: no section overlaps the range [0x2001,0x2005) specified by --start-address/--stop-address
 # MULTI-INPUT: file format
 # MULTI-INPUT-NOT: warning:
 
@@ -151,9 +151,8 @@ ProgramHeaders:
     Flags:    [ PF_X, PF_R ]
     VAddr:    0x1000
     FileSize: 0x500
-    Sections:
-      - Section: .text
-      - Section: .text2
+    FirstSec: .text
+    LastSec:  .text2
 
 --- !ELF
 FileHeader:
@@ -172,8 +171,8 @@ ProgramHeaders:
     Flags:    [ PF_X, PF_R ]
     VAddr:    0x1000
     FileSize: 0x4
-    Sections:
-      - Section: .text
+    FirstSec: .text
+    LastSec:  .text
 
 --- !ELF
 FileHeader:

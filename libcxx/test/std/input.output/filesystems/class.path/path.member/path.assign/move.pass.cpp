@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++98, c++03
+// UNSUPPORTED: c++03
 
 // <filesystem>
 
@@ -14,12 +14,12 @@
 
 // path& operator=(path&&) noexcept
 
-#include "filesystem_include.hpp"
+#include "filesystem_include.h"
 #include <type_traits>
 #include <cassert>
 
 #include "test_macros.h"
-#include "count_new.hpp"
+#include "count_new.h"
 
 
 int main(int, char**) {
@@ -29,13 +29,14 @@ int main(int, char**) {
   const std::string s("we really really really really really really really "
                       "really really long string so that we allocate");
   assert(globalMemCounter.checkOutstandingNewEq(1));
+  const fs::path::string_type ps(s.begin(), s.end());
   path p(s);
   {
     DisableAllocationGuard g;
     path p2;
     path& pref = (p2 = std::move(p));
-    assert(p2.native() == s);
-    assert(p.native() != s); // Testing moved from state
+    assert(p2.native() == ps);
+    assert(p.native() != ps); // Testing moved from state
     assert(&pref == &p2);
   }
 

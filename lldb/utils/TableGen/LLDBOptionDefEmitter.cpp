@@ -12,26 +12,15 @@
 //===----------------------------------------------------------------------===//
 
 #include "LLDBTableGenBackends.h"
+#include "LLDBTableGenUtils.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/TableGen/Record.h"
 #include "llvm/TableGen/StringMatcher.h"
 #include "llvm/TableGen/TableGenBackend.h"
-#include <map>
 #include <vector>
 
 using namespace llvm;
-
-/// Map of command names to their associated records. Also makes sure our
-/// commands are sorted in a deterministic way.
-typedef std::map<std::string, std::vector<Record *>> RecordsByCommand;
-
-/// Groups all records by their command.
-static RecordsByCommand getCommandList(std::vector<Record *> Options) {
-  RecordsByCommand result;
-  for (Record *Option : Options)
-    result[Option->getValueAsString("Command").str()].push_back(Option);
-  return result;
-}
+using namespace lldb_private;
 
 namespace {
 struct CommandOption {
@@ -66,18 +55,18 @@ struct CommandOption {
     Required = Option->getValue("Required");
 
     // Add the full and short name for this option.
-    FullName = Option->getValueAsString("FullName");
-    ShortName = Option->getValueAsString("ShortName");
+    FullName = std::string(Option->getValueAsString("FullName"));
+    ShortName = std::string(Option->getValueAsString("ShortName"));
 
     if (auto A = Option->getValue("ArgType"))
       ArgType = A->getValue()->getAsUnquotedString();
     OptionalArg = Option->getValue("OptionalArg") != nullptr;
 
     if (Option->getValue("Validator"))
-      Validator = Option->getValueAsString("Validator");
+      Validator = std::string(Option->getValueAsString("Validator"));
 
     if (Option->getValue("ArgEnum"))
-      ArgEnum = Option->getValueAsString("ArgEnum");
+      ArgEnum = std::string(Option->getValueAsString("ArgEnum"));
 
     if (Option->getValue("Completions"))
       Completions = Option->getValueAsListOfStrings("Completions");
@@ -187,14 +176,10 @@ static void emitOptions(std::string Command, std::vector<Record *> Records,
 }
 
 void lldb_private::EmitOptionDefs(RecordKeeper &Records, raw_ostream &OS) {
-
-  std::vector<Record *> Options = Records.getAllDerivedDefinitions("Option");
-
   emitSourceFileHeader("Options for LLDB command line commands.", OS);
 
-  RecordsByCommand ByCommand = getCommandList(Options);
-
-  for (auto &CommandRecordPair : ByCommand) {
+  std::vector<Record *> Options = Records.getAllDerivedDefinitions("Option");
+  for (auto &CommandRecordPair : getRecordsByName(Options, "Command")) {
     emitOptions(CommandRecordPair.first, CommandRecordPair.second, OS);
   }
 }

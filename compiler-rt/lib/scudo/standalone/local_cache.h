@@ -83,6 +83,7 @@ template <class SizeClassAllocator> struct SizeClassAllocatorLocalCache {
     // performance. It definitely decreases performance on Android though.
     // if (!SCUDO_ANDROID) PREFETCH(P);
     Stats.add(StatAllocated, ClassSize);
+    Stats.sub(StatFree, ClassSize);
     return P;
   }
 
@@ -98,6 +99,7 @@ template <class SizeClassAllocator> struct SizeClassAllocatorLocalCache {
     const uptr ClassSize = C->ClassSize;
     C->Chunks[C->Count++] = P;
     Stats.sub(StatAllocated, ClassSize);
+    Stats.add(StatFree, ClassSize);
   }
 
   void drain() {
@@ -157,19 +159,21 @@ private:
     DCHECK_GT(B->getCount(), 0);
     C->Count = B->getCount();
     B->copyToArray(C->Chunks);
+    B->clear();
     destroyBatch(ClassId, B);
     return true;
   }
 
   NOINLINE void drain(PerClass *C, uptr ClassId) {
     const u32 Count = Min(C->MaxCount / 2, C->Count);
-    const uptr FirstIndexToDrain = C->Count - Count;
-    TransferBatch *B = createBatch(ClassId, C->Chunks[FirstIndexToDrain]);
+    TransferBatch *B = createBatch(ClassId, C->Chunks[0]);
     if (UNLIKELY(!B))
       reportOutOfMemory(
           SizeClassAllocator::getSizeByClassId(SizeClassMap::BatchClassId));
-    B->setFromArray(&C->Chunks[FirstIndexToDrain], Count);
+    B->setFromArray(&C->Chunks[0], Count);
     C->Count -= Count;
+    for (uptr I = 0; I < C->Count; I++)
+      C->Chunks[I] = C->Chunks[I + Count];
     Allocator->pushBatch(ClassId, B);
   }
 };

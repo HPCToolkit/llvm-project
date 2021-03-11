@@ -8,7 +8,7 @@
 //
 // This file is a part of AddressSanitizer, an address sanity checker.
 //
-// ASan-private header for asan_thread.cc.
+// ASan-private header for asan_thread.cpp.
 //===----------------------------------------------------------------------===//
 
 #ifndef ASAN_THREAD_H
@@ -35,7 +35,7 @@ class AsanThread;
 
 // These objects are created for every thread and are never deleted,
 // so we can find them by tid even if the thread is long dead.
-class AsanThreadContext : public ThreadContextBase {
+class AsanThreadContext final : public ThreadContextBase {
  public:
   explicit AsanThreadContext(int tid)
       : ThreadContextBase(tid), announced(false),

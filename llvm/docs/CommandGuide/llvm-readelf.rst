@@ -14,7 +14,7 @@ DESCRIPTION
 The :program:`llvm-readelf` tool displays low-level format-specific information
 about one or more object files.
 
-If ``input`` is "``-``" or omitted, :program:`llvm-readelf` reads from standard
+If ``input`` is "``-``", :program:`llvm-readelf` reads from standard
 input. Otherwise, it will read from the specified ``filenames``.
 
 OPTIONS
@@ -28,9 +28,9 @@ OPTIONS
 
  Display the address-significance table.
 
-.. option:: --arm-attributes
+.. option:: --arch-specific, -A
 
- Display the ARM attributes section. Only applicable for ARM architectures.
+ Display architecture-specific information, e.g. the ARM attributes section on ARM.
 
 .. option:: --color
 
@@ -52,7 +52,7 @@ OPTIONS
 
  Display the dynamic table.
 
-.. option:: --elf-cg-profile
+.. option:: --cg-profile
 
  Display the callgraph profile section.
 
@@ -142,6 +142,10 @@ OPTIONS
  When used with :option:`--sections`, display section data for each section
  shown. This option has no effect for GNU style output.
 
+.. option:: --section-details, -t
+
+ Display all section details. Used as an alternative to :option:`--sections`.
+
 .. option:: --section-mapping
 
  Display the section to segment mapping.
@@ -160,6 +164,12 @@ OPTIONS
 
  Display contents of the stackmap section.
 
+.. option:: --stack-sizes
+
+ Display the contents of the stack sizes section(s), i.e. pairs of function
+ names and the size of their stack frames. Currently only implemented for GNU
+ style output.
+
 .. option:: --string-dump=<section[,section,...]>, -p
 
  Display the specified section(s) as a list of strings. ``section`` may be a
@@ -175,7 +185,7 @@ OPTIONS
 
 .. option:: --version
 
- Display the version of this program.
+ Display the version of the :program:`llvm-readelf` executable.
 
 .. option:: --version-info, -V
 

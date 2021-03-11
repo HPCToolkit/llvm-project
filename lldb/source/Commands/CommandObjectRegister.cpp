@@ -1,4 +1,4 @@
-//===-- CommandObjectRegister.cpp -------------------------------*- C++ -*-===//
+//===-- CommandObjectRegister.cpp -----------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -10,7 +10,6 @@
 #include "lldb/Core/Debugger.h"
 #include "lldb/Core/DumpRegisterValue.h"
 #include "lldb/Host/OptionParser.h"
-#include "lldb/Interpreter/CommandInterpreter.h"
 #include "lldb/Interpreter/CommandReturnObject.h"
 #include "lldb/Interpreter/OptionGroupFormat.h"
 #include "lldb/Interpreter/OptionValueArray.h"
@@ -25,7 +24,6 @@
 #include "lldb/Utility/Args.h"
 #include "lldb/Utility/DataExtractor.h"
 #include "lldb/Utility/RegisterValue.h"
-#include "lldb/Utility/Scalar.h"
 #include "llvm/Support/Errno.h"
 
 using namespace lldb;
@@ -71,6 +69,17 @@ public:
   }
 
   ~CommandObjectRegisterRead() override = default;
+
+  void
+  HandleArgumentCompletion(CompletionRequest &request,
+                           OptionElementVector &opt_element_vector) override {
+    if (!m_exe_ctx.HasProcessScope())
+      return;
+
+    CommandCompletions::InvokeCommonCompletionCallbacks(
+        GetCommandInterpreter(), CommandCompletions::eRegisterCompletion,
+        request, nullptr);
+  }
 
   Options *GetOptions() override { return &m_option_group; }
 
@@ -206,7 +215,7 @@ protected:
           // consistent towards the user and allow them to say reg read $rbx -
           // internally, however, we should be strict and not allow ourselves
           // to call our registers $rbx in our own API
-          auto arg_str = entry.ref;
+          auto arg_str = entry.ref();
           arg_str.consume_front("$");
 
           reg_info = reg_ctx->GetRegisterInfoByName(arg_str);
@@ -272,9 +281,7 @@ protected:
         break;
 
       default:
-        error.SetErrorStringWithFormat("unrecognized short option '%c'",
-                                       short_option);
-        break;
+        llvm_unreachable("Unimplemented option");
       }
       return error;
     }
@@ -327,6 +334,17 @@ public:
 
   ~CommandObjectRegisterWrite() override = default;
 
+  void
+  HandleArgumentCompletion(CompletionRequest &request,
+                           OptionElementVector &opt_element_vector) override {
+    if (!m_exe_ctx.HasProcessScope() || request.GetCursorIndex() != 0)
+      return;
+
+    CommandCompletions::InvokeCommonCompletionCallbacks(
+        GetCommandInterpreter(), CommandCompletions::eRegisterCompletion,
+        request, nullptr);
+  }
+
 protected:
   bool DoExecute(Args &command, CommandReturnObject &result) override {
     DataExtractor reg_data;
@@ -337,8 +355,8 @@ protected:
           "register write takes exactly 2 arguments: <reg-name> <value>");
       result.SetStatus(eReturnStatusFailed);
     } else {
-      auto reg_name = command[0].ref;
-      auto value_str = command[1].ref;
+      auto reg_name = command[0].ref();
+      auto value_str = command[1].ref();
 
       // in most LLDB commands we accept $rbx as the name for register RBX -
       // and here we would reject it and non-existant. we should be more

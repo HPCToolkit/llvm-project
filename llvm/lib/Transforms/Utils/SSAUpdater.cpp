@@ -56,7 +56,7 @@ void SSAUpdater::Initialize(Type *Ty, StringRef Name) {
   else
     getAvailableVals(AV).clear();
   ProtoType = Ty;
-  ProtoName = Name;
+  ProtoName = std::string(Name);
 }
 
 bool SSAUpdater::HasValueForBlock(BasicBlock *BB) const {
@@ -64,8 +64,7 @@ bool SSAUpdater::HasValueForBlock(BasicBlock *BB) const {
 }
 
 Value *SSAUpdater::FindValueForBlock(BasicBlock *BB) const {
-  AvailableValsTy::iterator AVI = getAvailableVals(AV).find(BB);
-  return (AVI != getAvailableVals(AV).end()) ? AVI->second : nullptr;
+  return getAvailableVals(AV).lookup(BB);
 }
 
 void SSAUpdater::AddAvailableValue(BasicBlock *BB, Value *V) {
@@ -195,11 +194,6 @@ void SSAUpdater::RewriteUse(Use &U) {
   else
     V = GetValueInMiddleOfBlock(User->getParent());
 
-  // Notify that users of the existing value that it is being replaced.
-  Value *OldVal = U.get();
-  if (OldVal != V && OldVal->hasValueHandle())
-    ValueHandleBase::ValueIsRAUWd(OldVal, V);
-
   U.set(V);
 }
 
@@ -286,12 +280,6 @@ public:
   /// the specified predecessor block.
   static void AddPHIOperand(PHINode *PHI, Value *Val, BasicBlock *Pred) {
     PHI->addIncoming(Val, Pred);
-  }
-
-  /// InstrIsPHI - Check if an instruction is a PHI.
-  ///
-  static PHINode *InstrIsPHI(Instruction *I) {
-    return dyn_cast<PHINode>(I);
   }
 
   /// ValueIsPHI - Check if a value is a PHI.

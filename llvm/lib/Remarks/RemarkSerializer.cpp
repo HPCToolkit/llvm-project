@@ -11,6 +11,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/Remarks/RemarkSerializer.h"
+#include "llvm/Remarks/BitstreamRemarkSerializer.h"
 #include "llvm/Remarks/YAMLRemarkSerializer.h"
 
 using namespace llvm;
@@ -24,9 +25,11 @@ remarks::createRemarkSerializer(Format RemarksFormat, SerializerMode Mode,
     return createStringError(std::errc::invalid_argument,
                              "Unknown remark serializer format.");
   case Format::YAML:
-    return llvm::make_unique<YAMLRemarkSerializer>(OS, Mode);
+    return std::make_unique<YAMLRemarkSerializer>(OS, Mode);
   case Format::YAMLStrTab:
-    return llvm::make_unique<YAMLStrTabRemarkSerializer>(OS, Mode);
+    return std::make_unique<YAMLStrTabRemarkSerializer>(OS, Mode);
+  case Format::Bitstream:
+    return std::make_unique<BitstreamRemarkSerializer>(OS, Mode);
   }
   llvm_unreachable("Unknown remarks::Format enum");
 }
@@ -39,12 +42,13 @@ remarks::createRemarkSerializer(Format RemarksFormat, SerializerMode Mode,
     return createStringError(std::errc::invalid_argument,
                              "Unknown remark serializer format.");
   case Format::YAML:
-    return createStringError(std::errc::invalid_argument,
-                             "Unable to use a string table with the yaml "
-                             "format. Use 'yaml-strtab' instead.");
+    return std::make_unique<YAMLRemarkSerializer>(OS, Mode, std::move(StrTab));
   case Format::YAMLStrTab:
-    return llvm::make_unique<YAMLStrTabRemarkSerializer>(OS, Mode,
-                                                         std::move(StrTab));
+    return std::make_unique<YAMLStrTabRemarkSerializer>(OS, Mode,
+                                                        std::move(StrTab));
+  case Format::Bitstream:
+    return std::make_unique<BitstreamRemarkSerializer>(OS, Mode,
+                                                       std::move(StrTab));
   }
   llvm_unreachable("Unknown remarks::Format enum");
 }

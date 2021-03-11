@@ -6,7 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++98, c++03
+// UNSUPPORTED: c++03
+
+// These tests require locale for non-char paths
+// UNSUPPORTED: libcpp-has-no-localization
 
 // <filesystem>
 
@@ -19,15 +22,15 @@
 // std::u32string generic_u32string() const;
 
 
-#include "filesystem_include.hpp"
+#include "filesystem_include.h"
 #include <type_traits>
 #include <cassert>
 
 #include "test_macros.h"
 #include "test_iterators.h"
-#include "count_new.hpp"
+#include "count_new.h"
 #include "min_allocator.h"
-#include "filesystem_test_helper.hpp"
+#include "filesystem_test_helper.h"
 
 MultiStringType longString = MKSTR("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ/123456789/abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
@@ -42,8 +45,15 @@ int main(int, char**)
     assert(s == value);
   }
   {
+#if TEST_STD_VER > 17 && defined(__cpp_char8_t)
+    ASSERT_SAME_TYPE(decltype(p.generic_u8string()), std::u8string);
+    std::u8string s = p.generic_u8string();
+    assert(s == (const char8_t*)MS);
+#else
+    ASSERT_SAME_TYPE(decltype(p.generic_u8string()), std::string);
     std::string s = p.generic_u8string();
     assert(s == (const char*)MS);
+#endif
   }
   {
     std::wstring s = p.generic_wstring();

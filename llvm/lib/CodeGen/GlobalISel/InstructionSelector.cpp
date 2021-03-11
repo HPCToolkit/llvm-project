@@ -42,7 +42,7 @@ bool InstructionSelector::constrainOperandRegToRegClass(
   MachineRegisterInfo &MRI = MF.getRegInfo();
 
   return constrainOperandRegClass(MF, TRI, MRI, TII, RBI, I, RC,
-                                  I.getOperand(OpIdx), OpIdx);
+                                  I.getOperand(OpIdx));
 }
 
 bool InstructionSelector::isOperandImmEqual(
@@ -50,7 +50,7 @@ bool InstructionSelector::isOperandImmEqual(
     const MachineRegisterInfo &MRI) const {
   if (MO.isReg() && MO.getReg())
     if (auto VRegVal = getConstantVRegValWithLookThrough(MO.getReg(), MRI))
-      return VRegVal->Value == Value;
+      return VRegVal->Value.getSExtValue() == Value;
   return false;
 }
 
@@ -60,7 +60,7 @@ bool InstructionSelector::isBaseWithConstantOffset(
     return false;
 
   MachineInstr *RootI = MRI.getVRegDef(Root.getReg());
-  if (RootI->getOpcode() != TargetOpcode::G_GEP)
+  if (RootI->getOpcode() != TargetOpcode::G_PTR_ADD)
     return false;
 
   MachineOperand &RHS = RootI->getOperand(2);
@@ -79,5 +79,5 @@ bool InstructionSelector::isObviouslySafeToFold(MachineInstr &MI,
     return true;
 
   return !MI.mayLoadOrStore() && !MI.mayRaiseFPException() &&
-         !MI.hasUnmodeledSideEffects() && empty(MI.implicit_operands());
+         !MI.hasUnmodeledSideEffects() && MI.implicit_operands().empty();
 }

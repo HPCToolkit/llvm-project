@@ -7,15 +7,14 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// \brief This file implements a function that runs clangd on a single input.
+/// This file implements a function that runs clangd on a single input.
 /// This function is then linked into the Fuzzer library.
 ///
 //===----------------------------------------------------------------------===//
 
 #include "ClangdLSPServer.h"
 #include "ClangdServer.h"
-#include "CodeComplete.h"
-#include "FSProvider.h"
+#include "support/ThreadsafeFS.h"
 #include <cstdio>
 #include <sstream>
 
@@ -30,14 +29,14 @@ extern "C" int LLVMFuzzerTestOneInput(uint8_t *data, size_t size) {
   auto Transport = newJSONTransport(In, llvm::nulls(),
                                     /*InMirror=*/nullptr, /*Pretty=*/false,
                                     /*Style=*/JSONStreamStyle::Delimited);
-  RealFileSystemProvider FS;
+  RealThreadsafeFS FS;
   CodeCompleteOptions CCOpts;
-  CCOpts.EnableSnippets = false;
-  ClangdServer::Options Opts;
+  ClangdLSPServer::Options Opts;
+  Opts.CodeComplete.EnableSnippets = false;
+  Opts.UseDirBasedCDB = false;
 
   // Initialize and run ClangdLSPServer.
-  ClangdLSPServer LSPServer(*Transport, FS, CCOpts, llvm::None, false,
-                            llvm::None, Opts);
+  ClangdLSPServer LSPServer(*Transport, FS, Opts);
   LSPServer.run();
   return 0;
 }

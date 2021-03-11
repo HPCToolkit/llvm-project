@@ -57,7 +57,8 @@ int main() {
 // CHECK-SAME: thread_type=ompt_thread_initial=1, thread_id=[[MASTER_ID_1]]
 
 // CHECK: {{^}}[[MASTER_ID:[0-9]+]]: ompt_event_initial_task_begin: parallel_id={{[0-9]+}}
-// CHECK-SAME: task_id=[[PARENT_TASK_ID_1:[0-9]+]], actual_parallelism=1, index=1, flags=1 
+// CHECK-SAME: task_id=[[PARENT_TASK_ID_1:[0-9]+]], actual_parallelism=1,
+// CHECK-SAME: index=1, flags=1
 
 // CHECK: {{^}}[[MASTER_ID_1]]: ompt_event_parallel_begin:
 // CHECK-SAME: parent_task_id=[[PARENT_TASK_ID_1]]
@@ -72,7 +73,7 @@ int main() {
 
 // CHECK: {{^}}[[MASTER_ID_1]]: ompt_event_initial_task_end:
 // CHECK-SAME: parallel_id={{[0-9]+}}, task_id=[[PARENT_TASK_ID_1]],
-// CHECK-SAME: team_size=0, thread_num=1
+// CHECK-SAME: actual_parallelism=0, index=1
 
 // CHECK: {{^}}[[MASTER_ID_1]]: ompt_event_thread_end:
 // CHECK-SAME: thread_id=[[MASTER_ID_1]]
@@ -82,7 +83,8 @@ int main() {
 // CHECK-SAME: thread_type=ompt_thread_initial=1, thread_id=[[MASTER_ID_2]]
 
 // CHECK: {{^}}[[MASTER_ID:[0-9]+]]: ompt_event_initial_task_begin: parallel_id={{[0-9]+}}
-// CHECK-SAME: task_id=[[PARENT_TASK_ID_2:[0-9]+]], actual_parallelism=1, index=1, flags=1 
+// CHECK-SAME: task_id=[[PARENT_TASK_ID_2:[0-9]+]], actual_parallelism=1,
+// CHECK-SAME: index=1, flags=1
 
 // CHECK: {{^}}[[MASTER_ID_2]]: ompt_event_parallel_begin:
 // CHECK-SAME: parent_task_id=[[PARENT_TASK_ID_2]]
@@ -98,7 +100,7 @@ int main() {
 
 // CHECK: {{^}}[[MASTER_ID_2]]: ompt_event_initial_task_end:
 // CHECK-SAME: parallel_id={{[0-9]+}}, task_id=[[PARENT_TASK_ID_2]],
-// CHECK-SAME: team_size=0, thread_num=1
+// CHECK-SAME: actual_parallelism=0, index=1
 
 // CHECK: {{^}}[[MASTER_ID_2]]: ompt_event_thread_end:
 // CHECK-SAME: thread_id=[[MASTER_ID_2]]

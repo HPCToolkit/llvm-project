@@ -12,6 +12,7 @@
 #include "clang/AST/RawCommentList.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Sema/CodeCompleteConsumer.h"
+#include "llvm/Support/JSON.h"
 #include <limits>
 #include <utility>
 
@@ -29,6 +30,21 @@ void appendEscapeSnippet(const llvm::StringRef Text, std::string *Out) {
     if (Character == '$' || Character == '}' || Character == '\\')
       Out->push_back('\\');
     Out->push_back(Character);
+  }
+}
+
+void appendOptionalChunk(const CodeCompletionString &CCS, std::string *Out) {
+  for (const CodeCompletionString::Chunk &C : CCS) {
+    switch (C.Kind) {
+    case CodeCompletionString::CK_Optional:
+      assert(C.Optional &&
+             "Expected the optional code completion string to be non-null.");
+      appendOptionalChunk(*C.Optional, Out);
+      break;
+    default:
+      *Out += C.Text;
+      break;
+    }
   }
 }
 
@@ -71,7 +87,12 @@ std::string getDeclComment(const ASTContext &Ctx, const NamedDecl &Decl) {
   assert(!Ctx.getSourceManager().isLoadedSourceLocation(RC->getBeginLoc()));
   std::string Doc =
       RC->getFormattedText(Ctx.getSourceManager(), Ctx.getDiagnostics());
-  return looksLikeDocComment(Doc) ? Doc : "";
+  if (!looksLikeDocComment(Doc))
+    return "";
+  // Clang requires source to be UTF-8, but doesn't enforce this in comments.
+  if (!llvm::json::isUTF8(Doc))
+    Doc = llvm::json::fixUTF8(Doc);
+  return Doc;
 }
 
 void getSignature(const CodeCompletionString &CCS, std::string *Signature,
@@ -138,6 +159,9 @@ void getSignature(const CodeCompletionString &CCS, std::string *Signature,
       *Snippet += Chunk.Text;
       break;
     case CodeCompletionString::CK_Optional:
+      assert(Chunk.Optional);      
+      // No need to create placeholders for default arguments in Snippet.
+      appendOptionalChunk(*Chunk.Optional, Signature);
       break;
     case CodeCompletionString::CK_Placeholder:
       *Signature += Chunk.Text;

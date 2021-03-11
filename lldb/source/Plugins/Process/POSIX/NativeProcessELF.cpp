@@ -1,4 +1,4 @@
-//===-- NativeProcessELF.cpp ---------------------------------- -*- C++ -*-===//
+//===-- NativeProcessELF.cpp ----------------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -21,7 +21,7 @@ NativeProcessELF::GetAuxValue(enum AuxVector::EntryType type) {
     DataExtractor auxv_data(buffer_or_error.get()->getBufferStart(),
                             buffer_or_error.get()->getBufferSize(),
                             GetByteOrder(), GetAddressByteSize());
-    m_aux_vector = llvm::make_unique<AuxVector>(auxv_data);
+    m_aux_vector = std::make_unique<AuxVector>(auxv_data);
   }
 
   return m_aux_vector->GetAuxValue(type);
@@ -106,6 +106,11 @@ lldb::addr_t NativeProcessELF::GetELFImageInfoAddress() {
 
   return LLDB_INVALID_ADDRESS;
 }
+
+template lldb::addr_t NativeProcessELF::GetELFImageInfoAddress<
+    llvm::ELF::Elf32_Ehdr, llvm::ELF::Elf32_Phdr, llvm::ELF::Elf32_Dyn>();
+template lldb::addr_t NativeProcessELF::GetELFImageInfoAddress<
+    llvm::ELF::Elf64_Ehdr, llvm::ELF::Elf64_Phdr, llvm::ELF::Elf64_Dyn>();
 
 template <typename T>
 llvm::Expected<SVR4LibraryInfo>

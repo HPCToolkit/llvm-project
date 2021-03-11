@@ -15,7 +15,8 @@ define <4 x i32> @test_srem_odd_even(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v3.4s
 ; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI0_2]
 ; CHECK-NEXT:    adrp x8, .LCPI0_3
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
+; CHECK-NEXT:    and v2.16b, v0.16b, v2.16b
+; CHECK-NEXT:    add v1.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI0_3]
 ; CHECK-NEXT:    neg v3.4s, v3.4s
 ; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
@@ -37,27 +38,16 @@ define <4 x i32> @test_srem_odd_even(<4 x i32> %X) nounwind {
 define <4 x i32> @test_srem_odd_allones_eq(<4 x i32> %X) nounwind {
 ; CHECK-LABEL: test_srem_odd_allones_eq:
 ; CHECK:       // %bb.0:
-; CHECK-NEXT:    adrp x8, .LCPI1_0
-; CHECK-NEXT:    ldr q1, [x8, :lo12:.LCPI1_0]
-; CHECK-NEXT:    adrp x8, .LCPI1_1
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI1_1]
-; CHECK-NEXT:    adrp x8, .LCPI1_2
-; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI1_2]
-; CHECK-NEXT:    adrp x8, .LCPI1_3
-; CHECK-NEXT:    smull2 v4.2d, v0.4s, v1.4s
-; CHECK-NEXT:    smull v1.2d, v0.2s, v1.2s
-; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
-; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI1_3]
-; CHECK-NEXT:    adrp x8, .LCPI1_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI1_4]
-; CHECK-NEXT:    neg v3.4s, v3.4s
-; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
-; CHECK-NEXT:    ushr v1.4s, v1.4s, #31
-; CHECK-NEXT:    and v1.16b, v1.16b, v4.16b
-; CHECK-NEXT:    add v1.4s, v3.4s, v1.4s
-; CHECK-NEXT:    mls v0.4s, v1.4s, v2.4s
-; CHECK-NEXT:    cmeq v0.4s, v0.4s, #0
+; CHECK-NEXT:    adrp x10, .LCPI1_0
+; CHECK-NEXT:    mov w8, #52429
+; CHECK-NEXT:    mov w9, #39321
+; CHECK-NEXT:    ldr q1, [x10, :lo12:.LCPI1_0]
+; CHECK-NEXT:    movk w8, #52428, lsl #16
+; CHECK-NEXT:    movk w9, #6553, lsl #16
+; CHECK-NEXT:    dup v2.4s, w8
+; CHECK-NEXT:    dup v3.4s, w9
+; CHECK-NEXT:    mla v3.4s, v0.4s, v2.4s
+; CHECK-NEXT:    cmhs v0.4s, v1.4s, v3.4s
 ; CHECK-NEXT:    movi v1.4s, #1
 ; CHECK-NEXT:    and v0.16b, v0.16b, v1.16b
 ; CHECK-NEXT:    ret
@@ -69,28 +59,16 @@ define <4 x i32> @test_srem_odd_allones_eq(<4 x i32> %X) nounwind {
 define <4 x i32> @test_srem_odd_allones_ne(<4 x i32> %X) nounwind {
 ; CHECK-LABEL: test_srem_odd_allones_ne:
 ; CHECK:       // %bb.0:
-; CHECK-NEXT:    adrp x8, .LCPI2_0
-; CHECK-NEXT:    ldr q1, [x8, :lo12:.LCPI2_0]
-; CHECK-NEXT:    adrp x8, .LCPI2_1
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI2_1]
-; CHECK-NEXT:    adrp x8, .LCPI2_2
-; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI2_2]
-; CHECK-NEXT:    adrp x8, .LCPI2_3
-; CHECK-NEXT:    smull2 v4.2d, v0.4s, v1.4s
-; CHECK-NEXT:    smull v1.2d, v0.2s, v1.2s
-; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
-; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI2_3]
-; CHECK-NEXT:    adrp x8, .LCPI2_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI2_4]
-; CHECK-NEXT:    neg v3.4s, v3.4s
-; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
-; CHECK-NEXT:    ushr v1.4s, v1.4s, #31
-; CHECK-NEXT:    and v1.16b, v1.16b, v4.16b
-; CHECK-NEXT:    add v1.4s, v3.4s, v1.4s
-; CHECK-NEXT:    mls v0.4s, v1.4s, v2.4s
-; CHECK-NEXT:    cmeq v0.4s, v0.4s, #0
-; CHECK-NEXT:    mvn v0.16b, v0.16b
+; CHECK-NEXT:    adrp x10, .LCPI2_0
+; CHECK-NEXT:    mov w8, #52429
+; CHECK-NEXT:    mov w9, #39321
+; CHECK-NEXT:    ldr q1, [x10, :lo12:.LCPI2_0]
+; CHECK-NEXT:    movk w8, #52428, lsl #16
+; CHECK-NEXT:    movk w9, #6553, lsl #16
+; CHECK-NEXT:    dup v2.4s, w8
+; CHECK-NEXT:    dup v3.4s, w9
+; CHECK-NEXT:    mla v3.4s, v0.4s, v2.4s
+; CHECK-NEXT:    cmhi v0.4s, v3.4s, v1.4s
 ; CHECK-NEXT:    movi v1.4s, #1
 ; CHECK-NEXT:    and v0.16b, v0.16b, v1.16b
 ; CHECK-NEXT:    ret
@@ -157,9 +135,8 @@ define <4 x i32> @test_srem_even_allones_ne(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    add v1.4s, v3.4s, v1.4s
 ; CHECK-NEXT:    mls v0.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    cmeq v0.4s, v0.4s, #0
-; CHECK-NEXT:    mvn v0.16b, v0.16b
 ; CHECK-NEXT:    movi v1.4s, #1
-; CHECK-NEXT:    and v0.16b, v0.16b, v1.16b
+; CHECK-NEXT:    bic v0.16b, v1.16b, v0.16b
 ; CHECK-NEXT:    ret
   %srem = srem <4 x i32> %X, <i32 14, i32 14, i32 4294967295, i32 14>
   %cmp = icmp ne <4 x i32> %srem, <i32 0, i32 0, i32 0, i32 0>
@@ -224,9 +201,8 @@ define <4 x i32> @test_srem_odd_even_allones_ne(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    add v1.4s, v3.4s, v1.4s
 ; CHECK-NEXT:    mls v0.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    cmeq v0.4s, v0.4s, #0
-; CHECK-NEXT:    mvn v0.16b, v0.16b
 ; CHECK-NEXT:    movi v1.4s, #1
-; CHECK-NEXT:    and v0.16b, v0.16b, v1.16b
+; CHECK-NEXT:    bic v0.16b, v1.16b, v0.16b
 ; CHECK-NEXT:    ret
   %srem = srem <4 x i32> %X, <i32 5, i32 14, i32 4294967295, i32 100>
   %cmp = icmp ne <4 x i32> %srem, <i32 0, i32 0, i32 0, i32 0>
@@ -250,7 +226,8 @@ define <4 x i32> @test_srem_odd_poweroftwo(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v3.4s
 ; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI7_2]
 ; CHECK-NEXT:    adrp x8, .LCPI7_3
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
+; CHECK-NEXT:    and v2.16b, v0.16b, v2.16b
+; CHECK-NEXT:    add v1.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI7_3]
 ; CHECK-NEXT:    neg v3.4s, v3.4s
 ; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
@@ -305,7 +282,8 @@ define <4 x i32> @test_srem_odd_even_poweroftwo(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v3.4s
 ; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI9_2]
 ; CHECK-NEXT:    adrp x8, .LCPI9_3
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
+; CHECK-NEXT:    and v2.16b, v0.16b, v2.16b
+; CHECK-NEXT:    add v1.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI9_3]
 ; CHECK-NEXT:    neg v3.4s, v3.4s
 ; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
@@ -327,27 +305,16 @@ define <4 x i32> @test_srem_odd_even_poweroftwo(<4 x i32> %X) nounwind {
 define <4 x i32> @test_srem_odd_one(<4 x i32> %X) nounwind {
 ; CHECK-LABEL: test_srem_odd_one:
 ; CHECK:       // %bb.0:
-; CHECK-NEXT:    adrp x8, .LCPI10_0
-; CHECK-NEXT:    ldr q1, [x8, :lo12:.LCPI10_0]
-; CHECK-NEXT:    adrp x8, .LCPI10_1
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI10_1]
-; CHECK-NEXT:    adrp x8, .LCPI10_2
-; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI10_2]
-; CHECK-NEXT:    adrp x8, .LCPI10_3
-; CHECK-NEXT:    smull2 v4.2d, v0.4s, v1.4s
-; CHECK-NEXT:    smull v1.2d, v0.2s, v1.2s
-; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
-; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI10_3]
-; CHECK-NEXT:    adrp x8, .LCPI10_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI10_4]
-; CHECK-NEXT:    neg v3.4s, v3.4s
-; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
-; CHECK-NEXT:    ushr v1.4s, v1.4s, #31
-; CHECK-NEXT:    and v1.16b, v1.16b, v4.16b
-; CHECK-NEXT:    add v1.4s, v3.4s, v1.4s
-; CHECK-NEXT:    mls v0.4s, v1.4s, v2.4s
-; CHECK-NEXT:    cmeq v0.4s, v0.4s, #0
+; CHECK-NEXT:    adrp x10, .LCPI10_0
+; CHECK-NEXT:    mov w8, #52429
+; CHECK-NEXT:    mov w9, #39321
+; CHECK-NEXT:    ldr q1, [x10, :lo12:.LCPI10_0]
+; CHECK-NEXT:    movk w8, #52428, lsl #16
+; CHECK-NEXT:    movk w9, #6553, lsl #16
+; CHECK-NEXT:    dup v2.4s, w8
+; CHECK-NEXT:    dup v3.4s, w9
+; CHECK-NEXT:    mla v3.4s, v0.4s, v2.4s
+; CHECK-NEXT:    cmhs v0.4s, v1.4s, v3.4s
 ; CHECK-NEXT:    movi v1.4s, #1
 ; CHECK-NEXT:    and v0.16b, v0.16b, v1.16b
 ; CHECK-NEXT:    ret
@@ -405,7 +372,8 @@ define <4 x i32> @test_srem_odd_even_one(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
 ; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI12_3]
 ; CHECK-NEXT:    adrp x8, .LCPI12_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
+; CHECK-NEXT:    and v2.16b, v0.16b, v2.16b
+; CHECK-NEXT:    add v1.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI12_4]
 ; CHECK-NEXT:    neg v3.4s, v3.4s
 ; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
@@ -625,27 +593,16 @@ define <4 x i32> @test_srem_odd_even_allones_and_poweroftwo(<4 x i32> %X) nounwi
 define <4 x i32> @test_srem_odd_allones_and_one(<4 x i32> %X) nounwind {
 ; CHECK-LABEL: test_srem_odd_allones_and_one:
 ; CHECK:       // %bb.0:
-; CHECK-NEXT:    adrp x8, .LCPI19_0
-; CHECK-NEXT:    ldr q1, [x8, :lo12:.LCPI19_0]
-; CHECK-NEXT:    adrp x8, .LCPI19_1
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI19_1]
-; CHECK-NEXT:    adrp x8, .LCPI19_2
-; CHECK-NEXT:    ldr q3, [x8, :lo12:.LCPI19_2]
-; CHECK-NEXT:    adrp x8, .LCPI19_3
-; CHECK-NEXT:    smull2 v4.2d, v0.4s, v1.4s
-; CHECK-NEXT:    smull v1.2d, v0.2s, v1.2s
-; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
-; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI19_3]
-; CHECK-NEXT:    adrp x8, .LCPI19_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
-; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI19_4]
-; CHECK-NEXT:    neg v3.4s, v3.4s
-; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
-; CHECK-NEXT:    ushr v1.4s, v1.4s, #31
-; CHECK-NEXT:    and v1.16b, v1.16b, v4.16b
-; CHECK-NEXT:    add v1.4s, v3.4s, v1.4s
-; CHECK-NEXT:    mls v0.4s, v1.4s, v2.4s
-; CHECK-NEXT:    cmeq v0.4s, v0.4s, #0
+; CHECK-NEXT:    adrp x10, .LCPI19_0
+; CHECK-NEXT:    mov w8, #52429
+; CHECK-NEXT:    mov w9, #39321
+; CHECK-NEXT:    ldr q1, [x10, :lo12:.LCPI19_0]
+; CHECK-NEXT:    movk w8, #52428, lsl #16
+; CHECK-NEXT:    movk w9, #6553, lsl #16
+; CHECK-NEXT:    dup v2.4s, w8
+; CHECK-NEXT:    dup v3.4s, w9
+; CHECK-NEXT:    mla v3.4s, v0.4s, v2.4s
+; CHECK-NEXT:    cmhs v0.4s, v1.4s, v3.4s
 ; CHECK-NEXT:    movi v1.4s, #1
 ; CHECK-NEXT:    and v0.16b, v0.16b, v1.16b
 ; CHECK-NEXT:    ret
@@ -741,7 +698,8 @@ define <4 x i32> @test_srem_odd_poweroftwo_and_one(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
 ; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI22_3]
 ; CHECK-NEXT:    adrp x8, .LCPI22_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
+; CHECK-NEXT:    and v2.16b, v0.16b, v2.16b
+; CHECK-NEXT:    add v1.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI22_4]
 ; CHECK-NEXT:    neg v3.4s, v3.4s
 ; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s
@@ -807,7 +765,8 @@ define <4 x i32> @test_srem_odd_even_poweroftwo_and_one(<4 x i32> %X) nounwind {
 ; CHECK-NEXT:    uzp2 v1.4s, v1.4s, v4.4s
 ; CHECK-NEXT:    ldr q4, [x8, :lo12:.LCPI24_3]
 ; CHECK-NEXT:    adrp x8, .LCPI24_4
-; CHECK-NEXT:    mla v1.4s, v0.4s, v2.4s
+; CHECK-NEXT:    and v2.16b, v0.16b, v2.16b
+; CHECK-NEXT:    add v1.4s, v1.4s, v2.4s
 ; CHECK-NEXT:    ldr q2, [x8, :lo12:.LCPI24_4]
 ; CHECK-NEXT:    neg v3.4s, v3.4s
 ; CHECK-NEXT:    sshl v3.4s, v1.4s, v3.4s

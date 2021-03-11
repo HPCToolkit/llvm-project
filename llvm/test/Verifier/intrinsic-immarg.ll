@@ -27,6 +27,23 @@ define void @memcpy(i8* %dest, i8* %src, i1 %is.volatile) {
   ret void
 }
 
+declare void @llvm.memcpy.inline.p0i8.p0i8.i32(i8* nocapture, i8* nocapture, i32, i1)
+define void @memcpy_inline_is_volatile(i8* %dest, i8* %src, i1 %is.volatile) {
+  ; CHECK: immarg operand has non-immediate parameter
+  ; CHECK-NEXT: i1 %is.volatile
+  ; CHECK-NEXT: call void @llvm.memcpy.inline.p0i8.p0i8.i32(i8* %dest, i8* %src, i32 8, i1 %is.volatile)
+  call void @llvm.memcpy.inline.p0i8.p0i8.i32(i8* %dest, i8* %src, i32 8, i1 %is.volatile)
+  ret void
+}
+
+define void @memcpy_inline_variable_size(i8* %dest, i8* %src, i32 %size) {
+  ; CHECK: immarg operand has non-immediate parameter
+  ; CHECK-NEXT: i32 %size
+  ; CHECK-NEXT: call void @llvm.memcpy.inline.p0i8.p0i8.i32(i8* %dest, i8* %src, i32 %size, i1 true)
+  call void @llvm.memcpy.inline.p0i8.p0i8.i32(i8* %dest, i8* %src, i32 %size, i1 true)
+  ret void
+}
+
 declare void @llvm.memmove.p0i8.p0i8.i32(i8* nocapture, i8* nocapture, i32, i1)
 define void @memmove(i8* %dest, i8* %src, i1 %is.volatile) {
   ; CHECK: immarg operand has non-immediate parameter
@@ -74,12 +91,30 @@ define i64 @smul_fix(i64 %arg0, i64 %arg1, i32 %arg2) {
   ret i64 %ret
 }
 
+declare i64 @llvm.smul.fix.sat.i64(i64, i64, i32)
+define i64 @smul_fix_sat(i64 %arg0, i64 %arg1, i32 %arg2) {
+  ; CHECK: immarg operand has non-immediate parameter
+  ; CHECK-NEXT: i32 %arg2
+  ; CHECK-NEXT: %ret = call i64 @llvm.smul.fix.sat.i64(i64 %arg0, i64 %arg1, i32 %arg2)
+  %ret = call i64 @llvm.smul.fix.sat.i64(i64 %arg0, i64 %arg1, i32 %arg2)
+  ret i64 %ret
+}
+
 declare i64 @llvm.umul.fix.i64(i64, i64, i32)
 define i64 @umul_fix(i64 %arg0, i64 %arg1, i32 %arg2) {
   ; CHECK: immarg operand has non-immediate parameter
   ; CHECK-NEXT: i32 %arg2
   ; CHECK-NEXT: %ret = call i64 @llvm.umul.fix.i64(i64 %arg0, i64 %arg1, i32 %arg2)
   %ret = call i64 @llvm.umul.fix.i64(i64 %arg0, i64 %arg1, i32 %arg2)
+  ret i64 %ret
+}
+
+declare i64 @llvm.umul.fix.sat.i64(i64, i64, i32)
+define i64 @umul_fix_sat(i64 %arg0, i64 %arg1, i32 %arg2) {
+  ; CHECK: immarg operand has non-immediate parameter
+  ; CHECK-NEXT: i32 %arg2
+  ; CHECK-NEXT: %ret = call i64 @llvm.umul.fix.sat.i64(i64 %arg0, i64 %arg1, i32 %arg2)
+  %ret = call i64 @llvm.umul.fix.sat.i64(i64 %arg0, i64 %arg1, i32 %arg2)
   ret i64 %ret
 }
 

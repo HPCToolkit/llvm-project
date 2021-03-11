@@ -2,11 +2,6 @@ import("//clang/resource_dir.gni")
 import("//libcxx/config.gni")
 import("//llvm/utils/gn/build/write_cmake_config.gni")
 
-declare_args() {
-  # Install libc++ support headers.
-  libcxx_install_support_headers = true
-}
-
 libcxx_needs_site_config =
     libcxx_abi_version != 1 || libcxx_abi_namespace != "" || libcxx_abi_unstable
 
@@ -23,7 +18,7 @@ if (libcxx_needs_site_config) {
       values += [ "_LIBCPP_ABI_NAMESPACE=$libcxx_abi_namespace" ]
     }
     if (libcxx_abi_unstable) {
-      values += [ "_LIBCPP_ABI_UNSTABLE=" ]
+      values += [ "_LIBCPP_ABI_UNSTABLE=1" ]
     }
   }
 
@@ -35,35 +30,26 @@ if (libcxx_needs_site_config) {
       "$target_gen_dir/__config_site",
       "__config",
     ]
-    outputs = [
-      "$target_gen_dir/__config",
-    ]
+    outputs = [ "$target_gen_dir/__config" ]
     args = [
       "$target_gen_dir/__config_site",
       "__config",
       "-o",
       "$target_gen_dir/__config",
     ]
-    deps = [
-      ":write_config",
-    ]
+    deps = [ ":write_config" ]
   }
 
   copy("copy_config") {
-    sources = [
-      "$target_gen_dir/__config",
-    ]
-    outputs = [
-      "$clang_resource_dir/include/c++/v1/{{source_file_part}}",
-    ]
-    deps = [
-      ":concat_config",
-    ]
+    sources = [ "$target_gen_dir/__config" ]
+    outputs = [ "$clang_resource_dir/include/c++/v1/{{source_file_part}}" ]
+    deps = [ ":concat_config" ]
   }
 }
 
 copy("include") {
   sources = [
+    "__availability",
     "__bit_reference",
     "__bsd_locale_defaults.h",
     "__bsd_locale_fallbacks.h",
@@ -75,6 +61,10 @@ copy("include") {
     "__hash_table",
     "__libcpp_version",
     "__locale",
+    "__memory/allocator_traits.h",
+    "__memory/base.h",
+    "__memory/pointer_traits.h",
+    "__memory/utilities.h",
     "__mutex_base",
     "__node_handle",
     "__nullptr",
@@ -90,6 +80,7 @@ copy("include") {
     "any",
     "array",
     "atomic",
+    "barrier",
     "bit",
     "bitset",
     "cassert",
@@ -109,6 +100,7 @@ copy("include") {
     "compare",
     "complex",
     "complex.h",
+    "concepts",
     "condition_variable",
     "csetjmp",
     "csignal",
@@ -127,6 +119,7 @@ copy("include") {
     "deque",
     "errno.h",
     "exception",
+    "execution",
     "experimental/__config",
     "experimental/__memory",
     "experimental/algorithm",
@@ -167,6 +160,7 @@ copy("include") {
     "iostream",
     "istream",
     "iterator",
+    "latch",
     "limits",
     "limits.h",
     "list",
@@ -178,6 +172,7 @@ copy("include") {
     "module.modulemap",
     "mutex",
     "new",
+    "numbers",
     "numeric",
     "optional",
     "ostream",
@@ -186,6 +181,7 @@ copy("include") {
     "ratio",
     "regex",
     "scoped_allocator",
+    "semaphore",
     "set",
     "setjmp.h",
     "shared_mutex",
@@ -203,6 +199,24 @@ copy("include") {
     "string.h",
     "string_view",
     "strstream",
+    "support/android/locale_bionic.h",
+    "support/fuchsia/xlocale.h",
+    "support/ibm/limits.h",
+    "support/ibm/locale_mgmt_aix.h",
+    "support/ibm/nanosleep.h",
+    "support/ibm/support.h",
+    "support/ibm/xlocale.h",
+    "support/musl/xlocale.h",
+    "support/newlib/xlocale.h",
+    "support/nuttx/xlocale.h",
+    "support/solaris/floatingpoint.h",
+    "support/solaris/wchar.h",
+    "support/solaris/xlocale.h",
+    "support/win32/limits_msvc_win32.h",
+    "support/win32/locale_win32.h",
+    "support/xlocale/__nop_locale_mgmt.h",
+    "support/xlocale/__posix_l_fallback.h",
+    "support/xlocale/__strtonum_fallback.h",
     "system_error",
     "tgmath.h",
     "thread",
@@ -220,39 +234,22 @@ copy("include") {
     "wchar.h",
     "wctype.h",
   ]
-  deps = [
-    "//libcxxabi/include",
-  ]
+  deps = []
+  if (target_os != "mac" && target_os != "win") {
+    # libcxx/cmake/Modules/HandleLibCXXABI.cmake sets
+    # LIBCXX_CXX_ABI_HEADER_TARGET if the libcxx abi library either of
+    # "libstdc++", "libsupc++", "libcxxabi", "libcxxrt", but not if it's "none",
+    # "default", or "vcruntime". So on Windows, these don't get copied due to
+    # LIBCXX_CXX_ABI_HEADER_TARGET not being set.
+    # On macOS, libcxx/CMakeLists.txt sets LIBCXX_CXX_ABI_SYSTEM to 1, which
+    # causes an empty header list to be passed to setup_abi_lib, so these
+    # don't get copied on macOS due to that.
+    deps += [ "//libcxxabi/include" ]
+  }
   if (!libcxx_needs_site_config) {
     sources += [ "__config" ]
   } else {
     deps += [ ":copy_config" ]
   }
-  if (libcxx_install_support_headers) {
-    sources += [
-      "support/android/locale_bionic.h",
-      "support/fuchsia/xlocale.h",
-      "support/ibm/limits.h",
-      "support/ibm/locale_mgmt_aix.h",
-      "support/ibm/support.h",
-      "support/ibm/xlocale.h",
-      "support/musl/xlocale.h",
-      "support/newlib/xlocale.h",
-      "support/solaris/floatingpoint.h",
-      "support/solaris/wchar.h",
-      "support/solaris/xlocale.h",
-      "support/xlocale/__nop_locale_mgmt.h",
-      "support/xlocale/__posix_l_fallback.h",
-      "support/xlocale/__strtonum_fallback.h",
-    ]
-    if (target_os == "win") {
-      sources += [
-        "support/win32/limits_msvc_win32.h",
-        "support/win32/locale_win32.h",
-      ]
-    }
-  }
-  outputs = [
-    "$root_build_dir/include/c++/v1/{{source_target_relative}}",
-  ]
+  outputs = [ "$root_build_dir/include/c++/v1/{{source_target_relative}}" ]
 }

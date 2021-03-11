@@ -1,4 +1,4 @@
-//===-- HexagonDYLDRendezvous.cpp -------------------------------*- C++ -*-===//
+//===-- HexagonDYLDRendezvous.cpp -----------------------------------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -246,7 +246,7 @@ std::string HexagonDYLDRendezvous::ReadStringFromMemory(addr_t addr) {
     return std::string();
 
   for (;;) {
-    size = m_process->DoReadMemory(addr, &c, 1, error);
+    size = m_process->ReadMemory(addr, &c, 1, error);
     if (size != 1 || error.Fail())
       return std::string();
     if (c == 0)
@@ -290,8 +290,9 @@ bool HexagonDYLDRendezvous::FindMetadata(const char *name, PThreadField field,
   Target &target = m_process->GetTarget();
 
   SymbolContextList list;
-  if (!target.GetImages().FindSymbolsWithNameAndType(ConstString(name),
-                                                     eSymbolTypeAny, list))
+  target.GetImages().FindSymbolsWithNameAndType(ConstString(name),
+                                                eSymbolTypeAny, list);
+  if (list.IsEmpty())
     return false;
 
   Address address = list[0].symbol->GetAddress();
