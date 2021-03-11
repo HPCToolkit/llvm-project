@@ -37,6 +37,7 @@ class PassRegistry;
 
 Pass *createMVETailPredicationPass();
 FunctionPass *createARMLowOverheadLoopsPass();
+FunctionPass *createARMBlockPlacementPass();
 Pass *createARMParallelDSPPass();
 FunctionPass *createARMISelDag(ARMBaseTargetMachine &TM,
                                CodeGenOpt::Level OptLevel);
@@ -47,7 +48,7 @@ FunctionPass *createARMConstantIslandPass();
 FunctionPass *createMLxExpansionPass();
 FunctionPass *createThumb2ITBlockPass();
 FunctionPass *createMVEVPTBlockPass();
-FunctionPass *createMVEVPTOptimisationsPass();
+FunctionPass *createMVETPAndVPTOptimisationsPass();
 FunctionPass *createARMOptimizeBarriersPass();
 FunctionPass *createThumb2SizeReductionPass(
     std::function<bool(const Function &)> Ftor = nullptr);
@@ -69,8 +70,9 @@ void initializeARMExpandPseudoPass(PassRegistry &);
 void initializeThumb2SizeReducePass(PassRegistry &);
 void initializeThumb2ITBlockPass(PassRegistry &);
 void initializeMVEVPTBlockPass(PassRegistry &);
-void initializeMVEVPTOptimisationsPass(PassRegistry &);
+void initializeMVETPAndVPTOptimisationsPass(PassRegistry &);
 void initializeARMLowOverheadLoopsPass(PassRegistry &);
+void initializeARMBlockPlacementPass(PassRegistry &);
 void initializeMVETailPredicationPass(PassRegistry &);
 void initializeMVEGatherScatterLoweringPass(PassRegistry &);
 void initializeARMSLSHardeningPass(PassRegistry &);

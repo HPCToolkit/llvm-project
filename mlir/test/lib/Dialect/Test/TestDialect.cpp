@@ -7,7 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include "TestDialect.h"
+#include "TestAttributes.h"
 #include "TestTypes.h"
+#include "mlir/Dialect/DLTI/DLTI.h"
 #include "mlir/Dialect/StandardOps/IR/Ops.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/DialectImplementation.h"
@@ -164,16 +166,14 @@ struct TestInlinerInterface : public DialectInlinerInterface {
 //===----------------------------------------------------------------------===//
 
 void TestDialect::initialize() {
+  registerAttributes();
+  registerTypes();
   addOperations<
 #define GET_OP_LIST
 #include "TestOps.cpp.inc"
       >();
   addInterfaces<TestOpAsmInterface, TestDialectFoldInterface,
                 TestInlinerInterface>();
-  addTypes<TestType, TestRecursiveType,
-#define GET_TYPEDEF_LIST
-#include "TestTypeDefs.cpp.inc"
-           >();
   allowUnknownOperations();
 }
 
@@ -352,6 +352,14 @@ static ParseResult parseCustomDirectiveAttrDict(OpAsmParser &parser,
                                                 NamedAttrList &attrs) {
   return parser.parseOptionalAttrDict(attrs);
 }
+static ParseResult parseCustomDirectiveOptionalOperandRef(
+    OpAsmParser &parser, Optional<OpAsmParser::OperandType> &optOperand) {
+  int64_t operandCount = 0;
+  if (parser.parseInteger(operandCount))
+    return failure();
+  bool expectedOptionalOperand = operandCount == 0;
+  return success(expectedOptionalOperand != optOperand.hasValue());
+}
 
 //===----------------------------------------------------------------------===//
 // Printing
@@ -417,6 +425,13 @@ static void printCustomDirectiveAttrDict(OpAsmPrinter &printer, Operation *op,
                                          DictionaryAttr attrs) {
   printer.printOptionalAttrDict(attrs.getValue());
 }
+
+static void printCustomDirectiveOptionalOperandRef(OpAsmPrinter &printer,
+                                                   Operation *op,
+                                                   Value optOperand) {
+  printer << (optOperand ? "1" : "0");
+}
+
 //===----------------------------------------------------------------------===//
 // Test IsolatedRegionOp - parse passthrough region arguments.
 //===----------------------------------------------------------------------===//
@@ -628,6 +643,10 @@ OpFoldResult TestOpInPlaceFold::fold(ArrayRef<Attribute> operands) {
   return {};
 }
 
+OpFoldResult TestPassthroughFold::fold(ArrayRef<Attribute> operands) {
+  return getOperand();
+}
+
 LogicalResult OpWithInferTypeInterfaceOp::inferReturnTypes(
     MLIRContext *, Optional<Location> location, ValueRange operands,
     DictionaryAttr attributes, RegionRange regions,
@@ -785,9 +804,9 @@ static void print(OpAsmPrinter &p, StringAttrPrettyNameOp op) {
   }
 
   if (namesDisagree)
-    p.printOptionalAttrDictWithKeyword(op.getAttrs());
+    p.printOptionalAttrDictWithKeyword(op->getAttrs());
   else
-    p.printOptionalAttrDictWithKeyword(op.getAttrs(), {"names"});
+    p.printOptionalAttrDictWithKeyword(op->getAttrs(), {"names"});
 }
 
 // We set the SSA name in the asm syntax to the contents of the name

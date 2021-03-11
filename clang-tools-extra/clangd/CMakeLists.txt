@@ -46,6 +46,7 @@ include_directories(BEFORE "${CMAKE_CURRENT_BINARY_DIR}/../clang-tidy")
 
 add_clang_library(clangDaemon
   AST.cpp
+  ASTSignals.cpp
   ClangdLSPServer.cpp
   ClangdServer.cpp
   CodeComplete.cpp
@@ -61,6 +62,7 @@ add_clang_library(clangDaemon
   DraftStore.cpp
   DumpAST.cpp
   ExpectedTypes.cpp
+  FeatureModule.cpp
   FindSymbols.cpp
   FindTarget.cpp
   FileDistance.cpp
@@ -70,6 +72,7 @@ add_clang_library(clangDaemon
   GlobalCompilationDatabase.cpp
   Headers.cpp
   HeaderSourceSwitch.cpp
+  HeuristicResolver.cpp
   Hover.cpp
   IncludeFixer.cpp
   JSONTransport.cpp

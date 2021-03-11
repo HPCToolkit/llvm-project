@@ -9,9 +9,10 @@
 #ifndef LLD_MACHO_INPUT_SECTION_H
 #define LLD_MACHO_INPUT_SECTION_H
 
+#include "Relocations.h"
+
 #include "lld/Common/LLVM.h"
 #include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/PointerUnion.h"
 #include "llvm/BinaryFormat/MachO.h"
 
 namespace lld {
@@ -21,19 +22,7 @@ class InputFile;
 class InputSection;
 class OutputSection;
 class Symbol;
-
-struct Reloc {
-  uint8_t type;
-  bool pcrel;
-  uint8_t length;
-  // The offset from the start of the subsection that this relocation belongs
-  // to.
-  uint32_t offset;
-  // Adding this offset to the address of the referent symbol or subsection
-  // gives the destination that this relocation refers to.
-  uint64_t addend;
-  llvm::PointerUnion<Symbol *, InputSection *> referent;
-};
+class Defined;
 
 class InputSection {
 public:

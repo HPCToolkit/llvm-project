@@ -2282,7 +2282,7 @@ InstrRefBasedLDV::mlocJoin(MachineBasicBlock &MBB,
   auto Cmp = [&](const MachineBasicBlock *A, const MachineBasicBlock *B) {
     return BBToOrder.find(A)->second < BBToOrder.find(B)->second;
   };
-  llvm::sort(BlockOrders.begin(), BlockOrders.end(), Cmp);
+  llvm::sort(BlockOrders, Cmp);
 
   // Skip entry block.
   if (BlockOrders.size() == 0)
@@ -2641,15 +2641,13 @@ std::tuple<bool, bool> InstrRefBasedLDV::vlocJoin(
   auto &ILS = *ILSIt->second;
 
   // Order predecessors by RPOT order, for exploring them in that order.
-  SmallVector<MachineBasicBlock *, 8> BlockOrders;
-  for (auto p : MBB.predecessors())
-    BlockOrders.push_back(p);
+  SmallVector<MachineBasicBlock *, 8> BlockOrders(MBB.predecessors());
 
   auto Cmp = [&](MachineBasicBlock *A, MachineBasicBlock *B) {
     return BBToOrder[A] < BBToOrder[B];
   };
 
-  llvm::sort(BlockOrders.begin(), BlockOrders.end(), Cmp);
+  llvm::sort(BlockOrders, Cmp);
 
   unsigned CurBlockRPONum = BBToOrder[&MBB];
 
@@ -2991,7 +2989,7 @@ void InstrRefBasedLDV::vlocDataflow(
   for (auto *MBB : BlocksToExplore)
     BlockOrders.push_back(const_cast<MachineBasicBlock *>(MBB));
 
-  llvm::sort(BlockOrders.begin(), BlockOrders.end(), Cmp);
+  llvm::sort(BlockOrders, Cmp);
   unsigned NumBlocks = BlockOrders.size();
 
   // Allocate some vectors for storing the live ins and live outs. Large.
@@ -3170,7 +3168,7 @@ void InstrRefBasedLDV::emitLocations(
   // in the middle.
   for (auto &P : TTracker->Transfers) {
     // Sort them according to appearance order.
-    llvm::sort(P.Insts.begin(), P.Insts.end(), OrderDbgValues);
+    llvm::sort(P.Insts, OrderDbgValues);
     // Insert either before or after the designated point...
     if (P.MBB) {
       MachineBasicBlock &MBB = *P.MBB;
@@ -3201,10 +3199,10 @@ void InstrRefBasedLDV::initialSetup(MachineFunction &MF) {
   // Compute mappings of block <=> RPO order.
   ReversePostOrderTraversal<MachineFunction *> RPOT(&MF);
   unsigned int RPONumber = 0;
-  for (auto RI = RPOT.begin(), RE = RPOT.end(); RI != RE; ++RI) {
-    OrderToBB[RPONumber] = *RI;
-    BBToOrder[*RI] = RPONumber;
-    BBNumToRPO[(*RI)->getNumber()] = RPONumber;
+  for (MachineBasicBlock *MBB : RPOT) {
+    OrderToBB[RPONumber] = MBB;
+    BBToOrder[MBB] = RPONumber;
+    BBNumToRPO[MBB->getNumber()] = RPONumber;
     ++RPONumber;
   }
 }

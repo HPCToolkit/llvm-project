@@ -1,4 +1,4 @@
-// RUN: mlir-opt %s | FileCheck %s
+// RUN: mlir-opt %s -split-input-file -verify-diagnostics | FileCheck %s
 
 func @nvvm_special_regs() -> i32 {
   // CHECK: nvvm.read.ptx.sreg.tid.x : i32
@@ -60,11 +60,16 @@ func @nvvm_vote(%arg0 : i32, %arg1 : i1) -> i32 {
   llvm.return %0 : i32
 }
 
-func @nvvm_mma(%a0 : !llvm.vec<2 x f16>, %a1 : !llvm.vec<2 x f16>,
-               %b0 : !llvm.vec<2 x f16>, %b1 : !llvm.vec<2 x f16>,
+func @nvvm_mma(%a0 : vector<2xf16>, %a1 : vector<2xf16>,
+               %b0 : vector<2xf16>, %b1 : vector<2xf16>,
                %c0 : f32, %c1 : f32, %c2 : f32, %c3 : f32,
                %c4 : f32, %c5 : f32, %c6 : f32, %c7 : f32) {
-  // CHECK: nvvm.mma.sync {{.*}} {alayout = "row", blayout = "col"} : (!llvm.vec<2 x f16>, !llvm.vec<2 x f16>, !llvm.vec<2 x f16>, !llvm.vec<2 x f16>, f32, f32, f32, f32, f32, f32, f32, f32) -> !llvm.struct<(f32, f32, f32, f32, f32, f32, f32, f32)>
-  %0 = nvvm.mma.sync %a0, %a1, %b0, %b1, %c0, %c1, %c2, %c3, %c4, %c5, %c6, %c7 {alayout="row", blayout="col"} : (!llvm.vec<2 x f16>, !llvm.vec<2 x f16>, !llvm.vec<2 x f16>, !llvm.vec<2 x f16>, f32, f32, f32, f32, f32, f32, f32, f32) -> !llvm.struct<(f32, f32, f32, f32, f32, f32, f32, f32)>
+  // CHECK: nvvm.mma.sync {{.*}} {alayout = "row", blayout = "col"} : (vector<2xf16>, vector<2xf16>, vector<2xf16>, vector<2xf16>, f32, f32, f32, f32, f32, f32, f32, f32) -> !llvm.struct<(f32, f32, f32, f32, f32, f32, f32, f32)>
+  %0 = nvvm.mma.sync %a0, %a1, %b0, %b1, %c0, %c1, %c2, %c3, %c4, %c5, %c6, %c7 {alayout="row", blayout="col"} : (vector<2xf16>, vector<2xf16>, vector<2xf16>, vector<2xf16>, f32, f32, f32, f32, f32, f32, f32, f32) -> !llvm.struct<(f32, f32, f32, f32, f32, f32, f32, f32)>
   llvm.return %0 : !llvm.struct<(f32, f32, f32, f32, f32, f32, f32, f32)>
 }
+
+// -----
+
+// expected-error@below {{attribute attached to unexpected op}}
+func private @expected_llvm_func() attributes { nvvm.kernel }

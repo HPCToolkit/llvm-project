@@ -19,6 +19,7 @@
 #include <chrono>
 #include <vector>
 
+#include "make_string.h"
 #include "test_macros.h"
 #include "rapid-cxx-test.h"
 #include "format_string.h"
@@ -430,32 +431,6 @@ struct CWDGuard {
 
 // Misc test types
 
-#if TEST_STD_VER > 17 && defined(__cpp_char8_t)
-#define CHAR8_ONLY(x) x,
-#else
-#define CHAR8_ONLY(x)
-#endif
-
-#define MKSTR(Str) {Str, TEST_CONCAT(L, Str), CHAR8_ONLY(TEST_CONCAT(u8, Str)) TEST_CONCAT(u, Str), TEST_CONCAT(U, Str)}
-
-struct MultiStringType {
-  const char* s;
-  const wchar_t* w;
-#if TEST_STD_VER > 17 && defined(__cpp_char8_t)
-  const char8_t* u8;
-#endif
-  const char16_t* u16;
-  const char32_t* u32;
-
-  operator const char* () const { return s; }
-  operator const wchar_t* () const { return w; }
-#if TEST_STD_VER > 17 && defined(__cpp_char8_t)
-  operator const char8_t* () const { return u8; }
-#endif
-  operator const char16_t* () const { return u16; }
-  operator const char32_t* () const { return u32; }
-};
-
 const MultiStringType PathList[] = {
         MKSTR(""),
         MKSTR(" "),
@@ -616,6 +591,12 @@ inline bool PathEq(fs::path const& LHS, fs::path const& RHS) {
   return LHS.native() == RHS.native();
 }
 
+inline bool PathEqIgnoreSep(fs::path LHS, fs::path RHS) {
+  LHS.make_preferred();
+  RHS.make_preferred();
+  return LHS.native() == RHS.native();
+}
+
 struct ExceptionChecker {
   std::errc expected_err;
   fs::path expected_path1;
@@ -689,5 +670,30 @@ struct ExceptionChecker {
   ExceptionChecker& operator=(ExceptionChecker const&) = delete;
 
 };
+
+inline fs::path GetWindowsInaccessibleDir() {
+  // Only makes sense on windows, but the code can be compiled for
+  // any platform.
+  const fs::path dir("C:\\System Volume Information");
+  std::error_code ec;
+  const fs::path root("C:\\");
+  fs::directory_iterator it(root, ec);
+  if (ec)
+    return fs::path();
+  const fs::directory_iterator endIt{};
+  while (it != endIt) {
+    const fs::directory_entry &ent = *it;
+    if (ent == dir) {
+      // Basic sanity checks on the directory_entry
+      if (!ent.exists())
+        return fs::path();
+      if (!ent.is_directory())
+        return fs::path();
+      return ent;
+    }
+    ++it;
+  }
+  return fs::path();
+}
 
 #endif /* FILESYSTEM_TEST_HELPER_HPP */

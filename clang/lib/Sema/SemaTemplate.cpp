@@ -2494,6 +2494,12 @@ void Sema::DeclareImplicitDeductionGuides(TemplateDecl *Template,
     if (!CD || (!FTD && CD->isFunctionTemplateSpecialization()))
       continue;
 
+    // Cannot make a deduction guide when unparsed arguments are present.
+    if (std::any_of(CD->param_begin(), CD->param_end(), [](ParmVarDecl *P) {
+          return !P || P->hasUnparsedDefaultArg();
+        }))
+      continue;
+
     Transform.transformConstructor(FTD, CD);
     AddedAny = true;
   }
@@ -9762,6 +9768,11 @@ DeclResult Sema::ActOnExplicitInstantiation(
         Context.getTargetInfo().getTriple().isWindowsGNUEnvironment() &&
         PrevDecl->hasAttr<DLLExportAttr>()) {
       dllExportImportClassTemplateSpecialization(*this, Def);
+    }
+
+    if (Def->hasAttr<MSInheritanceAttr>()) {
+      Specialization->addAttr(Def->getAttr<MSInheritanceAttr>());
+      Consumer.AssignInheritanceModel(Specialization);
     }
 
     // Set the template specialization kind. Make sure it is set before

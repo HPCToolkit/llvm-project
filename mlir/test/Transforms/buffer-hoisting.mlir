@@ -360,7 +360,7 @@ func @nested_regions_and_cond_branch(
   ^bb0(%gen1_arg0: f32, %gen1_arg1: f32):
     %1 = alloc() : memref<2xf32>
     test.buffer_based in(%arg1: memref<2xf32>) out(%1: memref<2xf32>)
-    %tmp1 = exp %gen1_arg0 : f32
+    %tmp1 = math.exp %gen1_arg0 : f32
     test.region_yield %tmp1 : f32
   }
   br ^bb3(%0 : memref<2xf32>)
@@ -384,7 +384,7 @@ func @nested_regions_and_cond_branch(
 func @nested_region_control_flow(
   %arg0 : index,
   %arg1 : index) -> memref<?x?xf32> {
-  %0 = cmpi "eq", %arg0, %arg1 : index
+  %0 = cmpi eq, %arg0, %arg1 : index
   %1 = alloc(%arg0, %arg0) : memref<?x?xf32>
   %2 = scf.if %0 -> (memref<?x?xf32>) {
     scf.yield %1 : memref<?x?xf32>
@@ -410,7 +410,7 @@ func @nested_region_control_flow(
 func @nested_region_control_flow_div(
   %arg0 : index,
   %arg1 : index) -> memref<?x?xf32> {
-  %0 = cmpi "eq", %arg0, %arg1 : index
+  %0 = cmpi eq, %arg0, %arg1 : index
   %1 = alloc(%arg0, %arg0) : memref<?x?xf32>
   %2 = scf.if %0 -> (memref<?x?xf32>) {
     scf.yield %1 : memref<?x?xf32>
@@ -436,7 +436,7 @@ func @nested_region_control_flow_div(
 func @nested_region_control_flow_div_nested(
   %arg0 : index,
   %arg1 : index) -> memref<?x?xf32> {
-  %0 = cmpi "eq", %arg0, %arg1 : index
+  %0 = cmpi eq, %arg0, %arg1 : index
   %1 = alloc(%arg0, %arg0) : memref<?x?xf32>
   %2 = scf.if %0 -> (memref<?x?xf32>) {
     %3 = scf.if %0 -> (memref<?x?xf32>) {
@@ -456,6 +456,46 @@ func @nested_region_control_flow_div_nested(
 // CHECK-NEXT: %[[ALLOC1:.*]] = alloc(%arg0, %arg1)
 // CHECK-NEXT: %[[ALLOC2:.*]] = alloc(%arg1, %arg1)
 // CHECK-NEXT: %{{.*}} = scf.if
+
+// -----
+
+// Test Case: deeply nested region control flow with a nested buffer allocation
+// that has dependency within a nested region should not be moved outside of
+// this region.
+
+// CHECK-LABEL: func @nested_region_control_flow_div_nested_dependencies
+func @nested_region_control_flow_div_nested_dependencies(
+  %arg0: i32,
+  %arg1: i1,
+  %arg2: index) -> memref<?x?xf32> {
+  %0 = scf.if %arg1 -> (memref<?x?xf32>) {
+    %1 = constant 1 : i32
+    %2 = addi %arg0, %1 : i32
+    %3 = index_cast %2 : i32 to index
+    %4 = alloc(%arg2, %3) : memref<?x?xf32>
+    scf.yield %4 : memref<?x?xf32>
+  } else {
+    %1 = constant 2 : i32
+    %2 = addi %arg0, %1 : i32
+    %3 = index_cast %2 : i32 to index
+    %4 = alloc(%arg2, %3) : memref<?x?xf32>
+    scf.yield %4 : memref<?x?xf32>
+  }
+  return %0 : memref<?x?xf32>
+}
+
+//      CHECK: (%[[ARG0:.*]]: {{.*}}
+// CHECK-NEXT: %{{.*}} = scf.if
+// CHECK-NEXT: %{{.*}} = constant
+// CHECK-NEXT: %{{.*}} = addi
+// CHECK-NEXT: %[[FUNC:.*]] = index_cast
+// CHECK-NEXT: alloc(%arg2, %[[FUNC]])
+// CHECK-NEXT: scf.yield
+// CHECK-NEXT: } else {
+// CHECK-NEXT: %{{.*}} = constant
+// CHECK-NEXT: %{{.*}} = addi
+// CHECK-NEXT: %[[FUNC:.*]] = index_cast
+// CHECK-NEXT: alloc(%arg2, %[[FUNC]])
 
 // -----
 
@@ -592,7 +632,7 @@ func @nestedRegionsAndCondBranchAlloca(
   ^bb0(%gen1_arg0: f32, %gen1_arg1: f32):
     %1 = alloca() : memref<2xf32>
     test.buffer_based in(%arg1: memref<2xf32>) out(%1: memref<2xf32>)
-    %tmp1 = exp %gen1_arg0 : f32
+    %tmp1 = math.exp %gen1_arg0 : f32
     test.region_yield %tmp1 : f32
   }
   br ^bb3(%0 : memref<2xf32>)
@@ -621,7 +661,7 @@ func @loop_alloc(
   %0 = alloc() : memref<2xf32>
   %1 = scf.for %i = %lb to %ub step %step
     iter_args(%iterBuf = %buf) -> memref<2xf32> {
-    %2 = cmpi "eq", %i, %ub : index
+    %2 = cmpi eq, %i, %ub : index
     %3 = alloc() : memref<2xf32>
     scf.yield %3 : memref<2xf32>
   }
@@ -648,7 +688,7 @@ func @loop_nested_if_alloc(
   %0 = alloc() : memref<2xf32>
   %1 = scf.for %i = %lb to %ub step %step
     iter_args(%iterBuf = %buf) -> memref<2xf32> {
-    %2 = cmpi "eq", %i, %ub : index
+    %2 = cmpi eq, %i, %ub : index
     %3 = scf.if %2 -> (memref<2xf32>) {
       %4 = alloc() : memref<2xf32>
       scf.yield %4 : memref<2xf32>
@@ -685,7 +725,7 @@ func @loop_nested_alloc(
       %3 = scf.for %i3 = %lb to %ub step %step
         iter_args(%iterBuf3 = %iterBuf2) -> memref<2xf32> {
         %4 = alloc() : memref<2xf32>
-        %5 = cmpi "eq", %i, %ub : index
+        %5 = cmpi eq, %i, %ub : index
         %6 = scf.if %5 -> (memref<2xf32>) {
           %7 = alloc() : memref<2xf32>
           scf.yield %7 : memref<2xf32>
@@ -726,7 +766,7 @@ func @loop_nested_alloc_dyn_dependency(
       iter_args(%iterBuf2 = %iterBuf) -> memref<?xf32> {
       %3 = scf.for %i3 = %lb to %ub step %step
         iter_args(%iterBuf3 = %iterBuf2) -> memref<?xf32> {
-        %5 = cmpi "eq", %i, %ub : index
+        %5 = cmpi eq, %i, %ub : index
         %6 = scf.if %5 -> (memref<?xf32>) {
           %7 = alloc(%i3) : memref<?xf32>
           scf.yield %7 : memref<?xf32>

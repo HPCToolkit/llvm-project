@@ -22,6 +22,7 @@ static_library("MachO2") {
     "//libunwind/include",
   ]
   sources = [
+    "Arch/ARM64.cpp",
     "Arch/X86_64.cpp",
     "Driver.cpp",
     "DriverUtils.cpp",
@@ -34,6 +35,7 @@ static_library("MachO2") {
     "ObjC.cpp",
     "OutputSection.cpp",
     "OutputSegment.cpp",
+    "Relocations.cpp",
     "SymbolTable.cpp",
     "Symbols.cpp",
     "SyntheticSections.cpp",

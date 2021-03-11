@@ -64,6 +64,21 @@ std::string toString(const WasmEventType &type) {
   return "unknown";
 }
 
+static std::string toString(const llvm::wasm::WasmLimits &limits) {
+  std::string ret;
+  ret += "flags=0x" + std::to_string(limits.Flags);
+  ret += "; initial=" + std::to_string(limits.Initial);
+  if (limits.Flags & WASM_LIMITS_FLAG_HAS_MAX)
+    ret += "; max=" + std::to_string(limits.Maximum);
+  return ret;
+}
+
+std::string toString(const WasmTableType &type) {
+  SmallString<128> ret("");
+  return "type=" + toString(static_cast<ValType>(type.ElemType)) +
+         "; limits=[" + toString(type.Limits) + "]";
+}
+
 namespace wasm {
 void debugWrite(uint64_t offset, const Twine &msg) {
   LLVM_DEBUG(dbgs() << format("  | %08lld: ", offset) << msg << "\n");
@@ -187,11 +202,6 @@ void writeGlobalType(raw_ostream &os, const WasmGlobalType &type) {
   writeU8(os, type.Mutable, "global mutable");
 }
 
-void writeGlobal(raw_ostream &os, const WasmGlobal &global) {
-  writeGlobalType(os, global.Type);
-  writeInitExpr(os, global.InitExpr);
-}
-
 void writeEventType(raw_ostream &os, const WasmEventType &type) {
   writeUleb128(os, type.Attribute, "event attribute");
   writeUleb128(os, type.SigIndex, "sig index");
@@ -202,7 +212,7 @@ void writeEvent(raw_ostream &os, const WasmEvent &event) {
 }
 
 void writeTableType(raw_ostream &os, const WasmTableType &type) {
-  writeU8(os, WASM_TYPE_FUNCREF, "table type");
+  writeValueType(os, ValType(type.ElemType), "table type");
   writeLimits(os, type.Limits);
 }
 

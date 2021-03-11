@@ -62,7 +62,8 @@ public:
     Dict.handle("CompileFlags", [&](Node &N) { parse(F.CompileFlags, N); });
     Dict.handle("Index", [&](Node &N) { parse(F.Index, N); });
     Dict.handle("Style", [&](Node &N) { parse(F.Style, N); });
-    Dict.handle("ClangTidy", [&](Node &N) { parse(F.ClangTidy, N); });
+    Dict.handle("Diagnostics", [&](Node &N) { parse(F.Diagnostics, N); });
+    Dict.handle("Completion", [&](Node &N) { parse(F.Completion, N); });
     Dict.parse(N);
     return !(N.failed() || HadError);
   }
@@ -95,6 +96,9 @@ private:
       if (auto Values = scalarValues(N))
         F.Remove = std::move(*Values);
     });
+    Dict.handle("CompilationDatabase", [&](Node &N) {
+      F.CompilationDatabase = scalarValue(N, "CompilationDatabase");
+    });
     Dict.parse(N);
   }
 
@@ -107,7 +111,17 @@ private:
     Dict.parse(N);
   }
 
-  void parse(Fragment::ClangTidyBlock &F, Node &N) {
+  void parse(Fragment::DiagnosticsBlock &F, Node &N) {
+    DictParser Dict("Diagnostics", this);
+    Dict.handle("Suppress", [&](Node &N) {
+      if (auto Values = scalarValues(N))
+        F.Suppress = std::move(*Values);
+    });
+    Dict.handle("ClangTidy", [&](Node &N) { parse(F.ClangTidy, N); });
+    Dict.parse(N);
+  }
+
+  void parse(Fragment::DiagnosticsBlock::ClangTidyBlock &F, Node &N) {
     DictParser Dict("ClangTidy", this);
     Dict.handle("Add", [&](Node &N) {
       if (auto Values = scalarValues(N))
@@ -149,6 +163,19 @@ private:
                 [&](Node &N) { F.Server = scalarValue(N, "Server"); });
     Dict.handle("MountPoint",
                 [&](Node &N) { F.MountPoint = scalarValue(N, "MountPoint"); });
+    Dict.parse(N);
+  }
+
+  void parse(Fragment::CompletionBlock &F, Node &N) {
+    DictParser Dict("Completion", this);
+    Dict.handle("AllScopes", [&](Node &N) {
+      if (auto Value = scalarValue(N, "AllScopes")) {
+        if (auto AllScopes = llvm::yaml::parseBool(**Value))
+          F.AllScopes = *AllScopes;
+        else
+          warning("AllScopes should be a boolean", N);
+      }
+    });
     Dict.parse(N);
   }
 

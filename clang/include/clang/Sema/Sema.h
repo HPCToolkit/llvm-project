@@ -298,6 +298,9 @@ public:
   void enterCondition(Sema &S, SourceLocation Tok);
   void enterReturn(Sema &S, SourceLocation Tok);
   void enterVariableInit(SourceLocation Tok, Decl *D);
+  /// Handles e.g. BaseType{ .D = Tok...
+  void enterDesignatedInitializer(SourceLocation Tok, QualType BaseType,
+                                  const Designation &D);
   /// Computing a type for the function argument may require running
   /// overloading, so we postpone its computation until it is actually needed.
   ///
@@ -473,6 +476,108 @@ public:
     PSK_Pop_Set   = PSK_Pop | PSK_Set,  // #pragma (pop[, id], value)
   };
 
+  // #pragma pack and align.
+  class AlignPackInfo {
+  public:
+    // `Native` represents default align mode, which may vary based on the
+    // platform.
+    enum Mode : unsigned char { Native, Natural, Packed, Mac68k };
+
+    // #pragma pack info constructor
+    AlignPackInfo(AlignPackInfo::Mode M, unsigned Num, bool IsXL)
+        : PackAttr(true), AlignMode(M), PackNumber(Num), XLStack(IsXL) {
+      assert(Num == PackNumber && "The pack number has been truncated.");
+    }
+
+    // #pragma align info constructor
+    AlignPackInfo(AlignPackInfo::Mode M, bool IsXL)
+        : PackAttr(false), AlignMode(M),
+          PackNumber(M == Packed ? 1 : UninitPackVal), XLStack(IsXL) {}
+
+    explicit AlignPackInfo(bool IsXL) : AlignPackInfo(Native, IsXL) {}
+
+    AlignPackInfo() : AlignPackInfo(Native, false) {}
+
+    // When a AlignPackInfo itself cannot be used, this returns an 32-bit
+    // integer encoding for it. This should only be passed to
+    // AlignPackInfo::getFromRawEncoding, it should not be inspected directly.
+    static uint32_t getRawEncoding(const AlignPackInfo &Info) {
+      std::uint32_t Encoding{};
+      if (Info.IsXLStack())
+        Encoding |= IsXLMask;
+
+      Encoding |= static_cast<uint32_t>(Info.getAlignMode()) << 1;
+
+      if (Info.IsPackAttr())
+        Encoding |= PackAttrMask;
+
+      Encoding |= static_cast<uint32_t>(Info.getPackNumber()) << 4;
+
+      return Encoding;
+    }
+
+    static AlignPackInfo getFromRawEncoding(unsigned Encoding) {
+      bool IsXL = static_cast<bool>(Encoding & IsXLMask);
+      AlignPackInfo::Mode M =
+          static_cast<AlignPackInfo::Mode>((Encoding & AlignModeMask) >> 1);
+      int PackNumber = (Encoding & PackNumMask) >> 4;
+
+      if (Encoding & PackAttrMask)
+        return AlignPackInfo(M, PackNumber, IsXL);
+
+      return AlignPackInfo(M, IsXL);
+    }
+
+    bool IsPackAttr() const { return PackAttr; }
+
+    bool IsAlignAttr() const { return !PackAttr; }
+
+    Mode getAlignMode() const { return AlignMode; }
+
+    unsigned getPackNumber() const { return PackNumber; }
+
+    bool IsPackSet() const {
+      // #pragma align, #pragma pack(), and #pragma pack(0) do not set the pack
+      // attriute on a decl.
+      return PackNumber != UninitPackVal && PackNumber != 0;
+    }
+
+    bool IsXLStack() const { return XLStack; }
+
+    bool operator==(const AlignPackInfo &Info) const {
+      return std::tie(AlignMode, PackNumber, PackAttr, XLStack) ==
+             std::tie(Info.AlignMode, Info.PackNumber, Info.PackAttr,
+                      Info.XLStack);
+    }
+
+    bool operator!=(const AlignPackInfo &Info) const {
+      return !(*this == Info);
+    }
+
+  private:
+    /// \brief True if this is a pragma pack attribute,
+    ///         not a pragma align attribute.
+    bool PackAttr;
+
+    /// \brief The alignment mode that is in effect.
+    Mode AlignMode;
+
+    /// \brief The pack number of the stack.
+    unsigned char PackNumber;
+
+    /// \brief True if it is a XL #pragma align/pack stack.
+    bool XLStack;
+
+    /// \brief Uninitialized pack value.
+    static constexpr unsigned char UninitPackVal = -1;
+
+    // Masks to encode and decode an AlignPackInfo.
+    static constexpr uint32_t IsXLMask{0x0000'0001};
+    static constexpr uint32_t AlignModeMask{0x0000'0006};
+    static constexpr uint32_t PackAttrMask{0x00000'0008};
+    static constexpr uint32_t PackNumMask{0x0000'01F0};
+  };
+
   template<typename ValueType>
   struct PragmaStack {
     struct Slot {
@@ -565,13 +670,10 @@ public:
   /// 2: Always insert vtordisps to support RTTI on partially constructed
   ///    objects
   PragmaStack<MSVtorDispMode> VtorDispStack;
-  // #pragma pack.
-  // Sentinel to represent when the stack is set to mac68k alignment.
-  static const unsigned kMac68kAlignmentSentinel = ~0U;
-  PragmaStack<unsigned> AlignPackStack;
+  PragmaStack<AlignPackInfo> AlignPackStack;
   // The current #pragma align/pack values and locations at each #include.
   struct AlignPackIncludeState {
-    unsigned CurrentValue;
+    AlignPackInfo CurrentValue;
     SourceLocation CurrentPragmaLocation;
     bool HasNonDefaultValue, ShouldWarnOnInclude;
   };
@@ -2496,6 +2598,8 @@ public:
   NamedDecl *getShadowedDeclaration(const TypedefNameDecl *D,
                                     const LookupResult &R);
   NamedDecl *getShadowedDeclaration(const VarDecl *D, const LookupResult &R);
+  NamedDecl *getShadowedDeclaration(const BindingDecl *D,
+                                    const LookupResult &R);
   void CheckShadow(NamedDecl *D, NamedDecl *ShadowedDecl,
                    const LookupResult &R);
   void CheckShadow(Scope *S, VarDecl *D);
@@ -3210,6 +3314,9 @@ public:
       Decl *D, const WebAssemblyImportNameAttr &AL);
   WebAssemblyImportModuleAttr *mergeImportModuleAttr(
       Decl *D, const WebAssemblyImportModuleAttr &AL);
+  EnforceTCBAttr *mergeEnforceTCBAttr(Decl *D, const EnforceTCBAttr &AL);
+  EnforceTCBLeafAttr *mergeEnforceTCBLeafAttr(Decl *D,
+                                              const EnforceTCBLeafAttr &AL);
 
   void mergeDeclAttributes(NamedDecl *New, Decl *Old,
                            AvailabilityMergeKind AMK = AMK_Redeclaration);
@@ -4619,10 +4726,12 @@ public:
     CES_AllowParameters = 1,
     CES_AllowDifferentTypes = 2,
     CES_AllowExceptionVariables = 4,
-    CES_FormerDefault = (CES_AllowParameters),
-    CES_Default = (CES_AllowParameters | CES_AllowDifferentTypes),
-    CES_AsIfByStdMove = (CES_AllowParameters | CES_AllowDifferentTypes |
-                         CES_AllowExceptionVariables),
+    CES_AllowRValueReferenceType = 8,
+    CES_ImplicitlyMovableCXX11CXX14CXX17 =
+        (CES_AllowParameters | CES_AllowDifferentTypes),
+    CES_ImplicitlyMovableCXX20 =
+        (CES_AllowParameters | CES_AllowDifferentTypes |
+         CES_AllowExceptionVariables | CES_AllowRValueReferenceType),
   };
 
   VarDecl *getCopyElisionCandidate(QualType ReturnType, Expr *E,
@@ -5876,9 +5985,9 @@ public:
   ExprResult CheckForImmediateInvocation(ExprResult E, FunctionDecl *Decl);
 
   bool CompleteConstructorCall(CXXConstructorDecl *Constructor,
-                               MultiExprArg ArgsPtr,
+                               QualType DeclInitType, MultiExprArg ArgsPtr,
                                SourceLocation Loc,
-                               SmallVectorImpl<Expr*> &ConvertedArgs,
+                               SmallVectorImpl<Expr *> &ConvertedArgs,
                                bool AllowExplicit = false,
                                bool IsListInitialization = false);
 
@@ -6456,7 +6565,7 @@ public:
   /// Number lambda for linkage purposes if necessary.
   void handleLambdaNumbering(
       CXXRecordDecl *Class, CXXMethodDecl *Method,
-      Optional<std::tuple<unsigned, bool, Decl *>> Mangling = None);
+      Optional<std::tuple<bool, unsigned, unsigned, Decl *>> Mangling = None);
 
   /// Endow the lambda scope info with the relevant properties.
   void buildLambdaScope(sema::LambdaScopeInfo *LSI,
@@ -10377,6 +10486,11 @@ public:
 
   /// Initialization of captured region for OpenMP region.
   void ActOnOpenMPRegionStart(OpenMPDirectiveKind DKind, Scope *CurScope);
+
+  /// Called for syntactical loops (ForStmt or CXXForRangeStmt) associated to
+  /// an OpenMP loop directive.
+  StmtResult ActOnOpenMPCanonicalLoop(Stmt *AStmt);
+
   /// End of OpenMP region.
   ///
   /// \param S Statement associated with the current OpenMP region.
@@ -10402,6 +10516,11 @@ public:
   ActOnOpenMPSimdDirective(ArrayRef<OMPClause *> Clauses, Stmt *AStmt,
                            SourceLocation StartLoc, SourceLocation EndLoc,
                            VarsWithInheritedDSAType &VarsWithImplicitDSA);
+  /// Called on well-formed '#pragma omp tile' after parsing of its clauses and
+  /// the associated statement.
+  StmtResult ActOnOpenMPTileDirective(ArrayRef<OMPClause *> Clauses,
+                                      Stmt *AStmt, SourceLocation StartLoc,
+                                      SourceLocation EndLoc);
   /// Called on well-formed '\#pragma omp for' after parsing
   /// of the associated statement.
   StmtResult
@@ -10738,6 +10857,11 @@ public:
   OMPClause *ActOnOpenMPSimdlenClause(Expr *Length, SourceLocation StartLoc,
                                       SourceLocation LParenLoc,
                                       SourceLocation EndLoc);
+  /// Called on well-form 'sizes' clause.
+  OMPClause *ActOnOpenMPSizesClause(ArrayRef<Expr *> SizeExprs,
+                                    SourceLocation StartLoc,
+                                    SourceLocation LParenLoc,
+                                    SourceLocation EndLoc);
   /// Called on well-formed 'collapse' clause.
   OMPClause *ActOnOpenMPCollapseClause(Expr *NumForLoops,
                                        SourceLocation StartLoc,
@@ -11433,9 +11557,9 @@ public:
   QualType CXXCheckConditionalOperands( // C++ 5.16
     ExprResult &cond, ExprResult &lhs, ExprResult &rhs,
     ExprValueKind &VK, ExprObjectKind &OK, SourceLocation questionLoc);
-  QualType CheckGNUVectorConditionalTypes(ExprResult &Cond, ExprResult &LHS,
-                                          ExprResult &RHS,
-                                          SourceLocation QuestionLoc);
+  QualType CheckVectorConditionalTypes(ExprResult &Cond, ExprResult &LHS,
+                                       ExprResult &RHS,
+                                       SourceLocation QuestionLoc);
   QualType FindCompositePointerType(SourceLocation Loc, Expr *&E1, Expr *&E2,
                                     bool ConvertArgs = true);
   QualType FindCompositePointerType(SourceLocation Loc,
@@ -11846,8 +11970,8 @@ public:
   ///  if (diagIfOpenMPDeviceCode(Loc, diag::err_vla_unsupported))
   ///    return ExprError();
   ///  // Otherwise, continue parsing as normal.
-  SemaDiagnosticBuilder diagIfOpenMPDeviceCode(SourceLocation Loc,
-                                               unsigned DiagID);
+  SemaDiagnosticBuilder
+  diagIfOpenMPDeviceCode(SourceLocation Loc, unsigned DiagID, FunctionDecl *FD);
 
   /// Creates a SemaDiagnosticBuilder that emits the diagnostic if the current
   /// context is "used as host code".
@@ -11863,17 +11987,19 @@ public:
   ///    return ExprError();
   ///  // Otherwise, continue parsing as normal.
   SemaDiagnosticBuilder diagIfOpenMPHostCode(SourceLocation Loc,
-                                             unsigned DiagID);
+                                             unsigned DiagID, FunctionDecl *FD);
 
-  SemaDiagnosticBuilder targetDiag(SourceLocation Loc, unsigned DiagID);
+  SemaDiagnosticBuilder targetDiag(SourceLocation Loc, unsigned DiagID,
+                                   FunctionDecl *FD = nullptr);
   SemaDiagnosticBuilder targetDiag(SourceLocation Loc,
-                                   const PartialDiagnostic &PD) {
-    return targetDiag(Loc, PD.getDiagID()) << PD;
+                                   const PartialDiagnostic &PD,
+                                   FunctionDecl *FD = nullptr) {
+    return targetDiag(Loc, PD.getDiagID(), FD) << PD;
   }
 
   /// Check if the expression is allowed to be used in expressions for the
   /// offloading devices.
-  void checkDeviceDecl(const ValueDecl *D, SourceLocation Loc);
+  void checkDeviceDecl(ValueDecl *D, SourceLocation Loc);
 
   enum CUDAFunctionTarget {
     CFT_Device,
@@ -12226,10 +12352,12 @@ private:
   bool CheckPointerCall(NamedDecl *NDecl, CallExpr *TheCall,
                         const FunctionProtoType *Proto);
   bool CheckOtherCall(CallExpr *TheCall, const FunctionProtoType *Proto);
-  void CheckConstructorCall(FunctionDecl *FDecl,
+  void CheckConstructorCall(FunctionDecl *FDecl, QualType ThisType,
                             ArrayRef<const Expr *> Args,
-                            const FunctionProtoType *Proto,
-                            SourceLocation Loc);
+                            const FunctionProtoType *Proto, SourceLocation Loc);
+
+  void CheckArgAlignment(SourceLocation Loc, NamedDecl *FDecl,
+                         StringRef ParamName, QualType ArgTy, QualType ParamTy);
 
   void checkCall(NamedDecl *FDecl, const FunctionProtoType *Proto,
                  const Expr *ThisArg, ArrayRef<const Expr *> Args,
@@ -12284,6 +12412,8 @@ private:
   bool CheckPPCBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
                                    CallExpr *TheCall);
   bool CheckAMDGCNBuiltinFunctionCall(unsigned BuiltinID, CallExpr *TheCall);
+  bool CheckRISCVBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
+                                     CallExpr *TheCall);
 
   bool SemaBuiltinVAStart(unsigned BuiltinID, CallExpr *TheCall);
   bool SemaBuiltinVAStartARMMicrosoft(CallExpr *Call);
@@ -12426,6 +12556,8 @@ private:
   /// Check whether receiver is mutable ObjC container which
   /// attempts to add itself into the container
   void CheckObjCCircularContainer(ObjCMessageExpr *Message);
+
+  void CheckTCBEnforcement(const CallExpr *TheCall, const FunctionDecl *Callee);
 
   void AnalyzeDeleteExprMismatch(const CXXDeleteExpr *DE);
   void AnalyzeDeleteExprMismatch(FieldDecl *Field, SourceLocation DeleteLoc,
@@ -12745,6 +12877,13 @@ struct LateParsedTemplate {
   /// The template function declaration to be late parsed.
   Decl *D;
 };
+
+template <>
+void Sema::PragmaStack<Sema::AlignPackInfo>::Act(SourceLocation PragmaLocation,
+                                                 PragmaMsStackAction Action,
+                                                 llvm::StringRef StackSlotLabel,
+                                                 AlignPackInfo Value);
+
 } // end namespace clang
 
 namespace llvm {

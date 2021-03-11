@@ -2210,6 +2210,21 @@ Instruction *InstCombinerImpl::foldICmpShrConstant(ICmpInst &Cmp,
           (ShiftedC + 1).ashr(ShAmtVal) == (C + 1))
         return new ICmpInst(Pred, X, ConstantInt::get(ShrTy, ShiftedC));
     }
+
+    // If the compare constant has significant bits above the lowest sign-bit,
+    // then convert an unsigned cmp to a test of the sign-bit:
+    // (ashr X, ShiftC) u> C --> X s< 0
+    // (ashr X, ShiftC) u< C --> X s> -1
+    if (C.getBitWidth() > 2 && C.getNumSignBits() <= ShAmtVal) {
+      if (Pred == CmpInst::ICMP_UGT) {
+        return new ICmpInst(CmpInst::ICMP_SLT, X,
+                            ConstantInt::getNullValue(ShrTy));
+      }
+      if (Pred == CmpInst::ICMP_ULT) {
+        return new ICmpInst(CmpInst::ICMP_SGT, X,
+                            ConstantInt::getAllOnesValue(ShrTy));
+      }
+    }
   } else {
     if (Pred == CmpInst::ICMP_ULT || (Pred == CmpInst::ICMP_UGT && IsExact)) {
       // icmp ult (lshr X, ShAmtC), C --> icmp ult X, (C << ShAmtC)
@@ -5313,26 +5328,8 @@ CmpInst *InstCombinerImpl::canonicalizeICmpPredicate(CmpInst &I) {
   I.setPredicate(CmpInst::getInversePredicate(Pred));
   I.setName(I.getName() + ".not");
 
-  // And now let's adjust every user.
-  for (User *U : I.users()) {
-    switch (cast<Instruction>(U)->getOpcode()) {
-    case Instruction::Select: {
-      auto *SI = cast<SelectInst>(U);
-      SI->swapValues();
-      SI->swapProfMetadata();
-      break;
-    }
-    case Instruction::Br:
-      cast<BranchInst>(U)->swapSuccessors(); // swaps prof metadata too
-      break;
-    case Instruction::Xor:
-      replaceInstUsesWith(cast<Instruction>(*U), &I);
-      break;
-    default:
-      llvm_unreachable("Got unexpected user - out of sync with "
-                       "canFreelyInvertAllUsersOf() ?");
-    }
-  }
+  // And, adapt users.
+  freelyInvertAllUsersOf(&I);
 
   return &I;
 }
@@ -6267,6 +6264,26 @@ Instruction *InstCombinerImpl::visitFCmpInst(FCmpInst &I) {
         Constant *NewC = ConstantFP::get(X->getType(), TruncC);
         return new FCmpInst(Pred, X, NewC, "", &I);
       }
+    }
+  }
+
+  // Convert a sign-bit test of an FP value into a cast and integer compare.
+  // TODO: Simplify if the copysign constant is 0.0 or NaN.
+  // TODO: Handle non-zero compare constants.
+  // TODO: Handle other predicates.
+  const APFloat *C;
+  if (match(Op0, m_OneUse(m_Intrinsic<Intrinsic::copysign>(m_APFloat(C),
+                                                           m_Value(X)))) &&
+      match(Op1, m_AnyZeroFP()) && !C->isZero() && !C->isNaN()) {
+    Type *IntType = Builder.getIntNTy(X->getType()->getScalarSizeInBits());
+    if (auto *VecTy = dyn_cast<VectorType>(OpType))
+      IntType = VectorType::get(IntType, VecTy->getElementCount());
+
+    // copysign(non-zero constant, X) < 0.0 --> (bitcast X) < 0
+    if (Pred == FCmpInst::FCMP_OLT) {
+      Value *IntX = Builder.CreateBitCast(X, IntType);
+      return new ICmpInst(ICmpInst::ICMP_SLT, IntX,
+                          ConstantInt::getNullValue(IntType));
     }
   }
 

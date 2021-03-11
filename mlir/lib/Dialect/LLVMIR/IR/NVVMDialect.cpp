@@ -87,7 +87,7 @@ static ParseResult parseNVVMVoteBallotOp(OpAsmParser &parser,
 static LogicalResult verify(MmaOp op) {
   MLIRContext *context = op.getContext();
   auto f16Ty = Float16Type::get(context);
-  auto f16x2Ty = LLVM::LLVMFixedVectorType::get(f16Ty, 2);
+  auto f16x2Ty = LLVM::getFixedVectorType(f16Ty, 2);
   auto f32Ty = Float32Type::get(context);
   auto f16x2x4StructTy = LLVM::LLVMStructType::getLiteral(
       context, {f16x2Ty, f16x2Ty, f16x2Ty, f16x2Ty});
@@ -143,6 +143,18 @@ void NVVMDialect::initialize() {
 
   // Support unknown operations because not all NVVM operations are registered.
   allowUnknownOperations();
+}
+
+LogicalResult NVVMDialect::verifyOperationAttribute(Operation *op,
+                                                    NamedAttribute attr) {
+  // Kernel function attribute should be attached to functions.
+  if (attr.first == NVVMDialect::getKernelFuncAttrName()) {
+    if (!isa<LLVM::LLVMFuncOp>(op)) {
+      return op->emitError() << "'" << NVVMDialect::getKernelFuncAttrName()
+                             << "' attribute attached to unexpected op";
+    }
+  }
+  return success();
 }
 
 #define GET_OP_CLASSES

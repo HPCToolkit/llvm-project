@@ -11,7 +11,7 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Config/llvm-config.h"
 #include "llvm/ExecutionEngine/Orc/DebugUtils.h"
-#include "llvm/ExecutionEngine/Orc/OrcError.h"
+#include "llvm/ExecutionEngine/Orc/Shared/OrcError.h"
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/MSVCErrorWorkarounds.h"
 
@@ -577,7 +577,10 @@ LookupState::LookupState(std::unique_ptr<InProgressLookupState> IPLS)
 
 void LookupState::reset(InProgressLookupState *IPLS) { this->IPLS.reset(IPLS); }
 
-LookupState::~LookupState() {}
+LookupState::LookupState() = default;
+LookupState::LookupState(LookupState &&) = default;
+LookupState &LookupState::operator=(LookupState &&) = default;
+LookupState::~LookupState() = default;
 
 void LookupState::continueLookup(Error Err) {
   assert(IPLS && "Cannot call continueLookup on empty LookupState");
@@ -618,10 +621,10 @@ ResourceTrackerSP JITDylib::createResourceTracker() {
 
 void JITDylib::removeGenerator(DefinitionGenerator &G) {
   std::lock_guard<std::mutex> Lock(GeneratorsMutex);
-  auto I = std::find_if(DefGenerators.begin(), DefGenerators.end(),
-                        [&](const std::shared_ptr<DefinitionGenerator> &H) {
-                          return H.get() == &G;
-                        });
+  auto I = llvm::find_if(DefGenerators,
+                         [&](const std::shared_ptr<DefinitionGenerator> &H) {
+                           return H.get() == &G;
+                         });
   assert(I != DefGenerators.end() && "Generator not found");
   DefGenerators.erase(I);
 }
@@ -1084,6 +1087,7 @@ Error JITDylib::emit(MaterializationResponsibility &MR,
                     CompletedQueries.insert(Q);
                   Q->removeQueryDependence(DependantJD, DependantName);
                 }
+                DependantJD.MaterializingInfos.erase(DependantMII);
               }
             }
           }
@@ -1099,6 +1103,7 @@ Error JITDylib::emit(MaterializationResponsibility &MR,
                 CompletedQueries.insert(Q);
               Q->removeQueryDependence(*this, Name);
             }
+            MaterializingInfos.erase(MII);
           }
         }
 
@@ -1264,10 +1269,10 @@ void JITDylib::replaceInLinkOrder(JITDylib &OldJD, JITDylib &NewJD,
 
 void JITDylib::removeFromLinkOrder(JITDylib &JD) {
   ES.runSessionLocked([&]() {
-    auto I = std::find_if(LinkOrder.begin(), LinkOrder.end(),
-                          [&](const JITDylibSearchOrder::value_type &KV) {
-                            return KV.first == &JD;
-                          });
+    auto I = llvm::find_if(LinkOrder,
+                           [&](const JITDylibSearchOrder::value_type &KV) {
+                             return KV.first == &JD;
+                           });
     if (I != LinkOrder.end())
       LinkOrder.erase(I);
   });
@@ -1370,6 +1375,11 @@ void JITDylib::dump(raw_ostream &OS) {
       OS << "      Unemitted Dependencies:\n";
       for (auto &KV2 : KV.second.UnemittedDependencies)
         OS << "        " << KV2.first->getName() << ": " << KV2.second << "\n";
+      assert((Symbols[KV.first].getState() != SymbolState::Ready ||
+              !KV.second.pendingQueries().empty() ||
+              !KV.second.Dependants.empty() ||
+              !KV.second.UnemittedDependencies.empty()) &&
+             "Stale materializing info entry");
     }
   });
 }
@@ -1388,11 +1398,10 @@ void JITDylib::MaterializingInfo::addQuery(
 void JITDylib::MaterializingInfo::removeQuery(
     const AsynchronousSymbolQuery &Q) {
   // FIXME: Implement 'find_as' for shared_ptr<T>/T*.
-  auto I =
-      std::find_if(PendingQueries.begin(), PendingQueries.end(),
-                   [&Q](const std::shared_ptr<AsynchronousSymbolQuery> &V) {
-                     return V.get() == &Q;
-                   });
+  auto I = llvm::find_if(
+      PendingQueries, [&Q](const std::shared_ptr<AsynchronousSymbolQuery> &V) {
+        return V.get() == &Q;
+      });
   assert(I != PendingQueries.end() &&
          "Query is not attached to this MaterializingInfo");
   PendingQueries.erase(I);

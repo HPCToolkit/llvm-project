@@ -35,13 +35,14 @@ public:
                          llvm::opt::ArgStringList &CC1Args) const override;
   void AddIAMCUIncludeArgs(const llvm::opt::ArgList &DriverArgs,
                            llvm::opt::ArgStringList &CC1Args) const override;
+  RuntimeLibType GetDefaultRuntimeLibType() const override;
   CXXStdlibType GetDefaultCXXStdlibType() const override;
+  bool
+  IsAArch64OutlineAtomicsDefault(const llvm::opt::ArgList &Args) const override;
   bool isPIEDefault() const override;
   bool isNoExecStackDefault() const override;
   bool IsMathErrnoDefault() const override;
   SanitizerMask getSupportedSanitizers() const override;
-  void addProfileRTLibs(const llvm::opt::ArgList &Args,
-                        llvm::opt::ArgStringList &CmdArgs) const override;
   std::string computeSysRoot() const override;
 
   std::string getDynamicLinker(const llvm::opt::ArgList &Args) const override;

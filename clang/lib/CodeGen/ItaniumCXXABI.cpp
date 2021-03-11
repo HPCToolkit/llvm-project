@@ -515,6 +515,9 @@ public:
       : ItaniumCXXABI(CGM, /*UseARMMethodPtrABI=*/true,
                       /*UseARMGuardVarABI=*/true) {}
   void emitBeginCatch(CodeGenFunction &CGF, const CXXCatchStmt *C) override;
+  llvm::CallInst *
+  emitTerminateForUnexpectedException(CodeGenFunction &CGF,
+                                      llvm::Value *Exn) override;
 
 private:
   bool HasThisReturn(GlobalDecl GD) const override {
@@ -752,7 +755,8 @@ CGCallee ItaniumCXXABI::EmitLoadOfMemberFunctionPointer(
         VFPAddr = CGF.Builder.CreateBitCast(
             VFPAddr, FTy->getPointerTo()->getPointerTo());
         VirtualFn = CGF.Builder.CreateAlignedLoad(
-            VFPAddr, CGF.getPointerAlign(), "memptr.virtualfn");
+            FTy->getPointerTo(), VFPAddr, CGF.getPointerAlign(),
+            "memptr.virtualfn");
       }
     }
     assert(VirtualFn && "Virtual fuction pointer not created!");
@@ -1251,8 +1255,7 @@ void ItaniumCXXABI::emitVirtualObjectDelete(CodeGenFunction &CGF,
     // Track back to entry -2 and pull out the offset there.
     llvm::Value *OffsetPtr = CGF.Builder.CreateConstInBoundsGEP1_64(
         VTable, -2, "complete-offset.ptr");
-    llvm::Value *Offset =
-      CGF.Builder.CreateAlignedLoad(OffsetPtr, CGF.getPointerAlign());
+    llvm::Value *Offset = CGF.Builder.CreateAlignedLoad(CGF.IntPtrTy, OffsetPtr,                                                        CGF.getPointerAlign());
 
     // Apply the offset.
     llvm::Value *CompletePtr =
@@ -1464,7 +1467,8 @@ llvm::Value *ItaniumCXXABI::EmitTypeid(CodeGenFunction &CGF,
     // Load the type info.
     Value = CGF.Builder.CreateConstInBoundsGEP1_64(Value, -1ULL);
   }
-  return CGF.Builder.CreateAlignedLoad(Value, CGF.getPointerAlign());
+  return CGF.Builder.CreateAlignedLoad(StdTypeInfoPtrTy, Value,
+                                       CGF.getPointerAlign());
 }
 
 bool ItaniumCXXABI::shouldDynamicCastCallBeNullChecked(bool SrcIsPtr,
@@ -1532,7 +1536,7 @@ llvm::Value *ItaniumCXXABI::EmitDynamicCastToVoid(CodeGenFunction &CGF,
     OffsetToTop =
         CGF.Builder.CreateConstInBoundsGEP1_32(/*Type=*/nullptr, VTable, -2U);
     OffsetToTop = CGF.Builder.CreateAlignedLoad(
-        OffsetToTop, CharUnits::fromQuantity(4), "offset.to.top");
+        CGM.Int32Ty, OffsetToTop, CharUnits::fromQuantity(4), "offset.to.top");
   } else {
     llvm::Type *PtrDiffLTy =
         CGF.ConvertType(CGF.getContext().getPointerDiffType());
@@ -1544,7 +1548,7 @@ llvm::Value *ItaniumCXXABI::EmitDynamicCastToVoid(CodeGenFunction &CGF,
     // Get the offset-to-top from the vtable.
     OffsetToTop = CGF.Builder.CreateConstInBoundsGEP1_64(VTable, -2ULL);
     OffsetToTop = CGF.Builder.CreateAlignedLoad(
-        OffsetToTop, CGF.getPointerAlign(), "offset.to.top");
+        PtrDiffLTy, OffsetToTop, CGF.getPointerAlign(), "offset.to.top");
   }
   // Finally, add the offset to the pointer.
   llvm::Value *Value = ThisAddr.getPointer();
@@ -1579,12 +1583,13 @@ ItaniumCXXABI::GetVirtualBaseClassOffset(CodeGenFunction &CGF,
     VBaseOffsetPtr =
         CGF.Builder.CreateBitCast(VBaseOffsetPtr, CGF.Int32Ty->getPointerTo());
     VBaseOffset = CGF.Builder.CreateAlignedLoad(
-        VBaseOffsetPtr, CharUnits::fromQuantity(4), "vbase.offset");
+        CGF.Int32Ty, VBaseOffsetPtr, CharUnits::fromQuantity(4),
+        "vbase.offset");
   } else {
     VBaseOffsetPtr = CGF.Builder.CreateBitCast(VBaseOffsetPtr,
                                                CGM.PtrDiffTy->getPointerTo());
     VBaseOffset = CGF.Builder.CreateAlignedLoad(
-        VBaseOffsetPtr, CGF.getPointerAlign(), "vbase.offset");
+        CGM.PtrDiffTy, VBaseOffsetPtr, CGF.getPointerAlign(), "vbase.offset");
   }
   return VBaseOffset;
 }
@@ -1767,8 +1772,22 @@ void ItaniumCXXABI::emitVTableDefinitions(CodeGenVTables &CGVT,
       DC->getParent()->isTranslationUnit())
     EmitFundamentalRTTIDescriptors(RD);
 
-  if (!VTable->isDeclarationForLinker())
+  // Always emit type metadata on non-available_externally definitions, and on
+  // available_externally definitions if we are performing whole program
+  // devirtualization. For WPD we need the type metadata on all vtable
+  // definitions to ensure we associate derived classes with base classes
+  // defined in headers but with a strong definition only in a shared library.
+  if (!VTable->isDeclarationForLinker() ||
+      CGM.getCodeGenOpts().WholeProgramVTables) {
     CGM.EmitVTableTypeMetadata(RD, VTable, VTLayout);
+    // For available_externally definitions, add the vtable to
+    // @llvm.compiler.used so that it isn't deleted before whole program
+    // analysis.
+    if (VTable->isDeclarationForLinker()) {
+      assert(CGM.getCodeGenOpts().WholeProgramVTables);
+      CGM.addCompilerUsedGlobal(VTable);
+    }
+  }
 
   if (VTContext.isRelativeLayout() && !VTable->isDSOLocal())
     CGVT.GenerateRelativeVTableAlias(VTable, VTable->getName());
@@ -1831,7 +1850,8 @@ llvm::Value *ItaniumCXXABI::getVTableAddressPointInStructorWithVTT(
     VTT = CGF.Builder.CreateConstInBoundsGEP1_64(VTT, VirtualPointerIndex);
 
   // And load the address point from the VTT.
-  return CGF.Builder.CreateAlignedLoad(VTT, CGF.getPointerAlign());
+  return CGF.Builder.CreateAlignedLoad(CGF.VoidPtrTy, VTT,
+                                       CGF.getPointerAlign());
 }
 
 llvm::Constant *ItaniumCXXABI::getVTableAddressPointForConstExpr(
@@ -1906,7 +1926,8 @@ CGCallee ItaniumCXXABI::getVirtualFunctionPointer(CodeGenFunction &CGF,
       llvm::Value *VTableSlotPtr =
           CGF.Builder.CreateConstInBoundsGEP1_64(VTable, VTableIndex, "vfn");
       VFuncLoad =
-          CGF.Builder.CreateAlignedLoad(VTableSlotPtr, CGF.getPointerAlign());
+          CGF.Builder.CreateAlignedLoad(Ty->getPointerTo(), VTableSlotPtr,
+                                        CGF.getPointerAlign());
     }
 
     // Add !invariant.load md to virtual function load to indicate that
@@ -2051,7 +2072,8 @@ static llvm::Value *performTypeAdjustment(CodeGenFunction &CGF,
       OffsetPtr =
           CGF.Builder.CreateBitCast(OffsetPtr, CGF.Int32Ty->getPointerTo());
       Offset =
-          CGF.Builder.CreateAlignedLoad(OffsetPtr, CharUnits::fromQuantity(4));
+          CGF.Builder.CreateAlignedLoad(CGF.Int32Ty, OffsetPtr,
+                                        CharUnits::fromQuantity(4));
     } else {
       llvm::Type *PtrDiffTy =
           CGF.ConvertType(CGF.getContext().getPointerDiffType());
@@ -2060,7 +2082,8 @@ static llvm::Value *performTypeAdjustment(CodeGenFunction &CGF,
           CGF.Builder.CreateBitCast(OffsetPtr, PtrDiffTy->getPointerTo());
 
       // Load the adjustment offset from the vtable.
-      Offset = CGF.Builder.CreateAlignedLoad(OffsetPtr, CGF.getPointerAlign());
+      Offset = CGF.Builder.CreateAlignedLoad(PtrDiffTy, OffsetPtr,
+                                             CGF.getPointerAlign());
     }
     // Adjust our pointer.
     ResultPtr = CGF.Builder.CreateInBoundsGEP(V.getPointer(), Offset);
@@ -2472,7 +2495,10 @@ void ItaniumCXXABI::EmitGuardedInit(CodeGenFunction &CGF,
     CGF.EmitNounwindRuntimeCall(getGuardReleaseFn(CGM, guardPtrTy),
                                 guardAddr.getPointer());
   } else {
-    Builder.CreateStore(llvm::ConstantInt::get(guardTy, 1), guardAddr);
+    // Store 1 into the first byte of the guard variable after initialization is
+    // complete.
+    Builder.CreateStore(llvm::ConstantInt::get(CGM.Int8Ty, 1),
+                        Builder.CreateElementBitCast(guardAddr, CGM.Int8Ty));
   }
 
   CGF.EmitBlock(EndBlock);
@@ -2920,7 +2946,7 @@ void ItaniumCXXABI::EmitThreadLocalInitFuncs(
     llvm::Value *Val = Var;
     if (VD->getType()->isReferenceType()) {
       CharUnits Align = CGM.getContext().getDeclAlign(VD);
-      Val = Builder.CreateAlignedLoad(Val, Align);
+      Val = Builder.CreateAlignedLoad(Var->getValueType(), Var, Align);
     }
     if (Val->getType() != Wrapper->getReturnType())
       Val = Builder.CreatePointerBitCastOrAddrSpaceCast(
@@ -3181,6 +3207,8 @@ static bool TypeInfoIsInStandardLibrary(const BuiltinType *Ty) {
 #define PPC_VECTOR_TYPE(Name, Id, Size) \
     case BuiltinType::Id:
 #include "clang/Basic/PPCTypes.def"
+#define RVV_TYPE(Name, Id, SingletonId) case BuiltinType::Id:
+#include "clang/Basic/RISCVVTypes.def"
     case BuiltinType::ShortAccum:
     case BuiltinType::Accum:
     case BuiltinType::LongAccum:
@@ -4619,6 +4647,18 @@ void WebAssemblyCXXABI::emitBeginCatch(CodeGenFunction &CGF,
     CGF.EHStack.pushCleanup<CatchRetScope>(
         NormalCleanup, cast<llvm::CatchPadInst>(CGF.CurrentFuncletPad));
   ItaniumCXXABI::emitBeginCatch(CGF, C);
+}
+
+llvm::CallInst *
+WebAssemblyCXXABI::emitTerminateForUnexpectedException(CodeGenFunction &CGF,
+                                                       llvm::Value *Exn) {
+  // Itanium ABI calls __clang_call_terminate(), which __cxa_begin_catch() on
+  // the violating exception to mark it handled, but it is currently hard to do
+  // with wasm EH instruction structure with catch/catch_all, we just call
+  // std::terminate and ignore the violating exception as in CGCXXABI.
+  // TODO Consider code transformation that makes calling __clang_call_terminate
+  // possible.
+  return CGCXXABI::emitTerminateForUnexpectedException(CGF, Exn);
 }
 
 /// Register a global destructor as best as we know how.

@@ -94,7 +94,7 @@ static bool hasDescriptorSetAndBinding(spirv::GlobalVariableOp op) {
 
 /// Fills `globalVariableMap` with SPIR-V global variables that represent kernel
 /// arguments from the given SPIR-V module. We assume that the module contains a
-/// single entry point function. Hence, all `spv.globalVariable`s with a bind
+/// single entry point function. Hence, all `spv.GlobalVariable`s with a bind
 /// attribute are kernel arguments.
 static LogicalResult getKernelGlobalVariables(
     spirv::ModuleOp module,
@@ -212,8 +212,8 @@ class GPULaunchLowering : public ConvertOpToLLVMPattern<gpu::LaunchFuncOp> {
       SmallVector<Value, 4> sizes;
       SmallVector<Value, 4> strides;
       Value sizeBytes;
-      getMemRefDescriptorSizes(loc, memRefType, operand.value(), rewriter,
-                               sizes, strides, sizeBytes);
+      getMemRefDescriptorSizes(loc, memRefType, {}, rewriter, sizes, strides,
+                               sizeBytes);
       MemRefDescriptor descriptor(operand.value());
       Value src = descriptor.allocatedPtr(rewriter, loc);
 
@@ -295,7 +295,7 @@ public:
     // Finally, modify the kernel function in SPIR-V modules to avoid symbolic
     // conflicts.
     for (auto spvModule : module.getOps<spirv::ModuleOp>())
-      encodeKernelName(spvModule);
+      (void)encodeKernelName(spvModule);
   }
 };
 } // namespace

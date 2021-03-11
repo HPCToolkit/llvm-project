@@ -179,10 +179,10 @@ class LoopVectorizationRequirements {
 public:
   LoopVectorizationRequirements(OptimizationRemarkEmitter &ORE) : ORE(ORE) {}
 
-  void addUnsafeAlgebraInst(Instruction *I) {
-    // First unsafe algebra instruction.
-    if (!UnsafeAlgebraInst)
-      UnsafeAlgebraInst = I;
+  /// Track the 1st floating-point instruction that can not be reassociated.
+  void addExactFPMathInst(Instruction *I) {
+    if (I && !ExactFPMathInst)
+      ExactFPMathInst = I;
   }
 
   void addRuntimePointerChecks(unsigned Num) { NumRuntimePointerChecks = Num; }
@@ -191,7 +191,7 @@ public:
 
 private:
   unsigned NumRuntimePointerChecks = 0;
-  Instruction *UnsafeAlgebraInst = nullptr;
+  Instruction *ExactFPMathInst = nullptr;
 
   /// Interface to emit optimization remarks.
   OptimizationRemarkEmitter &ORE;
@@ -339,13 +339,10 @@ public:
 
   /// Returns true if vector representation of the instruction \p I
   /// requires mask.
-  bool isMaskRequired(const Instruction *I) { return (MaskedOp.count(I) != 0); }
+  bool isMaskRequired(const Instruction *I) { return MaskedOp.contains(I); }
 
   unsigned getNumStores() const { return LAI->getNumStores(); }
   unsigned getNumLoads() const { return LAI->getNumLoads(); }
-
-  // Returns true if the NoNaN attribute is set on the function.
-  bool hasFunNoNaNAttr() const { return HasFunNoNaNAttr; }
 
   /// Returns all assume calls in predicated blocks. They need to be dropped
   /// when flattening the CFG.
@@ -494,9 +491,6 @@ private:
   /// Allowed outside users. This holds the variables that can be accessed from
   /// outside the loop.
   SmallPtrSet<Value *, 4> AllowedExit;
-
-  /// Can we assume the absence of NaNs.
-  bool HasFunNoNaNAttr = false;
 
   /// Vectorization requirements that will go through late-evaluation.
   LoopVectorizationRequirements *Requirements;

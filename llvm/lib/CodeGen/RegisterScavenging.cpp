@@ -91,7 +91,7 @@ void RegScavenger::enterBasicBlockEnd(MachineBasicBlock &MBB) {
   LiveUnits.addLiveOuts(MBB);
 
   // Move internal iterator at the last instruction of the block.
-  if (MBB.begin() != MBB.end()) {
+  if (!MBB.empty()) {
     MBBI = std::prev(MBB.end());
     Tracking = true;
   }
@@ -167,13 +167,12 @@ void RegScavenger::forward() {
 
   MachineInstr &MI = *MBBI;
 
-  for (SmallVectorImpl<ScavengedInfo>::iterator I = Scavenged.begin(),
-         IE = Scavenged.end(); I != IE; ++I) {
-    if (I->Restore != &MI)
+  for (ScavengedInfo &I : Scavenged) {
+    if (I.Restore != &MI)
       continue;
 
-    I->Reg = 0;
-    I->Restore = nullptr;
+    I.Reg = 0;
+    I.Restore = nullptr;
   }
 
   if (MI.isDebugInstr())

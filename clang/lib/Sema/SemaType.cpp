@@ -1269,11 +1269,10 @@ static QualType ConvertConstrainedAutoDeclSpecToType(Sema &S, DeclSpec &DS,
   llvm::SmallVector<TemplateArgument, 8> TemplateArgs;
   for (auto &ArgLoc : TemplateArgsInfo.arguments())
     TemplateArgs.push_back(ArgLoc.getArgument());
-  return S.Context.getAutoType(QualType(), AutoTypeKeyword::Auto, false,
-                               /*IsPack=*/false,
-                               cast<ConceptDecl>(TemplateId->Template.get()
-                                                 .getAsTemplateDecl()),
-                               TemplateArgs);
+  return S.Context.getAutoType(
+      QualType(), AutoKW, false, /*IsPack=*/false,
+      cast<ConceptDecl>(TemplateId->Template.get().getAsTemplateDecl()),
+      TemplateArgs);
 }
 
 /// Convert the specified declspec to the appropriate type
@@ -2060,10 +2059,9 @@ static QualType deduceOpenCLPointeeAddrSpace(Sema &S, QualType PointeeType) {
       !PointeeType->isSamplerT() &&
       !PointeeType.hasAddressSpace())
     PointeeType = S.getASTContext().getAddrSpaceQualType(
-        PointeeType,
-        S.getLangOpts().OpenCLCPlusPlus || S.getLangOpts().OpenCLVersion == 200
-            ? LangAS::opencl_generic
-            : LangAS::opencl_private);
+        PointeeType, S.getLangOpts().OpenCLGenericAddressSpace
+                         ? LangAS::opencl_generic
+                         : LangAS::opencl_private);
   return PointeeType;
 }
 
@@ -2091,7 +2089,7 @@ QualType Sema::BuildPointerType(QualType T,
 
   if (T->isFunctionType() && getLangOpts().OpenCL &&
       !getOpenCLOptions().isEnabled("__cl_clang_function_pointers")) {
-    Diag(Loc, diag::err_opencl_function_pointer);
+    Diag(Loc, diag::err_opencl_function_pointer) << /*pointer*/ 0;
     return QualType();
   }
 
@@ -2162,6 +2160,12 @@ QualType Sema::BuildReferenceType(QualType T, bool SpelledAsLValue,
 
   if (checkQualifiedFunction(*this, T, Loc, QFK_Reference))
     return QualType();
+
+  if (T->isFunctionType() && getLangOpts().OpenCL &&
+      !getOpenCLOptions().isEnabled("__cl_clang_function_pointers")) {
+    Diag(Loc, diag::err_opencl_function_pointer) << /*reference*/ 1;
+    return QualType();
+  }
 
   // In ARC, it is forbidden to build references to unqualified pointers.
   if (getLangOpts().ObjCAutoRefCount)
@@ -2889,6 +2893,12 @@ QualType Sema::BuildMemberPointerType(QualType T, QualType Class,
     return QualType();
   }
 
+  if (T->isFunctionType() && getLangOpts().OpenCL &&
+      !getOpenCLOptions().isEnabled("__cl_clang_function_pointers")) {
+    Diag(Loc, diag::err_opencl_function_pointer) << /*pointer*/ 0;
+    return QualType();
+  }
+
   // Adjust the default free function calling convention to the default method
   // calling convention.
   bool IsCtorOrDtor =
@@ -3125,11 +3135,11 @@ static void diagnoseRedundantReturnTypeQualifiers(Sema &S, QualType RetTy,
           diag::warn_qual_return_type,
           PTI.TypeQuals,
           SourceLocation(),
-          SourceLocation::getFromRawEncoding(PTI.ConstQualLoc),
-          SourceLocation::getFromRawEncoding(PTI.VolatileQualLoc),
-          SourceLocation::getFromRawEncoding(PTI.RestrictQualLoc),
-          SourceLocation::getFromRawEncoding(PTI.AtomicQualLoc),
-          SourceLocation::getFromRawEncoding(PTI.UnalignedQualLoc));
+          PTI.ConstQualLoc,
+          PTI.VolatileQualLoc,
+          PTI.RestrictQualLoc,
+          PTI.AtomicQualLoc,
+          PTI.UnalignedQualLoc);
       return;
     }
 
@@ -6086,7 +6096,7 @@ namespace {
       }
 
       // Finally fill in MemberPointerLocInfo fields.
-      TL.setStarLoc(SourceLocation::getFromRawEncoding(Chunk.Mem.StarLoc));
+      TL.setStarLoc(Chunk.Mem.StarLoc);
       TL.setClassTInfo(ClsTInfo);
     }
     void VisitLValueReferenceTypeLoc(LValueReferenceTypeLoc TL) {
@@ -6163,7 +6173,7 @@ static void fillAtomicQualLoc(AtomicTypeLoc ATL, const DeclaratorChunk &Chunk) {
     llvm_unreachable("cannot be _Atomic qualified");
 
   case DeclaratorChunk::Pointer:
-    Loc = SourceLocation::getFromRawEncoding(Chunk.Ptr.AtomicQualLoc);
+    Loc = Chunk.Ptr.AtomicQualLoc;
     break;
 
   case DeclaratorChunk::BlockPointer:

@@ -19,13 +19,16 @@ class StandardOpsDialect;
 template <typename ConcreteDialect>
 void registerDialect(DialectRegistry &registry);
 
+namespace complex {
+class ComplexDialect;
+} // end namespace complex
+
 namespace gpu {
 class GPUDialect;
 class GPUModuleOp;
 } // end namespace gpu
 
 namespace LLVM {
-class LLVMArmNeonDialect;
 class LLVMArmSVEDialect;
 class LLVMAVX512Dialect;
 class LLVMDialect;
@@ -54,6 +57,14 @@ class SCFDialect;
 namespace spirv {
 class SPIRVDialect;
 } // end namespace spirv
+
+namespace tensor {
+class TensorDialect;
+} // end namespace tensor
+
+namespace tosa {
+class TosaDialect;
+} // end namespace tosa
 
 namespace vector {
 class VectorDialect;

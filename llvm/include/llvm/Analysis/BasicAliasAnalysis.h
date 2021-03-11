@@ -120,15 +120,6 @@ private:
     // Context instruction to use when querying information about this index.
     const Instruction *CxtI;
 
-    bool operator==(const VariableGEPIndex &Other) const {
-      return V == Other.V && ZExtBits == Other.ZExtBits &&
-             SExtBits == Other.SExtBits && Scale == Other.Scale;
-    }
-
-    bool operator!=(const VariableGEPIndex &Other) const {
-      return !operator==(Other);
-    }
-
     void dump() const {
       print(dbgs());
       dbgs() << "\n";
@@ -152,6 +143,9 @@ private:
     SmallVector<VariableGEPIndex, 4> VarIndices;
     // Is GEP index scale compile-time constant.
     bool HasCompileTimeConstantScale;
+    // Are all operations inbounds GEPs or non-indexing operations?
+    // (None iff expression doesn't involve any geps)
+    Optional<bool> InBounds;
 
     void dump() const {
       print(dbgs());
@@ -159,15 +153,15 @@ private:
     }
     void print(raw_ostream &OS) const {
       OS << "(DecomposedGEP Base=" << Base->getName()
-	 << ", Offset=" << Offset
-	 << ", VarIndices=[";
+         << ", Offset=" << Offset
+         << ", VarIndices=[";
       for (size_t i = 0; i < VarIndices.size(); i++) {
-       if (i != 0)
-         OS << ", ";
-       VarIndices[i].print(OS);
+        if (i != 0)
+          OS << ", ";
+        VarIndices[i].print(OS);
       }
       OS << "], HasCompileTimeConstantScale=" << HasCompileTimeConstantScale
-	 << ")";
+         << ")";
     }
   };
 
@@ -189,14 +183,6 @@ private:
 
   /// Tracks instructions visited by pointsToConstantMemory.
   SmallPtrSet<const Value *, 16> Visited;
-
-  /// How many active NoAlias assumption uses there are.
-  int NumAssumptionUses = 0;
-
-  /// Location pairs for which an assumption based result is currently stored.
-  /// Used to remove all potentially incorrect results from the cache if an
-  /// assumption is disproven.
-  SmallVector<AAQueryInfo::LocPair, 4> AssumptionBasedResults;
 
   static const Value *
   GetLinearExpression(const Value *V, APInt &Scale, APInt &Offset,
@@ -240,18 +226,17 @@ private:
   AliasResult aliasPHI(const PHINode *PN, LocationSize PNSize,
                        const AAMDNodes &PNAAInfo, const Value *V2,
                        LocationSize V2Size, const AAMDNodes &V2AAInfo,
-                       const Value *UnderV2, AAQueryInfo &AAQI);
+                       AAQueryInfo &AAQI);
 
   AliasResult aliasSelect(const SelectInst *SI, LocationSize SISize,
                           const AAMDNodes &SIAAInfo, const Value *V2,
                           LocationSize V2Size, const AAMDNodes &V2AAInfo,
-                          const Value *UnderV2, AAQueryInfo &AAQI);
+                          AAQueryInfo &AAQI);
 
   AliasResult aliasCheck(const Value *V1, LocationSize V1Size,
                          const AAMDNodes &V1AATag, const Value *V2,
                          LocationSize V2Size, const AAMDNodes &V2AATag,
-                         AAQueryInfo &AAQI, const Value *O1 = nullptr,
-                         const Value *O2 = nullptr);
+                         AAQueryInfo &AAQI);
 
   AliasResult aliasCheckRecursive(const Value *V1, LocationSize V1Size,
                                   const AAMDNodes &V1AATag, const Value *V2,

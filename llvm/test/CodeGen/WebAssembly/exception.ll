@@ -1,4 +1,5 @@
-; RUN: llc < %s -asm-verbose=false -disable-wasm-fallthrough-return-opt -wasm-disable-explicit-locals -wasm-keep-registers -exception-model=wasm -mattr=+exception-handling -verify-machineinstrs | FileCheck -allow-deprecated-dag-overlap %s
+; RUN: llc < %s -asm-verbose=false -disable-wasm-fallthrough-return-opt -wasm-disable-explicit-locals -wasm-keep-registers -exception-model=wasm -mattr=+exception-handling -verify-machineinstrs | FileCheck --implicit-check-not=ehgcr -allow-deprecated-dag-overlap %s
+; RUN: llc < %s -asm-verbose=false -disable-wasm-fallthrough-return-opt -wasm-disable-explicit-locals -wasm-keep-registers -exception-model=wasm -mattr=+exception-handling -verify-machineinstrs -O0
 ; RUN: llc < %s -disable-wasm-fallthrough-return-opt -wasm-keep-registers -exception-model=wasm -mattr=+exception-handling
 
 target datalayout = "e-m:e-p:32:32-i64:64-n32:64-S128"
@@ -128,8 +129,8 @@ ehcleanup:                                        ; preds = %entry
 ; CHECK:   catch_all
 ; CHECK:     try
 ; CHECK:       call      __cxa_end_catch
-; CHECK:     catch     $[[EXN:[0-9]+]]=, __cpp_exception
-; CHECK:       call      __clang_call_terminate, $[[EXN]]
+; CHECK:     catch_all
+; CHECK:       call      _ZSt9terminatev
 ; CHECK:       unreachable
 ; CHECK:     end_try
 ; CHECK:     rethrow
@@ -169,8 +170,7 @@ invoke.cont2:                                     ; preds = %ehcleanup
 
 terminate:                                        ; preds = %ehcleanup
   %6 = cleanuppad within %5 []
-  %7 = call i8* @llvm.wasm.get.exception(token %6)
-  call void @__clang_call_terminate(i8* %7) [ "funclet"(token %6) ]
+  call void @_ZSt9terminatev() [ "funclet"(token %6) ]
   unreachable
 }
 
@@ -353,15 +353,23 @@ ehcleanupret:                                     ; preds = %catch.start, %ehcle
 declare void @foo()
 declare void @bar(i32*)
 declare i32 @__gxx_wasm_personality_v0(...)
-declare void @llvm.wasm.throw(i32, i8*)
-declare i8* @llvm.wasm.get.exception(token)
-declare i32 @llvm.wasm.get.ehselector(token)
-declare void @llvm.wasm.rethrow()
-declare i32 @llvm.eh.typeid.for(i8*)
+; Function Attrs: noreturn
+declare void @llvm.wasm.throw(i32, i8*) #1
+; Function Attrs: nounwind
+declare i8* @llvm.wasm.get.exception(token) #0
+; Function Attrs: nounwind
+declare i32 @llvm.wasm.get.ehselector(token) #0
+; Function Attrs: noreturn
+declare void @llvm.wasm.rethrow() #1
+; Function Attrs: nounwind
+declare i32 @llvm.eh.typeid.for(i8*) #0
 declare i8* @__cxa_begin_catch(i8*)
 declare void @__cxa_end_catch()
-declare void @__clang_call_terminate(i8*)
+declare void @_ZSt9terminatev()
 declare %struct.Temp* @_ZN4TempD2Ev(%struct.Temp* returned)
+
+attributes #0 = { nounwind }
+attributes #1 = { noreturn }
 
 ; CHECK: __cpp_exception:
 ; CHECK: .eventtype  __cpp_exception i32

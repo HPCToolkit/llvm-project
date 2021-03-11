@@ -77,7 +77,7 @@ public:
   /// supported LLVM IR type.  In particular, if more than one value is
   /// returned, create an LLVM IR structure type with elements that correspond
   /// to each of the MLIR types converted with `convertType`.
-  Type packFunctionResults(ArrayRef<Type> types);
+  Type packFunctionResults(TypeRange types);
 
   /// Convert a type in the context of the default or bare pointer calling
   /// convention. Calling convention sensitive types, such as MemRefType and
@@ -533,7 +533,7 @@ protected:
   ///                  : (!llvm.ptr<f32>, i64) -> !llvm.ptr<f32>
   /// `sizeBytes`  = llvm.ptrtoint %gep : !llvm.ptr<f32> to i64
   void getMemRefDescriptorSizes(Location loc, MemRefType memRefType,
-                                ArrayRef<Value> dynamicSizes,
+                                ValueRange dynamicSizes,
                                 ConversionPatternRewriter &rewriter,
                                 SmallVectorImpl<Value> &sizes,
                                 SmallVectorImpl<Value> &strides,
@@ -656,9 +656,6 @@ public:
     static_assert(
         std::is_base_of<OpTrait::OneResult<SourceOp>, SourceOp>::value,
         "expected single result op");
-    static_assert(std::is_base_of<OpTrait::SameOperandsAndResultType<SourceOp>,
-                                  SourceOp>::value,
-                  "expected same operands and result type");
     return LLVM::detail::vectorOneToOneRewrite(
         op, TargetOp::getOperationName(), operands, *this->getTypeConverter(),
         rewriter);

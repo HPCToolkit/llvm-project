@@ -165,7 +165,7 @@ private:
   }
   void SayNoMatch(const std::string &, bool isAssignment = false);
   std::string TypeAsFortran(std::size_t);
-  bool AnyUntypedOperand();
+  bool AnyUntypedOrMissingOperand();
 
   ExpressionAnalyzer &context_;
   ActualArguments actuals_;
@@ -1847,11 +1847,12 @@ static bool CheckCompatibleArgument(bool isElemental,
   return std::visit(
       common::visitors{
           [&](const characteristics::DummyDataObject &x) {
-            characteristics::TypeAndShape dummyTypeAndShape{x.type};
-            if (!isElemental && actual.Rank() != dummyTypeAndShape.Rank()) {
+            if (!isElemental && actual.Rank() != x.type.Rank() &&
+                !x.type.attrs().test(
+                    characteristics::TypeAndShape::Attr::AssumedRank)) {
               return false;
             } else if (auto actualType{actual.GetType()}) {
-              return dummyTypeAndShape.type().IsTkCompatibleWith(*actualType);
+              return x.type.type().IsTkCompatibleWith(*actualType);
             } else {
               return false;
             }
@@ -1943,7 +1944,8 @@ const Symbol *ExpressionAnalyzer::ResolveGeneric(const Symbol &symbol,
               *procedure, localActuals, GetFoldingContext())) {
         if (CheckCompatibleArguments(*procedure, localActuals)) {
           if (!procedure->IsElemental()) {
-            return &specific; // takes priority over elemental match
+            // takes priority over elemental match
+            return &AccessSpecific(symbol, specific);
           }
           elemental = &specific;
         }
@@ -1951,7 +1953,7 @@ const Symbol *ExpressionAnalyzer::ResolveGeneric(const Symbol &symbol,
     }
   }
   if (elemental) {
-    return elemental;
+    return &AccessSpecific(symbol, *elemental);
   }
   // Check parent derived type
   if (const auto *parentScope{symbol.owner().GetDerivedTypeParent()}) {
@@ -1968,6 +1970,39 @@ const Symbol *ExpressionAnalyzer::ResolveGeneric(const Symbol &symbol,
     return details.derivedType();
   }
   return nullptr;
+}
+
+const Symbol &ExpressionAnalyzer::AccessSpecific(
+    const Symbol &originalGeneric, const Symbol &specific) {
+  if (const auto *hosted{
+          originalGeneric.detailsIf<semantics::HostAssocDetails>()}) {
+    return AccessSpecific(hosted->symbol(), specific);
+  } else if (const auto *used{
+                 originalGeneric.detailsIf<semantics::UseDetails>()}) {
+    const auto &scope{originalGeneric.owner()};
+    if (auto iter{scope.find(specific.name())}; iter != scope.end()) {
+      if (const auto *useDetails{
+              iter->second->detailsIf<semantics::UseDetails>()}) {
+        const Symbol &usedSymbol{useDetails->symbol()};
+        const auto *usedGeneric{
+            usedSymbol.detailsIf<semantics::GenericDetails>()};
+        if (&usedSymbol == &specific ||
+            (usedGeneric && usedGeneric->specific() == &specific)) {
+          return specific;
+        }
+      }
+    }
+    // Create a renaming USE of the specific procedure.
+    auto rename{context_.SaveTempName(
+        used->symbol().owner().GetName().value().ToString() + "$" +
+        specific.name().ToString())};
+    return *const_cast<semantics::Scope &>(scope)
+                .try_emplace(rename, specific.attrs(),
+                    semantics::UseDetails{rename, specific})
+                .first->second;
+  } else {
+    return specific;
+  }
 }
 
 void ExpressionAnalyzer::EmitGenericResolutionError(const Symbol &symbol) {
@@ -2009,6 +2044,7 @@ auto ExpressionAnalyzer::GetCalleeAndArguments(const parser::Name &name,
     if (std::optional<SpecificCall> specificCall{context_.intrinsics().Probe(
             CallCharacteristics{ultimate.name().ToString(), isSubroutine},
             arguments, GetFoldingContext())}) {
+      CheckBadExplicitType(*specificCall, *symbol);
       return CalleeAndArguments{
           ProcedureDesignator{std::move(specificCall->specificIntrinsic)},
           std::move(specificCall->arguments)};
@@ -2044,6 +2080,39 @@ auto ExpressionAnalyzer::GetCalleeAndArguments(const parser::Name &name,
     }
   }
   return std::nullopt;
+}
+
+// Fortran 2018 expressly states (8.2 p3) that any declared type for a
+// generic intrinsic function "has no effect" on the result type of a
+// call to that intrinsic.  So one can declare "character*8 cos" and
+// still get a real result from "cos(1.)".  This is a dangerous feature,
+// especially since implementations are free to extend their sets of
+// intrinsics, and in doing so might clash with a name in a program.
+// So we emit a warning in this situation, and perhaps it should be an
+// error -- any correctly working program can silence the message by
+// simply deleting the pointless type declaration.
+void ExpressionAnalyzer::CheckBadExplicitType(
+    const SpecificCall &call, const Symbol &intrinsic) {
+  if (intrinsic.GetUltimate().GetType()) {
+    const auto &procedure{call.specificIntrinsic.characteristics.value()};
+    if (const auto &result{procedure.functionResult}) {
+      if (const auto *typeAndShape{result->GetTypeAndShape()}) {
+        if (auto declared{
+                typeAndShape->Characterize(intrinsic, GetFoldingContext())}) {
+          if (!declared->type().IsTkCompatibleWith(typeAndShape->type())) {
+            if (auto *msg{Say(
+                    "The result type '%s' of the intrinsic function '%s' is not the explicit declared type '%s'"_en_US,
+                    typeAndShape->AsFortran(), intrinsic.name(),
+                    declared->AsFortran())}) {
+              msg->Attach(intrinsic.name(),
+                  "Ignored declaration of intrinsic function '%s'"_en_US,
+                  intrinsic.name());
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void ExpressionAnalyzer::CheckForBadRecursion(
@@ -2956,7 +3025,7 @@ bool ArgumentAnalyzer::CheckConformance() const {
 
 MaybeExpr ArgumentAnalyzer::TryDefinedOp(
     const char *opr, parser::MessageFixedText &&error, bool isUserOp) {
-  if (AnyUntypedOperand()) {
+  if (AnyUntypedOrMissingOperand()) {
     context_.Say(
         std::move(error), ToUpperCase(opr), TypeAsFortran(0), TypeAsFortran(1));
     return std::nullopt;
@@ -3271,7 +3340,9 @@ void ArgumentAnalyzer::SayNoMatch(const std::string &opr, bool isAssignment) {
 }
 
 std::string ArgumentAnalyzer::TypeAsFortran(std::size_t i) {
-  if (std::optional<DynamicType> type{GetType(i)}) {
+  if (i >= actuals_.size() || !actuals_[i]) {
+    return "missing argument";
+  } else if (std::optional<DynamicType> type{GetType(i)}) {
     return type->category() == TypeCategory::Derived
         ? "TYPE("s + type->AsFortran() + ')'
         : type->category() == TypeCategory::Character
@@ -3282,9 +3353,9 @@ std::string ArgumentAnalyzer::TypeAsFortran(std::size_t i) {
   }
 }
 
-bool ArgumentAnalyzer::AnyUntypedOperand() {
+bool ArgumentAnalyzer::AnyUntypedOrMissingOperand() {
   for (const auto &actual : actuals_) {
-    if (!actual.value().GetType()) {
+    if (!actual || !actual->GetType()) {
       return true;
     }
   }

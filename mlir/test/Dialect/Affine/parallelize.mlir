@@ -25,7 +25,7 @@ func @reduce_window_max() {
                 affine.for %arg7 = 0 to 1 {
                   %2 = affine.load %0[%arg0, %arg1, %arg2, %arg3] : memref<1x8x8x64xf32>
                   %3 = affine.load %1[%arg0 + %arg4, %arg1 * 2 + %arg5, %arg2 * 2 + %arg6, %arg3 + %arg7] : memref<1x18x18x64xf32>
-                  %4 = cmpf "ogt", %2, %3 : f32
+                  %4 = cmpf ogt, %2, %3 : f32
                   %5 = select %4, %2, %3 : f32
                   affine.store %5, %0[%arg0, %arg1, %arg2, %arg3] : memref<1x8x8x64xf32>
                 }
@@ -61,7 +61,7 @@ func @reduce_window_max() {
 // CHECK:                      affine.parallel (%[[a7:.*]]) = (0) to (1) {
 // CHECK:                        %[[lhs:.*]] = affine.load %[[v0]][%[[a0]], %[[a1]], %[[a2]], %[[a3]]] : memref<1x8x8x64xf32>
 // CHECK:                        %[[rhs:.*]] = affine.load %[[v1]][%[[a0]] + %[[a4]], %[[a1]] * 2 + %[[a5]], %[[a2]] * 2 + %[[a6]], %[[a3]] + %[[a7]]] : memref<1x18x18x64xf32>
-// CHECK:                        %[[res:.*]] = cmpf "ogt", %[[lhs]], %[[rhs]] : f32
+// CHECK:                        %[[res:.*]] = cmpf ogt, %[[lhs]], %[[rhs]] : f32
 // CHECK:                        %[[sel:.*]] = select %[[res]], %[[lhs]], %[[rhs]] : f32
 // CHECK:                        affine.store %[[sel]], %[[v0]][%[[a0]], %[[a1]], %[[a2]], %[[a3]]] : memref<1x8x8x64xf32>
 // CHECK:                      }
@@ -159,4 +159,29 @@ func @max_nested(%m: memref<?x?xf32>, %lb0: index, %lb1: index,
   return
 }
 
+// CHECK-LABEL: @unsupported_iter_args
+func @unsupported_iter_args(%in: memref<10xf32>) {
+  %cst = constant 0.000000e+00 : f32
+  // CHECK-NOT: affine.parallel
+  %final_red = affine.for %i = 0 to 10 iter_args(%red_iter = %cst) -> (f32) {
+    %ld = affine.load %in[%i] : memref<10xf32>
+    %add = addf %red_iter, %ld : f32
+    affine.yield %add : f32
+  }
+  return
+}
 
+// CHECK-LABEL: @unsupported_nested_iter_args
+func @unsupported_nested_iter_args(%in: memref<20x10xf32>) {
+  %cst = constant 0.000000e+00 : f32
+  // CHECK: affine.parallel
+  affine.for %i = 0 to 20 {
+    // CHECK: affine.for
+    %final_red = affine.for %j = 0 to 10 iter_args(%red_iter = %cst) -> (f32) {
+      %ld = affine.load %in[%i, %j] : memref<20x10xf32>
+      %add = addf %red_iter, %ld : f32
+      affine.yield %add : f32
+    }
+  }
+  return
+}

@@ -65,7 +65,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "AMDGPU.h"
-#include "AMDGPUSubtarget.h"
+#include "GCNSubtarget.h"
+#include "MCTargetDesc/AMDGPUMCTargetDesc.h"
 #include "llvm/CodeGen/MachineDominators.h"
 #include "llvm/InitializePasses.h"
 #include "llvm/Target/TargetMachine.h"
@@ -281,7 +282,7 @@ static bool foldVGPRCopyIntoRegSequence(MachineInstr &MI,
       const TargetRegisterClass *NewSrcRC = TRI->getEquivalentAGPRClass(SrcRC);
       Register TmpAReg = MRI.createVirtualRegister(NewSrcRC);
       unsigned Opc = NewSrcRC == &AMDGPU::AGPR_32RegClass ?
-        AMDGPU::V_ACCVGPR_WRITE_B32 : AMDGPU::COPY;
+        AMDGPU::V_ACCVGPR_WRITE_B32_e64 : AMDGPU::COPY;
       BuildMI(*MI.getParent(), &MI, MI.getDebugLoc(), TII->get(Opc),
             TmpAReg)
         .addReg(TmpReg, RegState::Kill);
@@ -580,8 +581,9 @@ bool SIFixSGPRCopies::runOnMachineFunction(MachineFunction &MF) {
         continue;
       case AMDGPU::COPY:
       case AMDGPU::WQM:
+      case AMDGPU::STRICT_WQM:
       case AMDGPU::SOFT_WQM:
-      case AMDGPU::WWM: {
+      case AMDGPU::STRICT_WWM: {
         Register DstReg = MI.getOperand(0).getReg();
 
         const TargetRegisterClass *SrcRC, *DstRC;

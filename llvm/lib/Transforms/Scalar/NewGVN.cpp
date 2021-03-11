@@ -62,6 +62,7 @@
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/PointerIntPair.h"
 #include "llvm/ADT/PostOrderIterator.h"
+#include "llvm/ADT/SetOperations.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/SparseBitVector.h"
@@ -389,8 +390,7 @@ public:
     if (Members.size() != Other->Members.size())
       return false;
 
-    return all_of(Members,
-                  [&](const Value *V) { return Other->Members.count(V); });
+    return llvm::set_is_subset(Members, Other->Members);
   }
 
 private:
@@ -2876,8 +2876,7 @@ void NewGVN::cleanupTables() {
   }
 
   while (!TempInst.empty()) {
-    auto *I = TempInst.back();
-    TempInst.pop_back();
+    auto *I = TempInst.pop_back_val();
     I->deleteValue();
   }
 
@@ -3372,10 +3371,9 @@ bool NewGVN::runGVN() {
   for (auto &B : RPOT) {
     auto *Node = DT->getNode(B);
     if (Node->getNumChildren() > 1)
-      llvm::sort(Node->begin(), Node->end(),
-                 [&](const DomTreeNode *A, const DomTreeNode *B) {
-                   return RPOOrdering[A] < RPOOrdering[B];
-                 });
+      llvm::sort(*Node, [&](const DomTreeNode *A, const DomTreeNode *B) {
+        return RPOOrdering[A] < RPOOrdering[B];
+      });
   }
 
   // Now a standard depth first ordering of the domtree is equivalent to RPO.

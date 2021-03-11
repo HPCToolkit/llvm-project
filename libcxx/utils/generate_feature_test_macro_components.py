@@ -111,19 +111,18 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_atomic_wait",
     "values": { "c++20": 201907 },
     "headers": ["atomic"],
-    "depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
-    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
+    "depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_atomic_wait)",
+    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_atomic_wait)",
   }, {
     "name": "__cpp_lib_barrier",
     "values": { "c++20": 201907 },
     "headers": ["barrier"],
-    "depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
-    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
+    "depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_barrier)",
+    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_barrier)",
   }, {
     "name": "__cpp_lib_bind_front",
     "values": { "c++20": 201907 },
     "headers": ["functional"],
-    "unimplemented": True,
   }, {
     "name": "__cpp_lib_bit_cast",
     "values": { "c++20": 201806 },
@@ -182,7 +181,6 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_constexpr_algorithms",
     "values": { "c++20": 201806 },
     "headers": ["algorithm"],
-    "unimplemented": True,
   }, {
     "name": "__cpp_lib_constexpr_complex",
     "values": { "c++20": 201711 },
@@ -205,7 +203,6 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_constexpr_memory",
     "values": { "c++20": 201811 },
     "headers": ["memory"],
-    "unimplemented": True,
   }, {
     "name": "__cpp_lib_constexpr_numeric",
     "values": { "c++20": 201911 },
@@ -270,6 +267,13 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_filesystem",
     "values": { "c++17": 201703 },
     "headers": ["filesystem"],
+    "depends": "!defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_filesystem)",
+    "internal_depends": "!defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_filesystem)"
+  }, {
+    "name": "__cpp_lib_format",
+    "values": { "c++20": 201907 },
+    "headers": ["format"],
+    "unimplemented": True,
   }, {
     "name": "__cpp_lib_gcd_lcm",
     "values": { "c++17": 201606 },
@@ -368,7 +372,6 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_is_scoped_enum",
     "values": { "c++2b": 202011 },
     "headers": ["type_traits"],
-    "unimplemented": True,
   }, {
     "name": "__cpp_lib_is_swappable",
     "values": { "c++17": 201603 },
@@ -384,8 +387,8 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_latch",
     "values": { "c++20": 201907 },
     "headers": ["latch"],
-    "depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
-    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
+    "depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_latch)",
+    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_latch)",
   }, {
     "name": "__cpp_lib_launder",
     "values": { "c++17": 201606 },
@@ -418,8 +421,8 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_math_constants",
     "values": { "c++20": 201907 },
     "headers": ["numbers"],
-    "depends": "defined(__cpp_concepts) && __cpp_concepts >= 201811L",
-    "internal_depends": "defined(__cpp_concepts) && __cpp_concepts >= 201811L",
+    "depends": "defined(__cpp_concepts) && __cpp_concepts >= 201907L",
+    "internal_depends": "defined(__cpp_concepts) && __cpp_concepts >= 201907L",
   }, {
     "name": "__cpp_lib_math_special_functions",
     "values": { "c++17": 201603 },
@@ -497,14 +500,14 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_semaphore",
     "values": { "c++20": 201907 },
     "headers": ["semaphore"],
-    "depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
-    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
+    "depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_semaphore)",
+    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_semaphore)",
   }, {
     "name": "__cpp_lib_shared_mutex",
     "values": { "c++17": 201505 },
     "headers": ["shared_mutex"],
-    "depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
-    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
+    "depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_shared_mutex)",
+    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_shared_mutex)",
   }, {
     "name": "__cpp_lib_shared_ptr_arrays",
     "values": { "c++17": 201611 },
@@ -517,13 +520,12 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_shared_timed_mutex",
     "values": { "c++14": 201402 },
     "headers": ["shared_mutex"],
-    "depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
-    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS)",
+    "depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_shared_timed_mutex)",
+    "internal_depends": "!defined(_LIBCPP_HAS_NO_THREADS) && !defined(_LIBCPP_AVAILABILITY_DISABLE_FTM___cpp_lib_shared_timed_mutex)",
   }, {
     "name": "__cpp_lib_shift",
     "values": { "c++20": 201806 },
     "headers": ["algorithm"],
-    "unimplemented": True,
   }, {
     "name": "__cpp_lib_smart_ptr_for_overwrite",
     "values": { "c++20": 202002 },
@@ -560,7 +562,6 @@ feature_test_macros = [ add_version_header(x) for x in [
     "name": "__cpp_lib_string_contains",
     "values": { "c++2b": 202011 },
     "headers": ["string", "string_view"],
-    "unimplemented": True,
   }, {
     "name": "__cpp_lib_string_udls",
     "values": { "c++14": 201304 },
@@ -592,6 +593,10 @@ feature_test_macros = [ add_version_header(x) for x in [
     "values": { "c++17": 201611 },
     "headers": ["utility"],
     "unimplemented": True,
+  }, {
+    "name": "__cpp_lib_to_underlying",
+    "values": { "c++2b": 202102 },
+    "headers": ["utility"],
   }, {
     "name": "__cpp_lib_transformation_trait_aliases",
     "values": { "c++14": 201304 },
@@ -647,6 +652,7 @@ assert all(tc["headers"] == sorted(tc["headers"]) for tc in feature_test_macros)
 lit_markup = {
   "atomic": ["UNSUPPORTED: libcpp-has-no-threads"],
   "barrier": ["UNSUPPORTED: libcpp-has-no-threads"],
+  "filesystem": ["UNSUPPORTED: libcpp-has-no-filesystem-library"],
   "iomanip": ["UNSUPPORTED: libcpp-has-no-localization"],
   "istream": ["UNSUPPORTED: libcpp-has-no-localization"],
   "latch": ["UNSUPPORTED: libcpp-has-no-threads"],
@@ -705,6 +711,8 @@ def get_for_std(d, std):
       return d[s]
   return None
 
+def get_std_number(std):
+    return std.replace('c++', '')
 
 """
   Functions to produce the <version> header
@@ -733,7 +741,22 @@ def produce_macros_definition_for_std(std):
     result += "\n"
     if 'depends' in tc.keys():
       result += "# endif\n"
-  return result
+  return result.strip()
+
+def produce_macros_definitions():
+  macro_definition_template = """#if _LIBCPP_STD_VER > {previous_std_number}
+{macro_definition}
+#endif"""
+
+  macros_definitions = []
+  previous_std_number = '11'
+  for std in get_std_dialects():
+    macros_definitions.append(
+      macro_definition_template.format(previous_std_number=previous_std_number,
+                                       macro_definition=produce_macros_definition_for_std(std)))
+    previous_std_number = get_std_number(std)
+
+  return '\n\n'.join(macros_definitions)
 
 def chunks(l, n):
   """Yield successive n-sized chunks from l."""
@@ -800,31 +823,18 @@ def produce_version_header():
 #pragma GCC system_header
 #endif
 
-#if _LIBCPP_STD_VER > 11
-{cxx14_macros}
-#endif
+// clang-format off
 
-#if _LIBCPP_STD_VER > 14
-{cxx17_macros}
-#endif
+{cxx_macros}
 
-#if _LIBCPP_STD_VER > 17
-{cxx20_macros}
-#endif
-
-#if _LIBCPP_STD_VER > 20
-{cxx2b_macros}
-#endif
+// clang-format on
 
 #endif // _LIBCPP_VERSIONH
 """
 
   version_str = template.format(
       synopsis=produce_version_synopsis().strip(),
-      cxx14_macros=produce_macros_definition_for_std('c++14').strip(),
-      cxx17_macros=produce_macros_definition_for_std('c++17').strip(),
-      cxx20_macros=produce_macros_definition_for_std('c++20').strip(),
-      cxx2b_macros=produce_macros_definition_for_std('c++2b').strip())
+      cxx_macros=produce_macros_definitions())
   version_header_path = os.path.join(include_path, 'version')
   with open(version_header_path, 'w', newline='\n') as f:
     f.write(version_str)
@@ -895,7 +905,36 @@ def generate_std_test(test_list, std):
       result += test_types["depends"].format(name=tc["name"], value=val, std=std, depends=tc["depends"])
     else:
       result +=  test_types["defined"].format(name=tc["name"], value=val, std=std)
-  return result
+  return result.strip()
+
+def generate_std_tests(test_list):
+  std_tests_template = """#if TEST_STD_VER < {first_std_number}
+
+{pre_std_test}
+
+{other_std_tests}
+
+#elif TEST_STD_VER > {penultimate_std_number}
+
+{last_std_test}
+
+#endif // TEST_STD_VER > {penultimate_std_number}"""
+
+  std_dialects = get_std_dialects()
+  assert not get_std_number(std_dialects[-1]).isnumeric()
+
+  other_std_tests = []
+  for std in std_dialects[:-1]:
+    other_std_tests.append('#elif TEST_STD_VER == ' + get_std_number(std))
+    other_std_tests.append(generate_std_test(test_list, std))
+
+  std_tests = std_tests_template.format(first_std_number=get_std_number(std_dialects[0]),
+                                        pre_std_test=generate_std_test(test_list, 'c++11'),
+                                        other_std_tests='\n\n'.join(other_std_tests),
+                                        penultimate_std_number=get_std_number(std_dialects[-2]),
+                                        last_std_test=generate_std_test(test_list, std_dialects[-1]))
+
+  return std_tests
 
 def generate_synopsis(test_list):
     max_name_len = max([len(tc["name"]) for tc in test_list])
@@ -933,6 +972,8 @@ def produce_tests():
 //
 // WARNING: This test was generated by {script_name}
 // and should not be edited manually.
+//
+// clang-format off
 {markup}
 // <{header}>
 
@@ -943,38 +984,14 @@ def produce_tests():
 #include <{header}>
 #include "test_macros.h"
 
-#if TEST_STD_VER < 14
-
-{cxx11_tests}
-
-#elif TEST_STD_VER == 14
-
-{cxx14_tests}
-
-#elif TEST_STD_VER == 17
-
-{cxx17_tests}
-
-#elif TEST_STD_VER == 20
-
-{cxx20_tests}
-
-#elif TEST_STD_VER > 20
-
-{cxx2b_tests}
-
-#endif // TEST_STD_VER > 20
+{cxx_tests}
 
 int main(int, char**) {{ return 0; }}
 """.format(script_name=script_name,
            header=h,
            markup=('\n{}\n'.format(markup) if markup else ''),
            synopsis=generate_synopsis(test_list),
-           cxx11_tests=generate_std_test(test_list, 'c++11').strip(),
-           cxx14_tests=generate_std_test(test_list, 'c++14').strip(),
-           cxx17_tests=generate_std_test(test_list, 'c++17').strip(),
-           cxx20_tests=generate_std_test(test_list, 'c++20').strip(),
-           cxx2b_tests=generate_std_test(test_list, 'c++2b').strip())
+           cxx_tests=generate_std_tests(test_list))
     test_name = "{header}.version.pass.cpp".format(header=h)
     out_path = os.path.join(macro_test_path, test_name)
     with open(out_path, 'w', newline='\n') as f:

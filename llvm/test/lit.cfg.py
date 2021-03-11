@@ -82,10 +82,6 @@ def get_asan_rtlib():
         return ''
     return found_dylibs[0]
 
-# Define this first. Afterwards, use_default_substitutions will add the rule for
-# expanding FileCheck to the full path.
-config.substitutions.append(('%FileCheckWithUnusedPrefixes%', 
-    'FileCheck --allow-unused-prefixes=true'))
 
 llvm_config.use_default_substitutions()
 
@@ -128,6 +124,12 @@ if config.have_ocamlopt:
 
 opt_viewer_cmd = '%s %s/tools/opt-viewer/opt-viewer.py' % (sys.executable, config.llvm_src_root)
 
+llvm_original_di_preservation_cmd = os.path.join(
+    config.llvm_src_root,'utils', 'llvm-original-di-preservation.py')
+config.substitutions.append(
+    ('%llvm-original-di-preservation', "'%s' %s" % (
+        config.python_executable, llvm_original_di_preservation_cmd)))
+
 llvm_locstats_tool = os.path.join(config.llvm_tools_dir, 'llvm-locstats')
 config.substitutions.append(
     ('%llvm-locstats', "'%s' %s" % (config.python_executable, llvm_locstats_tool)))
@@ -152,8 +154,8 @@ tools = [
 # FIXME: Why do we have both `lli` and `%lli` that do slightly different things?
 tools.extend([
     'dsymutil', 'lli', 'lli-child-target', 'llvm-ar', 'llvm-as',
-    'llvm-addr2line', 'llvm-bcanalyzer', 'llvm-bitcode-strip', 'llvm-config', 
-    'llvm-cov', 'llvm-cxxdump', 'llvm-cvtres', 'llvm-diff', 'llvm-dis', 
+    'llvm-addr2line', 'llvm-bcanalyzer', 'llvm-bitcode-strip', 'llvm-config',
+    'llvm-cov', 'llvm-cxxdump', 'llvm-cvtres', 'llvm-diff', 'llvm-dis',
     'llvm-dwarfdump', 'llvm-dlltool', 'llvm-exegesis', 'llvm-extract',
     'llvm-isel-fuzzer', 'llvm-ifs',
     'llvm-install-name-tool', 'llvm-jitlink', 'llvm-opt-fuzzer', 'llvm-lib',

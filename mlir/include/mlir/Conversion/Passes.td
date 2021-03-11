@@ -89,6 +89,16 @@ def ConvertAsyncToLLVM : Pass<"convert-async-to-llvm", "ModuleOp"> {
 }
 
 //===----------------------------------------------------------------------===//
+// ComplexToLLVM
+//===----------------------------------------------------------------------===//
+
+def ConvertComplexToLLVM : Pass<"convert-complex-to-llvm", "ModuleOp"> {
+  let summary = "Convert Complex dialect to LLVM dialect";
+  let constructor = "mlir::createConvertComplexToLLVMPass()";
+  let dependentDialects = ["LLVM::LLVMDialect"];
+}
+
+//===----------------------------------------------------------------------===//
 // GPUCommon
 //===----------------------------------------------------------------------===//
 
@@ -96,10 +106,6 @@ def GpuToLLVMConversionPass : Pass<"gpu-to-llvm", "ModuleOp"> {
   let summary = "Convert GPU dialect to LLVM dialect with GPU runtime calls";
   let constructor = "mlir::createGpuToLLVMConversionPass()";
   let dependentDialects = ["LLVM::LLVMDialect"];
-  let options = [
-    Option<"gpuBinaryAnnotation", "gpu-binary-annotation", "std::string",
-           "", "Annotation attribute string for GPU binary">,
-  ];
 }
 
 def LowerHostCodeToLLVM : Pass<"lower-host-to-llvm", "ModuleOp"> {
@@ -414,6 +420,50 @@ def ConvertStandardToSPIRV : Pass<"convert-std-to-spirv", "ModuleOp"> {
   let summary = "Convert Standard dialect to SPIR-V dialect";
   let constructor = "mlir::createConvertStandardToSPIRVPass()";
   let dependentDialects = ["spirv::SPIRVDialect"];
+}
+
+//===----------------------------------------------------------------------===//
+// TosaToLinalg
+//===----------------------------------------------------------------------===//
+
+def TosaToLinalgOnTensors : FunctionPass<"tosa-to-linalg-on-tensors"> {
+  let summary = "Lower TOSA to LinAlg on tensors";
+  let description = [{
+    Pass that converts TOSA operations to the equivalent operations using the
+    tensor operations in LinAlg.
+  }];
+
+  let constructor = "tosa::createTosaToLinalgOnTensors()";
+}
+
+//===----------------------------------------------------------------------===//
+// TosaToSCF
+//===----------------------------------------------------------------------===//
+
+def TosaToSCF : Pass<"tosa-to-scf"> {
+  let summary = "Lower TOSA to the SCF dialect";
+  let dependentDialects = ["tensor::TensorDialect, scf::SCFDialect"];
+  let description = [{
+    Pass that converts TOSA's control flow operations to the equivalent SCF
+    operations.
+  }];
+
+  let constructor = "tosa::createTosaToSCF()";
+}
+
+//===----------------------------------------------------------------------===//
+// TosaToStandard
+//===----------------------------------------------------------------------===//
+
+def TosaToStandard : Pass<"tosa-to-standard"> {
+  let summary = "Lower TOSA to the Standard dialect";
+  let dependentDialects = ["StandardOpsDialect"];
+  let description = [{
+    Pass that converts TOSA operations to the equivalent operations using the
+    operations in the Standard dialect.
+  }];
+
+  let constructor = "tosa::createTosaToStandard()";
 }
 
 //===----------------------------------------------------------------------===//

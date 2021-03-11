@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Buffer.h"
+#include "llvm-objcopy.h"
 #include "COFF/COFFObjcopy.h"
 #include "CopyConfig.h"
 #include "ELF/ELFObjcopy.h"
@@ -17,6 +17,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Twine.h"
+#include "llvm/BinaryFormat/ELF.h"
 #include "llvm/Object/Archive.h"
 #include "llvm/Object/ArchiveWriter.h"
 #include "llvm/Object/Binary.h"
@@ -32,6 +33,7 @@
 #include "llvm/Option/Option.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Support/Errc.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/ErrorOr.h"
@@ -40,6 +42,7 @@
 #include "llvm/Support/Memory.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Process.h"
+#include "llvm/Support/SmallVectorMemoryBuffer.h"
 #include "llvm/Support/StringSaver.h"
 #include "llvm/Support/WithColor.h"
 #include "llvm/Support/raw_ostream.h"
@@ -53,6 +56,44 @@
 
 namespace llvm {
 namespace objcopy {
+
+Error writeToFile(StringRef OutputFileName,
+                  std::function<Error(raw_ostream &)> Write, bool KeepOwnership,
+                  unsigned UserID, unsigned GroupID) {
+  if (OutputFileName == "-")
+    return Write(outs());
+
+  if (OutputFileName == "/dev/null") {
+    raw_null_ostream Out;
+    return Write(Out);
+  }
+
+  unsigned Mode = sys::fs::all_read | sys::fs::all_write | sys::fs::all_exe;
+  Expected<sys::fs::TempFile> Temp =
+      sys::fs::TempFile::create(OutputFileName + ".temp-objcopy-%%%%%%", Mode);
+  if (!Temp)
+    return createFileError(OutputFileName, Temp.takeError());
+
+#ifndef _WIN32
+  // Try to preserve file ownership if requested.
+  if (KeepOwnership) {
+    sys::fs::file_status Stat;
+    if (!sys::fs::status(Temp->FD, Stat) && Stat.getUser() == 0)
+      sys::fs::changeFileOwnership(Temp->FD, UserID, GroupID);
+  }
+#endif
+
+  raw_fd_ostream Out(Temp->FD, false);
+
+  if (Error E = Write(Out)) {
+    if (Error DiscardError = Temp->discard())
+      return joinErrors(std::move(E), std::move(DiscardError));
+    return E;
+  }
+  Out.flush();
+
+  return Temp->keep(OutputFileName);
+}
 
 // The name this program was invoked as.
 StringRef ToolName;
@@ -108,20 +149,21 @@ static Error deepWriteArchive(StringRef ArcName,
     return Error::success();
 
   for (const NewArchiveMember &Member : NewMembers) {
-    // Internally, FileBuffer will use the buffer created by
-    // FileOutputBuffer::create, for regular files (that is the case for
-    // deepWriteArchive) FileOutputBuffer::create will return OnDiskBuffer.
+    // For regular files (as is the case for deepWriteArchive),
+    // FileOutputBuffer::create will return OnDiskBuffer.
     // OnDiskBuffer uses a temporary file and then renames it. So in reality
     // there is no inefficiency / duplicated in-memory buffers in this case. For
     // now in-memory buffers can not be completely avoided since
     // NewArchiveMember still requires them even though writeArchive does not
     // write them on disk.
-    FileBuffer FB(Member.MemberName);
-    if (Error E = FB.allocate(Member.Buf->getBufferSize()))
-      return E;
+    Expected<std::unique_ptr<FileOutputBuffer>> FB = FileOutputBuffer::create(
+        Member.MemberName, Member.Buf->getBufferSize(),
+        FileOutputBuffer::F_executable | FileOutputBuffer::F_keep_ownership);
+    if (!FB)
+      return FB.takeError();
     std::copy(Member.Buf->getBufferStart(), Member.Buf->getBufferEnd(),
-              FB.getBufferStart());
-    if (Error E = FB.commit())
+              (*FB)->getBufferStart());
+    if (Error E = (*FB)->commit())
       return E;
   }
   return Error::success();
@@ -130,7 +172,7 @@ static Error deepWriteArchive(StringRef ArcName,
 /// The function executeObjcopyOnIHex does the dispatch based on the format
 /// of the output specified by the command line options.
 static Error executeObjcopyOnIHex(CopyConfig &Config, MemoryBuffer &In,
-                                  Buffer &Out) {
+                                  raw_ostream &Out) {
   // TODO: support output formats other than ELF.
   if (Error E = Config.parseELFConfig())
     return E;
@@ -140,7 +182,7 @@ static Error executeObjcopyOnIHex(CopyConfig &Config, MemoryBuffer &In,
 /// The function executeObjcopyOnRawBinary does the dispatch based on the format
 /// of the output specified by the command line options.
 static Error executeObjcopyOnRawBinary(CopyConfig &Config, MemoryBuffer &In,
-                                       Buffer &Out) {
+                                       raw_ostream &Out) {
   switch (Config.OutputFormat) {
   case FileFormat::ELF:
   // FIXME: Currently, we call elf::executeObjcopyOnRawBinary even if the
@@ -160,7 +202,7 @@ static Error executeObjcopyOnRawBinary(CopyConfig &Config, MemoryBuffer &In,
 /// The function executeObjcopyOnBinary does the dispatch based on the format
 /// of the input binary (ELF, MachO or COFF).
 static Error executeObjcopyOnBinary(CopyConfig &Config, object::Binary &In,
-                                    Buffer &Out) {
+                                    raw_ostream &Out) {
   if (auto *ELFBinary = dyn_cast<object::ELFObjectFileBase>(&In)) {
     if (Error E = Config.parseELFConfig())
       return E;
@@ -197,15 +239,19 @@ createNewArchiveMembers(CopyConfig &Config, const Archive &Ar) {
       return createFileError(Ar.getFileName() + "(" + *ChildNameOrErr + ")",
                              ChildOrErr.takeError());
 
-    MemBuffer MB(ChildNameOrErr.get());
-    if (Error E = executeObjcopyOnBinary(Config, *ChildOrErr->get(), MB))
+    SmallVector<char, 0> Buffer;
+    raw_svector_ostream MemStream(Buffer);
+
+    if (Error E = executeObjcopyOnBinary(Config, *ChildOrErr->get(), MemStream))
       return std::move(E);
 
     Expected<NewArchiveMember> Member =
         NewArchiveMember::getOldMember(Child, Config.DeterministicArchives);
     if (!Member)
       return createFileError(Ar.getFileName(), Member.takeError());
-    Member->Buf = MB.releaseMemoryBuffer();
+
+    Member->Buf = std::make_unique<SmallVectorMemoryBuffer>(
+        std::move(Buffer), ChildNameOrErr.get());
     Member->MemberName = Member->Buf->getBufferIdentifier();
     NewArchiveMembers.push_back(std::move(*Member));
   }
@@ -230,7 +276,7 @@ static Error executeObjcopyOnArchive(CopyConfig &Config,
 
 static Error restoreStatOnFile(StringRef Filename,
                                const sys::fs::file_status &Stat,
-                               bool PreserveDates) {
+                               const CopyConfig &Config) {
   int FD;
 
   // Writing to stdout should not be treated as an error here, just
@@ -242,7 +288,7 @@ static Error restoreStatOnFile(StringRef Filename,
           sys::fs::openFileForWrite(Filename, FD, sys::fs::CD_OpenExisting))
     return createFileError(Filename, EC);
 
-  if (PreserveDates)
+  if (Config.PreserveDates)
     if (auto EC = sys::fs::setLastAccessAndModificationTime(
             FD, Stat.getLastAccessedTime(), Stat.getLastModificationTime()))
       return createFileError(Filename, EC);
@@ -250,17 +296,17 @@ static Error restoreStatOnFile(StringRef Filename,
   sys::fs::file_status OStat;
   if (std::error_code EC = sys::fs::status(FD, OStat))
     return createFileError(Filename, EC);
-  if (OStat.type() == sys::fs::file_type::regular_file)
+  if (OStat.type() == sys::fs::file_type::regular_file) {
+    sys::fs::perms Perm = Stat.permissions();
+    if (Config.InputFilename != Config.OutputFilename)
+      Perm = static_cast<sys::fs::perms>(Perm & ~sys::fs::getUmask() & ~06000);
 #ifdef _WIN32
-    if (auto EC = sys::fs::setPermissions(
-            Filename, static_cast<sys::fs::perms>(Stat.permissions() &
-                                                  ~sys::fs::getUmask())))
+    if (auto EC = sys::fs::setPermissions(Filename, Perm))
 #else
-    if (auto EC = sys::fs::setPermissions(
-            FD, static_cast<sys::fs::perms>(Stat.permissions() &
-                                            ~sys::fs::getUmask())))
+    if (auto EC = sys::fs::setPermissions(FD, Perm))
 #endif
       return createFileError(Filename, EC);
+  }
 
   if (auto EC = sys::Process::SafelyCloseFileDescriptor(FD))
     return createFileError(Filename, EC);
@@ -280,7 +326,7 @@ static Error executeObjcopy(CopyConfig &Config) {
     Stat.permissions(static_cast<sys::fs::perms>(0777));
   }
 
-  using ProcessRawFn = Error (*)(CopyConfig &, MemoryBuffer &, Buffer &);
+  using ProcessRawFn = Error (*)(CopyConfig &, MemoryBuffer &, raw_ostream &);
   ProcessRawFn ProcessRaw;
   switch (Config.InputFormat) {
   case FileFormat::Binary:
@@ -297,8 +343,11 @@ static Error executeObjcopy(CopyConfig &Config) {
     auto BufOrErr = MemoryBuffer::getFileOrSTDIN(Config.InputFilename);
     if (!BufOrErr)
       return createFileError(Config.InputFilename, BufOrErr.getError());
-    FileBuffer FB(Config.OutputFilename);
-    if (Error E = ProcessRaw(Config, *BufOrErr->get(), FB))
+
+    if (Error E = writeToFile(
+            Config.OutputFilename, [&](raw_ostream &OutFile) -> Error {
+              return ProcessRaw(Config, *BufOrErr->get(), OutFile);
+            }))
       return E;
   } else {
     Expected<OwningBinary<llvm::object::Binary>> BinaryOrErr =
@@ -310,21 +359,25 @@ static Error executeObjcopy(CopyConfig &Config) {
       if (Error E = executeObjcopyOnArchive(Config, *Ar))
         return E;
     } else {
-      FileBuffer FB(Config.OutputFilename);
-      if (Error E = executeObjcopyOnBinary(Config,
-                                           *BinaryOrErr.get().getBinary(), FB))
+      if (Error E = writeToFile(
+              Config.OutputFilename,
+              [&](raw_ostream &OutFile) -> Error {
+                return executeObjcopyOnBinary(
+                    Config, *BinaryOrErr.get().getBinary(), OutFile);
+              },
+              Config.InputFilename != "-" &&
+                  Config.InputFilename == Config.OutputFilename,
+              Stat.getUser(), Stat.getGroup()))
         return E;
     }
   }
 
-  if (Error E =
-          restoreStatOnFile(Config.OutputFilename, Stat, Config.PreserveDates))
+  if (Error E = restoreStatOnFile(Config.OutputFilename, Stat, Config))
     return E;
 
   if (!Config.SplitDWO.empty()) {
     Stat.permissions(static_cast<sys::fs::perms>(0666));
-    if (Error E =
-            restoreStatOnFile(Config.SplitDWO, Stat, Config.PreserveDates))
+    if (Error E = restoreStatOnFile(Config.SplitDWO, Stat, Config))
       return E;
   }
 

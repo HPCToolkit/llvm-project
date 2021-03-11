@@ -315,8 +315,8 @@ void *KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SINGLE_COPY_START)(void) {
   if (__kmp_enter_single(gtid, &loc, FALSE))
     return NULL;
 
-// Wait for the first thread to set the copyprivate data pointer,
-// and for all other threads to reach this point.
+    // Wait for the first thread to set the copyprivate data pointer,
+    // and for all other threads to reach this point.
 
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   ompt_frame_t *task_frame;
@@ -548,7 +548,8 @@ __kmp_GOMP_fork_call(ident_t *loc, int gtid, unsigned num_threads,
 		     (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
       ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
           ompt_scope_begin, &(team_info->parallel_data),
-          &(task_info->task_data), ompt_team_size, __kmp_tid_from_gtid(gtid), ompt_task_implicit); // TODO: Can this be ompt_task_initial?
+          &(task_info->task_data), ompt_team_size, __kmp_tid_from_gtid(gtid), 
+	  ompt_task_implicit); // TODO: Can this be ompt_task_initial?
       OMPT_FRAME_CLEAR(frame, exit);
       task_info->thread_num = __kmp_tid_from_gtid(gtid);
     }
@@ -633,6 +634,10 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)(void) {
     OMPT_FRAME_CLEAR(parent_frame, enter);
     OMPT_CLEAR_RETURN_ADDRESS(gtid);
   }
+#endif
+#if 0
+  // johnmc: main had this?
+  );
 #endif
 }
 
@@ -1071,12 +1076,12 @@ LOOP_START_ULL(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_ULL_GUIDED_START),
 LOOP_NEXT_ULL(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_ULL_GUIDED_NEXT), {})
 LOOP_START_ULL(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_ULL_NONMONOTONIC_DYNAMIC_START),
-               kmp_sch_dynamic_chunked)
+    kmp_sch_dynamic_chunked)
 LOOP_NEXT_ULL(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_ULL_NONMONOTONIC_DYNAMIC_NEXT), {})
 LOOP_START_ULL(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_ULL_NONMONOTONIC_GUIDED_START),
-               kmp_sch_guided_chunked)
+    kmp_sch_guided_chunked)
 LOOP_NEXT_ULL(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_ULL_NONMONOTONIC_GUIDED_NEXT), {})
 LOOP_RUNTIME_START_ULL(
@@ -1706,10 +1711,10 @@ PARALLEL_LOOP(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_DYNAMIC),
               kmp_sch_dynamic_chunked, OMPT_LOOP_PRE, OMPT_LOOP_POST)
 PARALLEL_LOOP(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_NONMONOTONIC_GUIDED),
-              kmp_sch_guided_chunked, OMPT_LOOP_PRE, OMPT_LOOP_POST)
+    kmp_sch_guided_chunked, OMPT_LOOP_PRE, OMPT_LOOP_POST)
 PARALLEL_LOOP(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_NONMONOTONIC_DYNAMIC),
-              kmp_sch_dynamic_chunked, OMPT_LOOP_PRE, OMPT_LOOP_POST)
+    kmp_sch_dynamic_chunked, OMPT_LOOP_PRE, OMPT_LOOP_POST)
 PARALLEL_LOOP(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_GUIDED),
               kmp_sch_guided_chunked, OMPT_LOOP_PRE, OMPT_LOOP_POST)
 PARALLEL_LOOP(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_RUNTIME),
@@ -2041,7 +2046,7 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_DOACROSS_ULL_WAIT)(
   va_end(args);
 }
 
-// fn: the function each master thread of new team will call
+// fn: the function each primary thread of new team will call
 // data: argument to fn
 // num_teams, thread_limit: max bounds on respective ICV
 // flags: unused

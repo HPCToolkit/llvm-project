@@ -90,13 +90,17 @@ public:
   /// type identification.
   enum {
     VPValueSC,
+    VPVBlendSC,
     VPVInstructionSC,
     VPVMemoryInstructionSC,
+    VPVPredInstPHI,
     VPVReductionSC,
     VPVReplicateSC,
     VPVWidenSC,
     VPVWidenCallSC,
     VPVWidenGEPSC,
+    VPVWidenIntOrFpIndcutionSC,
+    VPVWidenPHISC,
     VPVWidenSelectSC,
   };
 
@@ -229,6 +233,11 @@ public:
     New->addUser(*this);
   }
 
+  void removeLastOperand() {
+    VPValue *Op = Operands.pop_back_val();
+    Op->removeUser(*this);
+  }
+
   typedef SmallVectorImpl<VPValue *>::iterator operand_iterator;
   typedef SmallVectorImpl<VPValue *>::const_iterator const_operand_iterator;
   typedef iterator_range<operand_iterator> operand_range;
@@ -327,6 +336,8 @@ public:
 
   /// Returns an ArrayRef of the values defined by the VPDef.
   ArrayRef<VPValue *> definedValues() { return DefinedValues; }
+  /// Returns an ArrayRef of the values defined by the VPDef.
+  ArrayRef<VPValue *> definedValues() const { return DefinedValues; }
 
   /// Returns the number of values defined by the VPDef.
   unsigned getNumDefinedValues() const { return DefinedValues.size(); }
@@ -335,6 +346,13 @@ public:
   /// This is used to implement the classof checks. This should not be used
   /// for any other purpose, as the values may change as LLVM evolves.
   unsigned getVPDefID() const { return SubclassID; }
+
+  /// Dump the VPDef to stderr (for debugging).
+  void dump() const;
+
+  /// Each concrete VPDef prints itself.
+  virtual void print(raw_ostream &O, const Twine &Indent,
+                     VPSlotTracker &SlotTracker) const = 0;
 };
 
 class VPlan;
@@ -356,7 +374,7 @@ class VPSlotTracker {
   void assignSlots(const VPlan &Plan);
 
 public:
-  VPSlotTracker(const VPlan *Plan) {
+  VPSlotTracker(const VPlan *Plan = nullptr) {
     if (Plan)
       assignSlots(*Plan);
   }

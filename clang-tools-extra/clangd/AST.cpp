@@ -116,6 +116,7 @@ getQualification(ASTContext &Context, const DeclContext *DestContext,
     if (auto *TD = llvm::dyn_cast<TagDecl>(CurContext)) {
       // There can't be any more tag parents after hitting a namespace.
       assert(!ReachedNS);
+      (void)ReachedNS;
       NNS = NestedNameSpecifier::Create(Context, nullptr, false,
                                         TD->getTypeForDecl());
     } else {
@@ -280,6 +281,52 @@ std::string printNamespaceScope(const DeclContext &DC) {
       if (!NS->isAnonymousNamespace() && !NS->isInlineNamespace())
         return printQualifiedName(*NS) + "::";
   return "";
+}
+
+static llvm::StringRef
+getNameOrErrForObjCInterface(const ObjCInterfaceDecl *ID) {
+  return ID ? ID->getName() : "<<error-type>>";
+}
+
+std::string printObjCMethod(const ObjCMethodDecl &Method) {
+  std::string Name;
+  llvm::raw_string_ostream OS(Name);
+
+  OS << (Method.isInstanceMethod() ? '-' : '+') << '[';
+
+  // Should always be true.
+  if (const ObjCContainerDecl *C =
+          dyn_cast<ObjCContainerDecl>(Method.getDeclContext()))
+    OS << printObjCContainer(*C);
+
+  Method.getSelector().print(OS << ' ');
+  if (Method.isVariadic())
+    OS << ", ...";
+
+  OS << ']';
+  OS.flush();
+  return Name;
+}
+
+std::string printObjCContainer(const ObjCContainerDecl &C) {
+  if (const ObjCCategoryDecl *Category = dyn_cast<ObjCCategoryDecl>(&C)) {
+    std::string Name;
+    llvm::raw_string_ostream OS(Name);
+    const ObjCInterfaceDecl *Class = Category->getClassInterface();
+    OS << getNameOrErrForObjCInterface(Class) << '(' << Category->getName()
+       << ')';
+    OS.flush();
+    return Name;
+  }
+  if (const ObjCCategoryImplDecl *CID = dyn_cast<ObjCCategoryImplDecl>(&C)) {
+    std::string Name;
+    llvm::raw_string_ostream OS(Name);
+    const ObjCInterfaceDecl *Class = CID->getClassInterface();
+    OS << getNameOrErrForObjCInterface(Class) << '(' << CID->getName() << ')';
+    OS.flush();
+    return Name;
+  }
+  return C.getNameAsString();
 }
 
 SymbolID getSymbolID(const Decl *D) {

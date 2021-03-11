@@ -251,6 +251,12 @@ public:
   /// Returns an iterator to the new next element.
   edge_iterator removeEdge(edge_iterator I) { return Edges.erase(I); }
 
+  /// Returns the address of the fixup for the given edge, which is equal to
+  /// this block's address plus the edge's offset.
+  JITTargetAddress getFixupAddress(const Edge &E) const {
+    return getAddress() + E.getOffset();
+  }
+
 private:
   static constexpr uint64_t MaxAlignmentOffset = (1ULL << 57) - 1;
 
@@ -793,7 +799,7 @@ public:
 
   /// Returns the name of this graph (usually the name of the original
   /// underlying MemoryBuffer).
-  const std::string &getName() { return Name; }
+  const std::string &getName() const { return Name; }
 
   /// Returns the target triple for this Graph.
   const Triple &getTargetTriple() const { return TT; }
@@ -830,6 +836,11 @@ public:
 
   /// Create a section with the given name, protection flags, and alignment.
   Section &createSection(StringRef Name, sys::Memory::ProtectionFlags Prot) {
+    assert(llvm::find_if(Sections,
+                         [&](std::unique_ptr<Section> &Sec) {
+                           return Sec->getName() == Name;
+                         }) == Sections.end() &&
+           "Duplicate section name");
     std::unique_ptr<Section> Sec(new Section(Name, Prot, Sections.size()));
     Sections.push_back(std::move(Sec));
     return *Sections.back();
@@ -1001,6 +1012,10 @@ public:
     assert(ExternalSymbols.count(&Sym) && "Symbol is not in the externals set");
     ExternalSymbols.erase(&Sym);
     Addressable &Base = *Sym.Base;
+    assert(llvm::find_if(ExternalSymbols,
+                         [&](Symbol *AS) { return AS->Base == &Base; }) ==
+               ExternalSymbols.end() &&
+           "Base addressable still in use");
     destroySymbol(Sym);
     destroyAddressable(Base);
   }
@@ -1013,6 +1028,10 @@ public:
            "Symbol is not in the absolute symbols set");
     AbsoluteSymbols.erase(&Sym);
     Addressable &Base = *Sym.Base;
+    assert(llvm::find_if(ExternalSymbols,
+                         [&](Symbol *AS) { return AS->Base == &Base; }) ==
+               ExternalSymbols.end() &&
+           "Base addressable still in use");
     destroySymbol(Sym);
     destroyAddressable(Base);
   }
@@ -1223,11 +1242,27 @@ struct PassConfiguration {
   /// Notable use cases: Building GOT, stub, and TLV symbols.
   LinkGraphPassList PostPrunePasses;
 
+  /// Post-allocation passes.
+  ///
+  /// These passes are called on the graph after memory has been allocated and
+  /// defined nodes have been assigned their final addresses, but before the
+  /// context has been notified of these addresses. At this point externals
+  /// have not been resolved, and symbol content has not yet been copied into
+  /// working memory.
+  ///
+  /// Notable use cases: Setting up data structures associated with addresses
+  /// of defined symbols (e.g. a mapping of __dso_handle to JITDylib* for the
+  /// JIT runtime) -- using a PostAllocationPass for this ensures that the
+  /// data structures are in-place before any query for resolved symbols
+  /// can complete.
+  LinkGraphPassList PostAllocationPasses;
+
   /// Pre-fixup passes.
   ///
   /// These passes are called on the graph after memory has been allocated,
-  /// content copied into working memory, and nodes have been assigned their
-  /// final addresses, but before any fixups have been applied.
+  /// content copied into working memory, and all nodes (including externals)
+  /// have been assigned their final addresses, but before any fixups have been
+  /// applied.
   ///
   /// Notable use cases: Late link-time optimizations like GOT and stub
   /// elimination.
@@ -1236,8 +1271,8 @@ struct PassConfiguration {
   /// Post-fixup passes.
   ///
   /// These passes are called on the graph after block contents has been copied
-  /// to working memory, and fixups applied. Graph nodes have been updated to
-  /// their final target vmaddrs.
+  /// to working memory, and fixups applied. Blocks have been updated to point
+  /// to their fixed up content.
   ///
   /// Notable use cases: Testing and validation.
   LinkGraphPassList PostFixupPasses;
