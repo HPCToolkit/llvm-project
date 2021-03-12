@@ -1539,8 +1539,8 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SECTIONS_END)(void) {
     OMPT_FRAME_CLEAR(task_frame, exit);
     OMPT_FRAME_SET(task_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-    OMPT_STORE_RETURN_ADDRESS(gtid);
   }
+  OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
   __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
 #if OMPT_SUPPORT
