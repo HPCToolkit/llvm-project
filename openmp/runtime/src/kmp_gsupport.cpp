@@ -1335,8 +1335,8 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_TASK)(void (*func)(void *), void *data,
     task_frame = &OMPT_CUR_TASK_INFO(__kmp_threads[gtid])->frame;
     OMPT_FRAME_SET(task_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-    OMPT_STORE_RETURN_ADDRESS(gtid);
   }
+  OMPT_STORE_RETURN_ADDRESS(gtid);
 
 #endif
 
@@ -1382,8 +1382,8 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_TASK)(void (*func)(void *), void *data,
       OMPT_FRAME_SET(child_task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
 
-      OMPT_STORE_RETURN_ADDRESS(gtid);
     }
+    OMPT_STORE_RETURN_ADDRESS(gtid);
 
 #endif
     if (gomp_flags & KMP_GOMP_TASK_DEPENDS_FLAG) {
