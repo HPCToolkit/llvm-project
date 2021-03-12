@@ -1576,8 +1576,8 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL)(void (*task)(void *),
     parent_frame = &OMPT_CUR_TASK_INFO(__kmp_threads[gtid])->frame;
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-    OMPT_STORE_RETURN_ADDRESS(gtid);
   }
+  OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
 
   __kmp_GOMP_fork_call(&loc, gtid, num_threads, flags, task,
@@ -1594,11 +1594,7 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL)(void (*task)(void *),
 
   task(data);
 
-#if OMPT_SUPPORT
-    OMPT_STORE_RETURN_ADDRESS(gtid);
-#endif
-
-    KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)();
+  KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)();
 
 #if OMPT_SUPPORT
   if (ompt_enabled.enabled) {
