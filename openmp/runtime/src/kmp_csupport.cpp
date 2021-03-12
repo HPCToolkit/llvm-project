@@ -569,9 +569,10 @@ void __kmpc_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
       ompt_frame_t *task_frame = &task_info->frame;
       OMPT_FRAME_SET(task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
 		     (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
+      int invoker = (loc ? ompt_parallel_invoker_runtime : ompt_parallel_invoker_program);
       ompt_callbacks.ompt_callback(ompt_callback_parallel_end)(
           &(serial_team->t.ompt_team_info.parallel_data), parent_task_data,
-          ompt_parallel_invoker_program | ompt_parallel_team,
+          invoker | ompt_parallel_team,
           OMPT_LOAD_RETURN_ADDRESS(global_tid));
       OMPT_FRAME_CLEAR(task_frame, exit);
     }
