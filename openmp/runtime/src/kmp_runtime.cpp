@@ -1139,11 +1139,12 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     parent_task_info->frame.enter_frame.ptr = OMPT_GET_FRAME_ADDRESS(0);
     if (ompt_enabled.ompt_callback_parallel_begin) {
       int team_size = 1;
-
+      // FIXME VI3: What should be the value of invoker?
+      int invoker = (loc ? ompt_parallel_invoker_runtime : ompt_parallel_invoker_program);
       ompt_callbacks.ompt_callback(ompt_callback_parallel_begin)(
           &(parent_task_info->task_data), &(parent_task_info->frame),
           &ompt_parallel_data, team_size,
-          ompt_parallel_invoker_program | ompt_parallel_team, codeptr);
+          invoker | ompt_parallel_team, codeptr);
     }
   }
 #endif // OMPT_SUPPORT
