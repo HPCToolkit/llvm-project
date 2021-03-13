@@ -1355,6 +1355,17 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_TASK)(void (*func)(void *), void *data,
       __kmpc_omp_task(&loc, gtid, task);
     }
   } else {
+
+    if (gomp_flags & KMP_GOMP_TASK_DEPENDS_FLAG) {
+      KMP_ASSERT(depend);
+      kmp_gomp_depends_info_t gomp_depends(depend);
+      kmp_int32 ndeps = gomp_depends.get_num_deps();
+      kmp_depend_info_t dep_list[ndeps];
+      for (kmp_int32 i = 0; i < ndeps; i++)
+        dep_list[i] = gomp_depends.get_kmp_depend(i);
+      __kmpc_omp_wait_deps(&loc, gtid, ndeps, dep_list, 0, NULL);
+    }
+
     __kmpc_omp_task_begin_if0(&loc, gtid, task);
 
 #if OMPT_SUPPORT
@@ -1376,25 +1387,14 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_TASK)(void (*func)(void *), void *data,
       // update current thread info
       thread_info->wait_id = 0;
       thread_info->state = ompt_state_work_parallel;
-
       child_task_frame = &OMPT_CUR_TASK_INFO(__kmp_threads[gtid])->frame;
 
       OMPT_FRAME_SET(child_task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
-		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-
+		    (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
     }
     OMPT_STORE_RETURN_ADDRESS(gtid);
 
 #endif
-    if (gomp_flags & KMP_GOMP_TASK_DEPENDS_FLAG) {
-      KMP_ASSERT(depend);
-      kmp_gomp_depends_info_t gomp_depends(depend);
-      kmp_int32 ndeps = gomp_depends.get_num_deps();
-      kmp_depend_info_t dep_list[ndeps];
-      for (kmp_int32 i = 0; i < ndeps; i++)
-        dep_list[i] = gomp_depends.get_kmp_depend(i);
-      __kmpc_omp_wait_deps(&loc, gtid, ndeps, dep_list, 0, NULL);
-    }
 
     func(data);
 
@@ -1407,6 +1407,7 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_TASK)(void (*func)(void *), void *data,
 #endif
 
     __kmpc_omp_task_complete_if0(&loc, gtid, task);
+
   }
 #if OMPT_SUPPORT
   if (ompt_enabled.enabled) {
