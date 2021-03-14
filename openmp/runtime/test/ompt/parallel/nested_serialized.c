@@ -1,6 +1,6 @@
 // RUN: %libomp-compile-and-run | FileCheck %s
 // RUN: %libomp-compile-and-run | %sort-threads | FileCheck --check-prefix=THREADS %s
-// REQUIRES: omp
+// REQUIRES: ompt
 // UNSUPPORTED: gcc-4, gcc-5, gcc-6, gcc-7
 #include "callback.h"
 #include <omp.h>
