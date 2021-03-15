@@ -80,8 +80,6 @@ inline void *__ompt_load_return_address(int gtid) {
   return return_address;
 }
 
-// vi3-merge: Should we use this or implementation based on guard?
-// FIXME: I'm not sure that this is used right inside kmp_gsupport.cpp
 /*
 #define OMPT_STORE_RETURN_ADDRESS(gtid) \
   if (ompt_enabled.enabled && gtid >= 0 && __kmp_threads[gtid] &&              \
