@@ -1,0 +1,13 @@
+0: NULL_POINTER=(nil)
+ompt_event_implicit_task_begin: task_id=281474976710657, memory_addr=(nil), memory_size=0, result=0 
+ompt_event_implicit_task_begin: task_id=281474976710658, memory_addr=(nil), memory_size=0, result=0 
+ompt_event_task_create: task_id=281474976710659
+ompt_event_task_create: task_id=281474976710660
+ompt_event_task_schedule: task_id=281474976710658, memory_addr=0x82ab54, memory_size=27, result=1
+ompt_event_task_schedule: task_id=281474976710660, memory_addr=0x82ab54, memory_size=27, result=1
+ompt_event_implicit_task_begin: task_id=562949953421313, memory_addr=(nil), memory_size=0, result=0 
+ompt_event_task_schedule: task_id=562949953421313, memory_addr=0x82ae54, memory_size=35, result=1
+ompt_event_task_schedule: task_id=281474976710659, memory_addr=0x82ae54, memory_size=35, result=1
+ompt_event_implicit_task_end: task_id=562949953421313, memory_addr=(nil), memory_size=0, result=0 
+ompt_event_implicit_task_end: task_id=281474976710658, memory_addr=(nil), memory_size=0, result=0 
+ompt_event_implicit_task_end: task_id=281474976710657, memory_addr=(nil), memory_size=0, result=0 

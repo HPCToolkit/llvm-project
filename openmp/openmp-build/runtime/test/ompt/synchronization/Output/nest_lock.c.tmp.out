@@ -1,0 +1,26 @@
+0: NULL_POINTER=(nil)
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: ompt_event_parallel_begin: parent_task_id=281474976710659, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7ffcfc4aabe0, parallel_id=281474976710661, requested_team_size=1, codeptr_ra=0x402c5d, invoker=2
+281474976710658: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=281474976710662, team_size=1, thread_num=0
+281474976710658: task level 0: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7ffcfc4aabe0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_implicit_task_end: parallel_id=0, task_id=281474976710662, team_size=1, thread_num=0
+281474976710658: ompt_event_parallel_end: parallel_id=281474976710661, task_id=281474976710659, invoker=2, codeptr_ra=0x402c5d
+281474976710658: &nest_lock: 140724541238264
+281474976710658: ompt_event_init_nest_lock: wait_id=140724541238264, hint=0, impl=2, codeptr_ra=0x402c8e 
+281474976710658: fuzzy_address=0x402b or 0x402c or 0x402d or 0x402e (0x402c8f)
+281474976710658: ompt_event_wait_nest_lock: wait_id=140724541238264, hint=0, impl=2, codeptr_ra=0x402d05 
+281474976710658: ompt_event_acquired_nest_lock_first: wait_id=140724541238264, codeptr_ra=0x402d05 
+281474976710658: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d06)
+281474976710658: ompt_event_wait_nest_lock: wait_id=140724541238264, hint=0, impl=2, codeptr_ra=0x402d7c 
+281474976710658: ompt_event_acquired_nest_lock_next: wait_id=140724541238264, codeptr_ra=0x402d7c 
+281474976710658: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d7d)
+281474976710658: ompt_event_release_nest_lock_prev: wait_id=140724541238264, codeptr_ra=0x402df3 
+281474976710658: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402df4)
+281474976710658: ompt_event_release_nest_lock_last: wait_id=140724541238264, codeptr_ra=0x402e6a 
+281474976710658: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e6b)
+281474976710658: ompt_event_destroy_nest_lock: wait_id=140724541238264, codeptr_ra=0x402ee1 
+281474976710658: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402ee2)
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+0: ompt_event_runtime_shutdown

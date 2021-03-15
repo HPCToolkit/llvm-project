@@ -1,0 +1,308 @@
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WFORMAT_PEDANTIC_FLAG failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_d5d40/fast && /usr/bin/gmake -f CMakeFiles/cmTC_d5d40.dir/build.make CMakeFiles/cmTC_d5d40.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_d5d40.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WFORMAT_PEDANTIC_FLAG   -Wformat-pedantic -o CMakeFiles/cmTC_d5d40.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+g++: error: unrecognized command line option '-Wformat-pedantic'; did you mean '-Wno-pedantic'?
+gmake[1]: *** [CMakeFiles/cmTC_d5d40.dir/build.make:66: CMakeFiles/cmTC_d5d40.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_d5d40/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C SOURCE FILE Test LIBOMP_HAVE_MMIC_FLAG failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_2c75f/fast && /usr/bin/gmake -f CMakeFiles/cmTC_2c75f.dir/build.make CMakeFiles/cmTC_2c75f.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_2c75f.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_MMIC_FLAG -mmic   -mmic -o CMakeFiles/cmTC_2c75f.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+gcc: error: unrecognized command line option '-mmic'; did you mean '-fpic'?
+gcc: error: unrecognized command line option '-mmic'; did you mean '-fpic'?
+gmake[1]: *** [CMakeFiles/cmTC_2c75f.dir/build.make:66: CMakeFiles/cmTC_2c75f.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_2c75f/fast] Error 2
+
+
+Source file was:
+int main(void) { return 0; }
+Performing C SOURCE FILE Test LIBOMP_HAVE_M32_FLAG failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_cd942/fast && /usr/bin/gmake -f CMakeFiles/cmTC_cd942.dir/build.make CMakeFiles/cmTC_cd942.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_cd942.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_M32_FLAG -m32   -m32 -o CMakeFiles/cmTC_cd942.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_cd942
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cd942.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_M32_FLAG -m32    CMakeFiles/cmTC_cd942.dir/src.c.o  -o cmTC_cd942 
+/usr/bin/ld: cannot find crt1.o: No such file or directory
+/usr/bin/ld: cannot find crti.o: No such file or directory
+/usr/bin/ld: cannot find /lib/libgcc_s.so.1
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_cd942.dir/build.make:87: cmTC_cd942] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_cd942/fast] Error 2
+
+
+Source file was:
+int main(void) { return 0; }
+Determining if the shm_open exist failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_37254/fast && /usr/bin/gmake -f CMakeFiles/cmTC_37254.dir/build.make CMakeFiles/cmTC_37254.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_37254.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized    -o CMakeFiles/cmTC_37254.dir/CheckSymbolExists.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_37254
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_37254.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized     CMakeFiles/cmTC_37254.dir/CheckSymbolExists.c.o  -o cmTC_37254 
+CMakeFiles/cmTC_37254.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x16): undefined reference to `shm_open'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_37254.dir/build.make:87: cmTC_37254] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_37254/fast] Error 2
+
+
+File /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/mman.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef shm_open
+  return ((int*)(&shm_open))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8df69/fast && /usr/bin/gmake -f CMakeFiles/cmTC_8df69.dir/build.make CMakeFiles/cmTC_8df69.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_8df69.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_8df69.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_8df69
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8df69.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCMAKE_HAVE_LIBC_PTHREAD    CMakeFiles/cmTC_8df69.dir/src.c.o  -o cmTC_8df69 
+CMakeFiles/cmTC_8df69.dir/src.c.o: In function `main':
+src.c:(.text+0x2d): undefined reference to `pthread_create'
+src.c:(.text+0x39): undefined reference to `pthread_detach'
+src.c:(.text+0x4a): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_8df69.dir/build.make:87: cmTC_8df69] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_8df69/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_20f00/fast && /usr/bin/gmake -f CMakeFiles/cmTC_20f00.dir/build.make CMakeFiles/cmTC_20f00.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_20f00.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_20f00.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+Linking C executable cmTC_20f00
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_20f00.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_20f00.dir/CheckFunctionExists.c.o  -o cmTC_20f00 -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_20f00.dir/build.make:87: cmTC_20f00] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_20f00/fast] Error 2
+
+
+
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_ATTRIBUTE_WAITPKG failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f9f1a/fast && /usr/bin/gmake -f CMakeFiles/cmTC_f9f1a.dir/build.make CMakeFiles/cmTC_f9f1a.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_f9f1a.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_ATTRIBUTE_WAITPKG   -o CMakeFiles/cmTC_f9f1a.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx:2:38: error: attribute(target("waitpkg")) is unknown
+                             int main() {return 0;}
+                                      ^
+gmake[1]: *** [CMakeFiles/cmTC_f9f1a.dir/build.make:66: CMakeFiles/cmTC_f9f1a.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_f9f1a/fast] Error 2
+
+
+Source file was:
+__attribute__((target("waitpkg")))
+                            int main() {return 0;}
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WAITPKG_INTRINSICS failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e9d80/fast && /usr/bin/gmake -f CMakeFiles/cmTC_e9d80.dir/build.make CMakeFiles/cmTC_e9d80.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_e9d80.dir/src.cxx.o
+/usr/bin/g++  -DATTRIBUTE_RTM -DIMMINTRIN_H  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WAITPKG_INTRINSICS   -o CMakeFiles/cmTC_e9d80.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx: In function ‘int __kmp_umwait(unsigned int, long long unsigned int)’:
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx:12:16: error: ‘_umwait’ was not declared in this scope
+         return _umwait(hint, counter);
+                ^~~~~~~
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx:12:16: note: suggested alternative: ‘_mm_mwait’
+         return _umwait(hint, counter);
+                ^~~~~~~
+                _mm_mwait
+gmake[1]: *** [CMakeFiles/cmTC_e9d80.dir/build.make:66: CMakeFiles/cmTC_e9d80.dir/src.cxx.o] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_e9d80/fast] Error 2
+
+
+Source file was:
+// check for attribute and wait pkg intrinsics
+      #ifdef IMMINTRIN_H
+      #include <immintrin.h>
+      #endif
+      #ifdef INTRIN_H
+      #include <intrin.h>
+      #endif
+      #ifdef ATTRIBUTE_WAITPKG
+      __attribute__((target("waitpkg")))
+      #endif
+      static inline int __kmp_umwait(unsigned hint, unsigned long long counter) {
+        return _umwait(hint, counter);
+      }
+      int main() { int a = __kmp_umwait(0, 1000); return a; }
+Performing C SOURCE FILE Test LIBOMP_HAVE_PSAPI failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bda60/fast && /usr/bin/gmake -f CMakeFiles/cmTC_bda60.dir/build.make CMakeFiles/cmTC_bda60.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_bda60.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_PSAPI   -o CMakeFiles/cmTC_bda60.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c:1:10: fatal error: windows.h: No such file or directory
+ #include <windows.h>
+          ^~~~~~~~~~~
+compilation terminated.
+gmake[1]: *** [CMakeFiles/cmTC_bda60.dir/build.make:66: CMakeFiles/cmTC_bda60.dir/src.c.o] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_bda60/fast] Error 2
+
+
+Source file was:
+#include <windows.h>
+  #include <psapi.h>
+  int main(int artc, char** argv) {
+    return EnumProcessModules(NULL, NULL, 0, NULL);
+  }
+Determining if the function __atomic_load_1 exists failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c860d/fast && /usr/bin/gmake -f CMakeFiles/cmTC_c860d.dir/build.make CMakeFiles/cmTC_c860d.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c860d.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1   -o CMakeFiles/cmTC_c860d.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function ‘__atomic_load_1’ [-Wbuiltin-declaration-mismatch]
+/projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_c860d
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c860d.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1    CMakeFiles/cmTC_c860d.dir/CheckFunctionExists.c.o  -o cmTC_c860d 
+CMakeFiles/cmTC_c860d.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `__atomic_load_1'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_c860d.dir/build.make:87: cmTC_c860d] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_c860d/fast] Error 2
+
+
+
+Determining if the function __atomic_load_1 exists in the atomic failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_6e9b4/fast && /usr/bin/gmake -f CMakeFiles/cmTC_6e9b4.dir/build.make CMakeFiles/cmTC_6e9b4.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_6e9b4.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1   -o CMakeFiles/cmTC_6e9b4.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function ‘__atomic_load_1’ [-Wbuiltin-declaration-mismatch]
+/projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_6e9b4
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6e9b4.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1    CMakeFiles/cmTC_6e9b4.dir/CheckFunctionExists.c.o  -o cmTC_6e9b4 -latomic 
+/usr/bin/ld: cannot find /usr/lib64/libatomic.so.1.2.0
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_6e9b4.dir/build.make:87: cmTC_6e9b4] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_6e9b4/fast] Error 2
+
+
+
+Determining if the function __atomic_load_1 exists failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a43f1/fast && /usr/bin/gmake -f CMakeFiles/cmTC_a43f1.dir/build.make CMakeFiles/cmTC_a43f1.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_a43f1.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1   -o CMakeFiles/cmTC_a43f1.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function ‘__atomic_load_1’ [-Wbuiltin-declaration-mismatch]
+/projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_a43f1
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a43f1.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1    CMakeFiles/cmTC_a43f1.dir/CheckFunctionExists.c.o  -o cmTC_a43f1 
+CMakeFiles/cmTC_a43f1.dir/CheckFunctionExists.c.o: In function `main':
+CheckFunctionExists.c:(.text+0x10): undefined reference to `__atomic_load_1'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_a43f1.dir/build.make:87: cmTC_a43f1] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_a43f1/fast] Error 2
+
+
+
+Determining if the function __atomic_load_1 exists in the atomic failed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_45731/fast && /usr/bin/gmake -f CMakeFiles/cmTC_45731.dir/build.make CMakeFiles/cmTC_45731.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_45731.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1   -o CMakeFiles/cmTC_45731.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function ‘__atomic_load_1’ [-Wbuiltin-declaration-mismatch]
+/projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_45731
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_45731.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=__atomic_load_1    CMakeFiles/cmTC_45731.dir/CheckFunctionExists.c.o  -o cmTC_45731 -latomic 
+/usr/bin/ld: cannot find /usr/lib64/libatomic.so.1.2.0
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [CMakeFiles/cmTC_45731.dir/build.make:87: cmTC_45731] Error 1
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+gmake: *** [Makefile:121: cmTC_45731/fast] Error 2
+
+
+

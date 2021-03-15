@@ -1,0 +1,22 @@
+0: NULL_POINTER=(nil)
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: ompt_event_init_lock: wait_id=140728094290280, hint=0, impl=2, codeptr_ra=0x402c40 
+281474976710658: fuzzy_address=0x402b or 0x402c or 0x402d or 0x402e (0x402c41)
+281474976710658: ompt_event_wait_lock: wait_id=140728094290280, hint=0, impl=2, codeptr_ra=0x402cb7 
+281474976710658: ompt_event_acquired_lock: wait_id=140728094290280, codeptr_ra=0x402cb7 
+281474976710658: fuzzy_address=0x402b or 0x402c or 0x402d or 0x402e (0x402cb8)
+281474976710658: ompt_event_release_lock: wait_id=140728094290280, codeptr_ra=0x402d2e 
+281474976710658: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d2f)
+281474976710658: ompt_event_wait_lock: wait_id=140728094290280, hint=0, impl=2, codeptr_ra=0x402da5 
+281474976710658: ompt_event_acquired_lock: wait_id=140728094290280, codeptr_ra=0x402da5 
+281474976710658: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402da6)
+281474976710658: ompt_event_wait_lock: wait_id=140728094290280, hint=0, impl=2, codeptr_ra=0x402e1c 
+281474976710658: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e1d)
+281474976710658: ompt_event_release_lock: wait_id=140728094290280, codeptr_ra=0x402e93 
+281474976710658: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e94)
+281474976710658: ompt_event_destroy_lock: wait_id=140728094290280, codeptr_ra=0x402f0a 
+281474976710658: fuzzy_address=0x402e or 0x402f or 0x4030 or 0x4031 (0x402f0b)
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+0: ompt_event_runtime_shutdown

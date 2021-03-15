@@ -1,0 +1,5 @@
+0: NULL_POINTER=(nil)
+0: fuzzy_address=0x400c or 0x400d or 0x400e or 0x400f (0x400d88)
+0: current_address=0x400d55 or 0x400d52 for non-void functions
+0: current_address=0x400d55 or 0x400d52 for non-void functions
+0: x=1

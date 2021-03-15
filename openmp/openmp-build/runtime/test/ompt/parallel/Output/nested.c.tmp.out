@@ -1,0 +1,424 @@
+0: NULL_POINTER=(nil)
+0: ompt_event_runtime_shutdown
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: __builtin_frame_address(0)=0x7fff7ad2ef30
+281474976710658: ompt_event_parallel_begin: parent_task_id=281474976710659, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7fff7ad2eee0, parallel_id=281474976710661, requested_team_size=4, codeptr_ra=0x402bf1, invoker=2
+281474976710658: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=281474976710662, team_size=4, thread_num=0
+281474976710658: __builtin_frame_address(1)=0x7fff7ad2eee0
+281474976710658: task level 0: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: task level 1: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+281474976710658: __builtin_frame_address(0)=0x7fff7ad2ee80
+281474976710658: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=281474976710662, codeptr_ra=0x402cf0
+281474976710658: task level 0: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=0x7fff7ad2ee30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=281474976710662, codeptr_ra=0x402cf0
+281474976710658: ompt_event_wait_barrier_end: parallel_id=281474976710661, task_id=281474976710662, codeptr_ra=0x402cf0
+281474976710658: ompt_event_barrier_end: parallel_id=281474976710661, task_id=281474976710662, codeptr_ra=0x402cf0
+281474976710658: ompt_event_parallel_begin: parent_task_id=281474976710662, parent_task_frame.exit=0x7fff7ad2eee0, parent_task_frame.reenter=0x7fff7ad2ee30, parallel_id=281474976710663, requested_team_size=4, codeptr_ra=0x402d16, invoker=2
+281474976710658: ompt_event_implicit_task_begin: parallel_id=281474976710663, task_id=281474976710664, team_size=4, thread_num=0
+281474976710658: __builtin_frame_address(1)=0x7fff7ad2ee30
+281474976710658: task level 0: parallel_id=281474976710663, task_id=281474976710664, exit_frame=0x7fff7ad2ee30, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: task level 1: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=0x7fff7ad2ee30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+281474976710658: __builtin_frame_address(0)=0x7fff7ad2edd0
+281474976710658: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=281474976710664, codeptr_ra=0x402e47
+281474976710658: task level 0: parallel_id=281474976710663, task_id=281474976710664, exit_frame=0x7fff7ad2ee30, reenter_frame=0x7fff7ad2ed90, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=281474976710664, codeptr_ra=0x402e47
+281474976710658: ompt_event_wait_barrier_end: parallel_id=281474976710663, task_id=281474976710664, codeptr_ra=0x402e47
+281474976710658: ompt_event_barrier_end: parallel_id=281474976710663, task_id=281474976710664, codeptr_ra=0x402e47
+281474976710658: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+281474976710658: task level 0: parallel_id=281474976710663, task_id=281474976710664, exit_frame=0x7fff7ad2ee30, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=281474976710664, codeptr_ra=0x402d16
+281474976710658: task level 0: parallel_id=281474976710663, task_id=281474976710664, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=281474976710664, codeptr_ra=0x402d16
+281474976710658: ompt_event_wait_barrier_end: parallel_id=0, task_id=281474976710664, codeptr_ra=0x402d16
+281474976710658: ompt_event_barrier_end: parallel_id=0, task_id=281474976710664, codeptr_ra=0x402d16
+281474976710658: ompt_event_implicit_task_end: parallel_id=0, task_id=281474976710664, team_size=4, thread_num=0
+281474976710658: ompt_event_parallel_end: parallel_id=281474976710663, task_id=281474976710662, invoker=2, codeptr_ra=0x402d16
+281474976710658: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d17)
+281474976710658: task level 0: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=281474976710662, codeptr_ra=0x402bf1
+281474976710658: task level 0: parallel_id=281474976710661, task_id=281474976710662, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=281474976710662, codeptr_ra=0x402bf1
+281474976710658: ompt_event_wait_barrier_end: parallel_id=0, task_id=281474976710662, codeptr_ra=0x402bf1
+281474976710658: ompt_event_barrier_end: parallel_id=0, task_id=281474976710662, codeptr_ra=0x402bf1
+281474976710658: ompt_event_implicit_task_end: parallel_id=0, task_id=281474976710662, team_size=4, thread_num=0
+281474976710658: ompt_event_parallel_end: parallel_id=281474976710661, task_id=281474976710659, invoker=2, codeptr_ra=0x402bf1
+281474976710658: fuzzy_address=0x402a or 0x402b or 0x402c or 0x402d (0x402bf2)
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+562949953421313: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=562949953421313
+562949953421313: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=562949953421314, team_size=4, thread_num=1
+562949953421313: __builtin_frame_address(1)=0x7fd9812d0ef0
+562949953421313: task level 0: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+562949953421313: task level 1: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+562949953421313: __builtin_frame_address(0)=0x7fd9812d0ea0
+562949953421313: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=562949953421314, codeptr_ra=0x402cf0
+562949953421313: task level 0: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=0x7fd9812d0e50, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+562949953421313: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=562949953421314, codeptr_ra=0x402cf0
+562949953421313: ompt_event_wait_barrier_end: parallel_id=281474976710661, task_id=562949953421314, codeptr_ra=0x402cf0
+562949953421313: ompt_event_barrier_end: parallel_id=281474976710661, task_id=562949953421314, codeptr_ra=0x402cf0
+562949953421313: ompt_event_parallel_begin: parent_task_id=562949953421314, parent_task_frame.exit=0x7fd9812d0ef0, parent_task_frame.reenter=0x7fd9812d0e50, parallel_id=562949953421315, requested_team_size=4, codeptr_ra=0x402d16, invoker=2
+562949953421313: ompt_event_implicit_task_begin: parallel_id=562949953421315, task_id=562949953421316, team_size=4, thread_num=0
+562949953421313: __builtin_frame_address(1)=0x7fd9812d0e50
+562949953421313: task level 0: parallel_id=562949953421315, task_id=562949953421316, exit_frame=0x7fd9812d0e50, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+562949953421313: task level 1: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=0x7fd9812d0e50, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+562949953421313: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+562949953421313: __builtin_frame_address(0)=0x7fd9812d0df0
+562949953421313: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=562949953421316, codeptr_ra=0x402e47
+562949953421313: task level 0: parallel_id=562949953421315, task_id=562949953421316, exit_frame=0x7fd9812d0e50, reenter_frame=0x7fd9812d0db0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+562949953421313: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=562949953421316, codeptr_ra=0x402e47
+562949953421313: ompt_event_wait_barrier_end: parallel_id=562949953421315, task_id=562949953421316, codeptr_ra=0x402e47
+562949953421313: ompt_event_barrier_end: parallel_id=562949953421315, task_id=562949953421316, codeptr_ra=0x402e47
+562949953421313: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+562949953421313: task level 0: parallel_id=562949953421315, task_id=562949953421316, exit_frame=0x7fd9812d0e50, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+562949953421313: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=562949953421316, codeptr_ra=0x402d16
+562949953421313: task level 0: parallel_id=562949953421315, task_id=562949953421316, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+562949953421313: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=562949953421316, codeptr_ra=0x402d16
+562949953421313: ompt_event_wait_barrier_end: parallel_id=0, task_id=562949953421316, codeptr_ra=0x402d16
+562949953421313: ompt_event_barrier_end: parallel_id=0, task_id=562949953421316, codeptr_ra=0x402d16
+562949953421313: ompt_event_implicit_task_end: parallel_id=0, task_id=562949953421316, team_size=4, thread_num=0
+562949953421313: ompt_event_parallel_end: parallel_id=562949953421315, task_id=562949953421314, invoker=2, codeptr_ra=0x402d16
+562949953421313: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d17)
+562949953421313: task level 0: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+562949953421313: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=562949953421314, codeptr_ra=0x402bf1
+562949953421313: task level 0: parallel_id=281474976710661, task_id=562949953421314, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+562949953421313: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=562949953421314, codeptr_ra=0x402bf1
+562949953421313: ompt_event_wait_barrier_end: parallel_id=0, task_id=562949953421314, codeptr_ra=(nil)
+562949953421313: ompt_event_barrier_end: parallel_id=0, task_id=562949953421314, codeptr_ra=(nil)
+562949953421313: ompt_event_implicit_task_end: parallel_id=0, task_id=562949953421314, team_size=0, thread_num=1
+562949953421313: ompt_event_thread_end: thread_id=562949953421313
+844424930131969: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=844424930131969
+844424930131969: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=844424930131970, team_size=4, thread_num=2
+844424930131969: __builtin_frame_address(1)=0x7fd980acef70
+844424930131969: task level 0: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+844424930131969: task level 1: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+844424930131969: __builtin_frame_address(0)=0x7fd980acef20
+844424930131969: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=844424930131970, codeptr_ra=0x402cf0
+844424930131969: task level 0: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=0x7fd980aceed0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+844424930131969: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=844424930131970, codeptr_ra=0x402cf0
+844424930131969: ompt_event_wait_barrier_end: parallel_id=281474976710661, task_id=844424930131970, codeptr_ra=0x402cf0
+844424930131969: ompt_event_barrier_end: parallel_id=281474976710661, task_id=844424930131970, codeptr_ra=0x402cf0
+844424930131969: ompt_event_parallel_begin: parent_task_id=844424930131970, parent_task_frame.exit=0x7fd980acef70, parent_task_frame.reenter=0x7fd980aceed0, parallel_id=844424930131971, requested_team_size=4, codeptr_ra=0x402d16, invoker=2
+844424930131969: ompt_event_implicit_task_begin: parallel_id=844424930131971, task_id=844424930131972, team_size=4, thread_num=0
+844424930131969: __builtin_frame_address(1)=0x7fd980aceed0
+844424930131969: task level 0: parallel_id=844424930131971, task_id=844424930131972, exit_frame=0x7fd980aceed0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+844424930131969: task level 1: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=0x7fd980aceed0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+844424930131969: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+844424930131969: __builtin_frame_address(0)=0x7fd980acee70
+844424930131969: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=844424930131972, codeptr_ra=0x402e47
+844424930131969: task level 0: parallel_id=844424930131971, task_id=844424930131972, exit_frame=0x7fd980aceed0, reenter_frame=0x7fd980acee30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+844424930131969: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=844424930131972, codeptr_ra=0x402e47
+844424930131969: ompt_event_wait_barrier_end: parallel_id=844424930131971, task_id=844424930131972, codeptr_ra=0x402e47
+844424930131969: ompt_event_barrier_end: parallel_id=844424930131971, task_id=844424930131972, codeptr_ra=0x402e47
+844424930131969: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+844424930131969: task level 0: parallel_id=844424930131971, task_id=844424930131972, exit_frame=0x7fd980aceed0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+844424930131969: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=844424930131972, codeptr_ra=0x402d16
+844424930131969: task level 0: parallel_id=844424930131971, task_id=844424930131972, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+844424930131969: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=844424930131972, codeptr_ra=0x402d16
+844424930131969: ompt_event_wait_barrier_end: parallel_id=0, task_id=844424930131972, codeptr_ra=0x402d16
+844424930131969: ompt_event_barrier_end: parallel_id=0, task_id=844424930131972, codeptr_ra=0x402d16
+844424930131969: ompt_event_implicit_task_end: parallel_id=0, task_id=844424930131972, team_size=4, thread_num=0
+844424930131969: ompt_event_parallel_end: parallel_id=844424930131971, task_id=844424930131970, invoker=2, codeptr_ra=0x402d16
+844424930131969: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d17)
+844424930131969: task level 0: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+844424930131969: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=844424930131970, codeptr_ra=0x402bf1
+844424930131969: task level 0: parallel_id=281474976710661, task_id=844424930131970, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+844424930131969: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=844424930131970, codeptr_ra=0x402bf1
+844424930131969: ompt_event_wait_barrier_end: parallel_id=0, task_id=844424930131970, codeptr_ra=(nil)
+844424930131969: ompt_event_barrier_end: parallel_id=0, task_id=844424930131970, codeptr_ra=(nil)
+844424930131969: ompt_event_implicit_task_end: parallel_id=0, task_id=844424930131970, team_size=0, thread_num=2
+844424930131969: ompt_event_thread_end: thread_id=844424930131969
+1125899906842625: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=1125899906842625
+1125899906842625: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=1125899906842626, team_size=4, thread_num=3
+1125899906842625: __builtin_frame_address(1)=0x7fd97bffdf70
+1125899906842625: task level 0: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1125899906842625: task level 1: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+1125899906842625: __builtin_frame_address(0)=0x7fd97bffdf20
+1125899906842625: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=1125899906842626, codeptr_ra=0x402cf0
+1125899906842625: task level 0: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=0x7fd97bffded0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1125899906842625: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=1125899906842626, codeptr_ra=0x402cf0
+1125899906842625: ompt_event_wait_barrier_end: parallel_id=281474976710661, task_id=1125899906842626, codeptr_ra=0x402cf0
+1125899906842625: ompt_event_barrier_end: parallel_id=281474976710661, task_id=1125899906842626, codeptr_ra=0x402cf0
+1125899906842625: ompt_event_parallel_begin: parent_task_id=1125899906842626, parent_task_frame.exit=0x7fd97bffdf70, parent_task_frame.reenter=0x7fd97bffded0, parallel_id=1125899906842627, requested_team_size=4, codeptr_ra=0x402d16, invoker=2
+1125899906842625: ompt_event_implicit_task_begin: parallel_id=1125899906842627, task_id=1125899906842628, team_size=4, thread_num=0
+1125899906842625: __builtin_frame_address(1)=0x7fd97bffded0
+1125899906842625: task level 0: parallel_id=1125899906842627, task_id=1125899906842628, exit_frame=0x7fd97bffded0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+1125899906842625: task level 1: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=0x7fd97bffded0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1125899906842625: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+1125899906842625: __builtin_frame_address(0)=0x7fd97bffde70
+1125899906842625: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=1125899906842628, codeptr_ra=0x402e47
+1125899906842625: task level 0: parallel_id=1125899906842627, task_id=1125899906842628, exit_frame=0x7fd97bffded0, reenter_frame=0x7fd97bffde30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+1125899906842625: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=1125899906842628, codeptr_ra=0x402e47
+1125899906842625: ompt_event_wait_barrier_end: parallel_id=1125899906842627, task_id=1125899906842628, codeptr_ra=0x402e47
+1125899906842625: ompt_event_barrier_end: parallel_id=1125899906842627, task_id=1125899906842628, codeptr_ra=0x402e47
+1125899906842625: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+1125899906842625: task level 0: parallel_id=1125899906842627, task_id=1125899906842628, exit_frame=0x7fd97bffded0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+1125899906842625: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=1125899906842628, codeptr_ra=0x402d16
+1125899906842625: task level 0: parallel_id=1125899906842627, task_id=1125899906842628, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+1125899906842625: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=1125899906842628, codeptr_ra=0x402d16
+1125899906842625: ompt_event_wait_barrier_end: parallel_id=0, task_id=1125899906842628, codeptr_ra=0x402d16
+1125899906842625: ompt_event_barrier_end: parallel_id=0, task_id=1125899906842628, codeptr_ra=0x402d16
+1125899906842625: ompt_event_implicit_task_end: parallel_id=0, task_id=1125899906842628, team_size=4, thread_num=0
+1125899906842625: ompt_event_parallel_end: parallel_id=1125899906842627, task_id=1125899906842626, invoker=2, codeptr_ra=0x402d16
+1125899906842625: fuzzy_address=0x402c or 0x402d or 0x402e or 0x402f (0x402d17)
+1125899906842625: task level 0: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1125899906842625: ompt_event_barrier_begin: parallel_id=281474976710661, task_id=1125899906842626, codeptr_ra=0x402bf1
+1125899906842625: task level 0: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1125899906842625: ompt_event_wait_barrier_begin: parallel_id=281474976710661, task_id=1125899906842626, codeptr_ra=0x402bf1
+1125899906842625: ompt_event_wait_barrier_end: parallel_id=0, task_id=1125899906842626, codeptr_ra=(nil)
+1125899906842625: ompt_event_barrier_end: parallel_id=0, task_id=1125899906842626, codeptr_ra=(nil)
+1125899906842625: ompt_event_implicit_task_end: parallel_id=0, task_id=1125899906842626, team_size=0, thread_num=3
+1125899906842625: ompt_event_thread_end: thread_id=1125899906842625
+1407374883553281: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=1407374883553281
+1407374883553281: ompt_event_implicit_task_begin: parallel_id=562949953421315, task_id=1407374883553282, team_size=4, thread_num=1
+1407374883553281: __builtin_frame_address(1)=0x7fd97b7fbff0
+1407374883553281: task level 0: parallel_id=562949953421315, task_id=1407374883553282, exit_frame=0x7fd97b7fbff0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1407374883553281: task level 1: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=0x7fd9812d0e50, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1407374883553281: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+1407374883553281: __builtin_frame_address(0)=0x7fd97b7fbfa0
+1407374883553281: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=1407374883553282, codeptr_ra=0x402e47
+1407374883553281: task level 0: parallel_id=562949953421315, task_id=1407374883553282, exit_frame=0x7fd97b7fbff0, reenter_frame=0x7fd97b7fbf60, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1407374883553281: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=1407374883553282, codeptr_ra=0x402e47
+1407374883553281: ompt_event_wait_barrier_end: parallel_id=562949953421315, task_id=1407374883553282, codeptr_ra=0x402e47
+1407374883553281: ompt_event_barrier_end: parallel_id=562949953421315, task_id=1407374883553282, codeptr_ra=0x402e47
+1407374883553281: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+1407374883553281: task level 0: parallel_id=562949953421315, task_id=1407374883553282, exit_frame=0x7fd97b7fbff0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1407374883553281: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=1407374883553282, codeptr_ra=0x402d16
+1407374883553281: task level 0: parallel_id=562949953421315, task_id=1407374883553282, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1407374883553281: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=1407374883553282, codeptr_ra=0x402d16
+1407374883553281: ompt_event_wait_barrier_end: parallel_id=0, task_id=1407374883553282, codeptr_ra=(nil)
+1407374883553281: ompt_event_barrier_end: parallel_id=0, task_id=1407374883553282, codeptr_ra=(nil)
+1407374883553281: ompt_event_implicit_task_end: parallel_id=0, task_id=1407374883553282, team_size=0, thread_num=1
+1407374883553281: ompt_event_thread_end: thread_id=1407374883553281
+1688849860263937: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=1688849860263937
+1688849860263937: ompt_event_implicit_task_begin: parallel_id=562949953421315, task_id=1688849860263938, team_size=4, thread_num=2
+1688849860263937: __builtin_frame_address(1)=0x7fd97aff9ff0
+1688849860263937: task level 0: parallel_id=562949953421315, task_id=1688849860263938, exit_frame=0x7fd97aff9ff0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+1688849860263937: task level 1: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=0x7fd9812d0e50, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1688849860263937: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+1688849860263937: __builtin_frame_address(0)=0x7fd97aff9fa0
+1688849860263937: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=1688849860263938, codeptr_ra=0x402e47
+1688849860263937: task level 0: parallel_id=562949953421315, task_id=1688849860263938, exit_frame=0x7fd97aff9ff0, reenter_frame=0x7fd97aff9f60, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+1688849860263937: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=1688849860263938, codeptr_ra=0x402e47
+1688849860263937: ompt_event_wait_barrier_end: parallel_id=562949953421315, task_id=1688849860263938, codeptr_ra=0x402e47
+1688849860263937: ompt_event_barrier_end: parallel_id=562949953421315, task_id=1688849860263938, codeptr_ra=0x402e47
+1688849860263937: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+1688849860263937: task level 0: parallel_id=562949953421315, task_id=1688849860263938, exit_frame=0x7fd97aff9ff0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+1688849860263937: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=1688849860263938, codeptr_ra=0x402d16
+1688849860263937: task level 0: parallel_id=562949953421315, task_id=1688849860263938, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+1688849860263937: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=1688849860263938, codeptr_ra=0x402d16
+1688849860263937: ompt_event_wait_barrier_end: parallel_id=0, task_id=1688849860263938, codeptr_ra=(nil)
+1688849860263937: ompt_event_barrier_end: parallel_id=0, task_id=1688849860263938, codeptr_ra=(nil)
+1688849860263937: ompt_event_implicit_task_end: parallel_id=0, task_id=1688849860263938, team_size=0, thread_num=2
+1688849860263937: ompt_event_thread_end: thread_id=1688849860263937
+1970324836974593: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=1970324836974593
+1970324836974593: ompt_event_implicit_task_begin: parallel_id=562949953421315, task_id=1970324836974594, team_size=4, thread_num=3
+1970324836974593: __builtin_frame_address(1)=0x7fd97a7f8070
+1970324836974593: task level 0: parallel_id=562949953421315, task_id=1970324836974594, exit_frame=0x7fd97a7f8070, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1970324836974593: task level 1: parallel_id=281474976710661, task_id=562949953421314, exit_frame=0x7fd9812d0ef0, reenter_frame=0x7fd9812d0e50, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+1970324836974593: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+1970324836974593: __builtin_frame_address(0)=0x7fd97a7f8020
+1970324836974593: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=1970324836974594, codeptr_ra=0x402e47
+1970324836974593: task level 0: parallel_id=562949953421315, task_id=1970324836974594, exit_frame=0x7fd97a7f8070, reenter_frame=0x7fd97a7f7fe0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1970324836974593: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=1970324836974594, codeptr_ra=0x402e47
+1970324836974593: ompt_event_wait_barrier_end: parallel_id=562949953421315, task_id=1970324836974594, codeptr_ra=0x402e47
+1970324836974593: ompt_event_barrier_end: parallel_id=562949953421315, task_id=1970324836974594, codeptr_ra=0x402e47
+1970324836974593: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+1970324836974593: task level 0: parallel_id=562949953421315, task_id=1970324836974594, exit_frame=0x7fd97a7f8070, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1970324836974593: ompt_event_barrier_begin: parallel_id=562949953421315, task_id=1970324836974594, codeptr_ra=0x402d16
+1970324836974593: task level 0: parallel_id=562949953421315, task_id=1970324836974594, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+1970324836974593: ompt_event_wait_barrier_begin: parallel_id=562949953421315, task_id=1970324836974594, codeptr_ra=0x402d16
+1970324836974593: ompt_event_wait_barrier_end: parallel_id=0, task_id=1970324836974594, codeptr_ra=(nil)
+1970324836974593: ompt_event_barrier_end: parallel_id=0, task_id=1970324836974594, codeptr_ra=(nil)
+1970324836974593: ompt_event_implicit_task_end: parallel_id=0, task_id=1970324836974594, team_size=0, thread_num=3
+1970324836974593: ompt_event_thread_end: thread_id=1970324836974593
+2251799813685249: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=2251799813685249
+2251799813685249: ompt_event_implicit_task_begin: parallel_id=1125899906842627, task_id=2251799813685250, team_size=4, thread_num=1
+2251799813685249: __builtin_frame_address(1)=0x7fd979ff6070
+2251799813685249: task level 0: parallel_id=1125899906842627, task_id=2251799813685250, exit_frame=0x7fd979ff6070, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+2251799813685249: task level 1: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=0x7fd97bffded0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2251799813685249: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+2251799813685249: __builtin_frame_address(0)=0x7fd979ff6020
+2251799813685249: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=2251799813685250, codeptr_ra=0x402e47
+2251799813685249: task level 0: parallel_id=1125899906842627, task_id=2251799813685250, exit_frame=0x7fd979ff6070, reenter_frame=0x7fd979ff5fe0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+2251799813685249: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=2251799813685250, codeptr_ra=0x402e47
+2251799813685249: ompt_event_wait_barrier_end: parallel_id=1125899906842627, task_id=2251799813685250, codeptr_ra=0x402e47
+2251799813685249: ompt_event_barrier_end: parallel_id=1125899906842627, task_id=2251799813685250, codeptr_ra=0x402e47
+2251799813685249: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+2251799813685249: task level 0: parallel_id=1125899906842627, task_id=2251799813685250, exit_frame=0x7fd979ff6070, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+2251799813685249: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=2251799813685250, codeptr_ra=0x402d16
+2251799813685249: task level 0: parallel_id=1125899906842627, task_id=2251799813685250, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+2251799813685249: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=2251799813685250, codeptr_ra=0x402d16
+2251799813685249: ompt_event_wait_barrier_end: parallel_id=0, task_id=2251799813685250, codeptr_ra=(nil)
+2251799813685249: ompt_event_barrier_end: parallel_id=0, task_id=2251799813685250, codeptr_ra=(nil)
+2251799813685249: ompt_event_implicit_task_end: parallel_id=0, task_id=2251799813685250, team_size=0, thread_num=1
+2251799813685249: ompt_event_thread_end: thread_id=2251799813685249
+2533274790395905: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=2533274790395905
+2533274790395905: ompt_event_implicit_task_begin: parallel_id=1125899906842627, task_id=2533274790395906, team_size=4, thread_num=2
+2533274790395905: __builtin_frame_address(1)=0x7fd9797f40f0
+2533274790395905: task level 0: parallel_id=1125899906842627, task_id=2533274790395906, exit_frame=0x7fd9797f40f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+2533274790395905: task level 1: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=0x7fd97bffded0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2533274790395905: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+2533274790395905: __builtin_frame_address(0)=0x7fd9797f40a0
+2533274790395905: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=2533274790395906, codeptr_ra=0x402e47
+2533274790395905: task level 0: parallel_id=1125899906842627, task_id=2533274790395906, exit_frame=0x7fd9797f40f0, reenter_frame=0x7fd9797f4060, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+2533274790395905: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=2533274790395906, codeptr_ra=0x402e47
+2533274790395905: ompt_event_wait_barrier_end: parallel_id=1125899906842627, task_id=2533274790395906, codeptr_ra=0x402e47
+2533274790395905: ompt_event_barrier_end: parallel_id=1125899906842627, task_id=2533274790395906, codeptr_ra=0x402e47
+2533274790395905: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+2533274790395905: task level 0: parallel_id=1125899906842627, task_id=2533274790395906, exit_frame=0x7fd9797f40f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+2533274790395905: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=2533274790395906, codeptr_ra=0x402d16
+2533274790395905: task level 0: parallel_id=1125899906842627, task_id=2533274790395906, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+2533274790395905: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=2533274790395906, codeptr_ra=0x402d16
+2533274790395905: ompt_event_wait_barrier_end: parallel_id=0, task_id=2533274790395906, codeptr_ra=(nil)
+2533274790395905: ompt_event_barrier_end: parallel_id=0, task_id=2533274790395906, codeptr_ra=(nil)
+2533274790395905: ompt_event_implicit_task_end: parallel_id=0, task_id=2533274790395906, team_size=0, thread_num=2
+2533274790395905: ompt_event_thread_end: thread_id=2533274790395905
+2814749767106561: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=2814749767106561
+2814749767106561: ompt_event_implicit_task_begin: parallel_id=1125899906842627, task_id=2814749767106562, team_size=4, thread_num=3
+2814749767106561: __builtin_frame_address(1)=0x7fd978ff20f0
+2814749767106561: task level 0: parallel_id=1125899906842627, task_id=2814749767106562, exit_frame=0x7fd978ff20f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2814749767106561: task level 1: parallel_id=281474976710661, task_id=1125899906842626, exit_frame=0x7fd97bffdf70, reenter_frame=0x7fd97bffded0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2814749767106561: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+2814749767106561: __builtin_frame_address(0)=0x7fd978ff20a0
+2814749767106561: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=2814749767106562, codeptr_ra=0x402e47
+2814749767106561: task level 0: parallel_id=1125899906842627, task_id=2814749767106562, exit_frame=0x7fd978ff20f0, reenter_frame=0x7fd978ff2060, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2814749767106561: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=2814749767106562, codeptr_ra=0x402e47
+2814749767106561: ompt_event_wait_barrier_end: parallel_id=1125899906842627, task_id=2814749767106562, codeptr_ra=0x402e47
+2814749767106561: ompt_event_barrier_end: parallel_id=1125899906842627, task_id=2814749767106562, codeptr_ra=0x402e47
+2814749767106561: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+2814749767106561: task level 0: parallel_id=1125899906842627, task_id=2814749767106562, exit_frame=0x7fd978ff20f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2814749767106561: ompt_event_barrier_begin: parallel_id=1125899906842627, task_id=2814749767106562, codeptr_ra=0x402d16
+2814749767106561: task level 0: parallel_id=1125899906842627, task_id=2814749767106562, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+2814749767106561: ompt_event_wait_barrier_begin: parallel_id=1125899906842627, task_id=2814749767106562, codeptr_ra=0x402d16
+2814749767106561: ompt_event_wait_barrier_end: parallel_id=0, task_id=2814749767106562, codeptr_ra=(nil)
+2814749767106561: ompt_event_barrier_end: parallel_id=0, task_id=2814749767106562, codeptr_ra=(nil)
+2814749767106561: ompt_event_implicit_task_end: parallel_id=0, task_id=2814749767106562, team_size=0, thread_num=3
+2814749767106561: ompt_event_thread_end: thread_id=2814749767106561
+3096224743817217: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=3096224743817217
+3096224743817217: ompt_event_implicit_task_begin: parallel_id=844424930131971, task_id=3096224743817218, team_size=4, thread_num=1
+3096224743817217: __builtin_frame_address(1)=0x7fd95bffe170
+3096224743817217: task level 0: parallel_id=844424930131971, task_id=3096224743817218, exit_frame=0x7fd95bffe170, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3096224743817217: task level 1: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=0x7fd980aceed0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3096224743817217: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+3096224743817217: __builtin_frame_address(0)=0x7fd95bffe120
+3096224743817217: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=3096224743817218, codeptr_ra=0x402e47
+3096224743817217: task level 0: parallel_id=844424930131971, task_id=3096224743817218, exit_frame=0x7fd95bffe170, reenter_frame=0x7fd95bffe0e0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3096224743817217: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=3096224743817218, codeptr_ra=0x402e47
+3096224743817217: ompt_event_wait_barrier_end: parallel_id=844424930131971, task_id=3096224743817218, codeptr_ra=0x402e47
+3096224743817217: ompt_event_barrier_end: parallel_id=844424930131971, task_id=3096224743817218, codeptr_ra=0x402e47
+3096224743817217: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+3096224743817217: task level 0: parallel_id=844424930131971, task_id=3096224743817218, exit_frame=0x7fd95bffe170, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3096224743817217: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=3096224743817218, codeptr_ra=0x402d16
+3096224743817217: task level 0: parallel_id=844424930131971, task_id=3096224743817218, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3096224743817217: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=3096224743817218, codeptr_ra=0x402d16
+3096224743817217: ompt_event_wait_barrier_end: parallel_id=0, task_id=3096224743817218, codeptr_ra=(nil)
+3096224743817217: ompt_event_barrier_end: parallel_id=0, task_id=3096224743817218, codeptr_ra=(nil)
+3096224743817217: ompt_event_implicit_task_end: parallel_id=0, task_id=3096224743817218, team_size=0, thread_num=1
+3096224743817217: ompt_event_thread_end: thread_id=3096224743817217
+3377699720527873: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=3377699720527873
+3377699720527873: ompt_event_implicit_task_begin: parallel_id=844424930131971, task_id=3377699720527874, team_size=4, thread_num=2
+3377699720527873: __builtin_frame_address(1)=0x7fd95b7fc170
+3377699720527873: task level 0: parallel_id=844424930131971, task_id=3377699720527874, exit_frame=0x7fd95b7fc170, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3377699720527873: task level 1: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=0x7fd980aceed0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3377699720527873: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+3377699720527873: __builtin_frame_address(0)=0x7fd95b7fc120
+3377699720527873: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=3377699720527874, codeptr_ra=0x402e47
+3377699720527873: task level 0: parallel_id=844424930131971, task_id=3377699720527874, exit_frame=0x7fd95b7fc170, reenter_frame=0x7fd95b7fc0e0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3377699720527873: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=3377699720527874, codeptr_ra=0x402e47
+3377699720527873: ompt_event_wait_barrier_end: parallel_id=844424930131971, task_id=3377699720527874, codeptr_ra=0x402e47
+3377699720527873: ompt_event_barrier_end: parallel_id=844424930131971, task_id=3377699720527874, codeptr_ra=0x402e47
+3377699720527873: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+3377699720527873: task level 0: parallel_id=844424930131971, task_id=3377699720527874, exit_frame=0x7fd95b7fc170, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3377699720527873: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=3377699720527874, codeptr_ra=0x402d16
+3377699720527873: task level 0: parallel_id=844424930131971, task_id=3377699720527874, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3377699720527873: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=3377699720527874, codeptr_ra=0x402d16
+3377699720527873: ompt_event_wait_barrier_end: parallel_id=0, task_id=3377699720527874, codeptr_ra=(nil)
+3377699720527873: ompt_event_barrier_end: parallel_id=0, task_id=3377699720527874, codeptr_ra=(nil)
+3377699720527873: ompt_event_implicit_task_end: parallel_id=0, task_id=3377699720527874, team_size=0, thread_num=2
+3377699720527873: ompt_event_thread_end: thread_id=3377699720527873
+3659174697238529: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=3659174697238529
+3659174697238529: ompt_event_implicit_task_begin: parallel_id=844424930131971, task_id=3659174697238530, team_size=4, thread_num=3
+3659174697238529: __builtin_frame_address(1)=0x7fd95affa1f0
+3659174697238529: task level 0: parallel_id=844424930131971, task_id=3659174697238530, exit_frame=0x7fd95affa1f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+3659174697238529: task level 1: parallel_id=281474976710661, task_id=844424930131970, exit_frame=0x7fd980acef70, reenter_frame=0x7fd980aceed0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+3659174697238529: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+3659174697238529: __builtin_frame_address(0)=0x7fd95affa1a0
+3659174697238529: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=3659174697238530, codeptr_ra=0x402e47
+3659174697238529: task level 0: parallel_id=844424930131971, task_id=3659174697238530, exit_frame=0x7fd95affa1f0, reenter_frame=0x7fd95affa160, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+3659174697238529: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=3659174697238530, codeptr_ra=0x402e47
+3659174697238529: ompt_event_wait_barrier_end: parallel_id=844424930131971, task_id=3659174697238530, codeptr_ra=0x402e47
+3659174697238529: ompt_event_barrier_end: parallel_id=844424930131971, task_id=3659174697238530, codeptr_ra=0x402e47
+3659174697238529: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+3659174697238529: task level 0: parallel_id=844424930131971, task_id=3659174697238530, exit_frame=0x7fd95affa1f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+3659174697238529: ompt_event_barrier_begin: parallel_id=844424930131971, task_id=3659174697238530, codeptr_ra=0x402d16
+3659174697238529: task level 0: parallel_id=844424930131971, task_id=3659174697238530, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+3659174697238529: ompt_event_wait_barrier_begin: parallel_id=844424930131971, task_id=3659174697238530, codeptr_ra=0x402d16
+3659174697238529: ompt_event_wait_barrier_end: parallel_id=0, task_id=3659174697238530, codeptr_ra=(nil)
+3659174697238529: ompt_event_barrier_end: parallel_id=0, task_id=3659174697238530, codeptr_ra=(nil)
+3659174697238529: ompt_event_implicit_task_end: parallel_id=0, task_id=3659174697238530, team_size=0, thread_num=3
+3659174697238529: ompt_event_thread_end: thread_id=3659174697238529
+3940649673949185: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=3940649673949185
+3940649673949185: ompt_event_implicit_task_begin: parallel_id=281474976710663, task_id=3940649673949186, team_size=4, thread_num=1
+3940649673949185: __builtin_frame_address(1)=0x7fd95a7f81f0
+3940649673949185: task level 0: parallel_id=281474976710663, task_id=3940649673949186, exit_frame=0x7fd95a7f81f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3940649673949185: task level 1: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=0x7fff7ad2ee30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+3940649673949185: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+3940649673949185: __builtin_frame_address(0)=0x7fd95a7f81a0
+3940649673949185: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=3940649673949186, codeptr_ra=0x402e47
+3940649673949185: task level 0: parallel_id=281474976710663, task_id=3940649673949186, exit_frame=0x7fd95a7f81f0, reenter_frame=0x7fd95a7f8160, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3940649673949185: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=3940649673949186, codeptr_ra=0x402e47
+3940649673949185: ompt_event_wait_barrier_end: parallel_id=281474976710663, task_id=3940649673949186, codeptr_ra=0x402e47
+3940649673949185: ompt_event_barrier_end: parallel_id=281474976710663, task_id=3940649673949186, codeptr_ra=0x402e47
+3940649673949185: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+3940649673949185: task level 0: parallel_id=281474976710663, task_id=3940649673949186, exit_frame=0x7fd95a7f81f0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3940649673949185: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=3940649673949186, codeptr_ra=0x402d16
+3940649673949185: task level 0: parallel_id=281474976710663, task_id=3940649673949186, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=1
+3940649673949185: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=3940649673949186, codeptr_ra=0x402d16
+3940649673949185: ompt_event_wait_barrier_end: parallel_id=0, task_id=3940649673949186, codeptr_ra=(nil)
+3940649673949185: ompt_event_barrier_end: parallel_id=0, task_id=3940649673949186, codeptr_ra=(nil)
+3940649673949185: ompt_event_implicit_task_end: parallel_id=0, task_id=3940649673949186, team_size=0, thread_num=1
+3940649673949185: ompt_event_thread_end: thread_id=3940649673949185
+4222124650659841: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=4222124650659841
+4222124650659841: ompt_event_implicit_task_begin: parallel_id=281474976710663, task_id=4222124650659842, team_size=4, thread_num=2
+4222124650659841: __builtin_frame_address(1)=0x7fd959ff6270
+4222124650659841: task level 0: parallel_id=281474976710663, task_id=4222124650659842, exit_frame=0x7fd959ff6270, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+4222124650659841: task level 1: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=0x7fff7ad2ee30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+4222124650659841: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+4222124650659841: __builtin_frame_address(0)=0x7fd959ff6220
+4222124650659841: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=4222124650659842, codeptr_ra=0x402e47
+4222124650659841: task level 0: parallel_id=281474976710663, task_id=4222124650659842, exit_frame=0x7fd959ff6270, reenter_frame=0x7fd959ff61e0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+4222124650659841: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=4222124650659842, codeptr_ra=0x402e47
+4222124650659841: ompt_event_wait_barrier_end: parallel_id=281474976710663, task_id=4222124650659842, codeptr_ra=0x402e47
+4222124650659841: ompt_event_barrier_end: parallel_id=281474976710663, task_id=4222124650659842, codeptr_ra=0x402e47
+4222124650659841: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+4222124650659841: task level 0: parallel_id=281474976710663, task_id=4222124650659842, exit_frame=0x7fd959ff6270, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+4222124650659841: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=4222124650659842, codeptr_ra=0x402d16
+4222124650659841: task level 0: parallel_id=281474976710663, task_id=4222124650659842, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=2
+4222124650659841: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=4222124650659842, codeptr_ra=0x402d16
+4222124650659841: ompt_event_wait_barrier_end: parallel_id=0, task_id=4222124650659842, codeptr_ra=(nil)
+4222124650659841: ompt_event_barrier_end: parallel_id=0, task_id=4222124650659842, codeptr_ra=(nil)
+4222124650659841: ompt_event_implicit_task_end: parallel_id=0, task_id=4222124650659842, team_size=0, thread_num=2
+4222124650659841: ompt_event_thread_end: thread_id=4222124650659841
+4503599627370497: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=4503599627370497
+4503599627370497: ompt_event_implicit_task_begin: parallel_id=281474976710663, task_id=4503599627370498, team_size=4, thread_num=3
+4503599627370497: __builtin_frame_address(1)=0x7fd9597f4270
+4503599627370497: task level 0: parallel_id=281474976710663, task_id=4503599627370498, exit_frame=0x7fd9597f4270, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+4503599627370497: task level 1: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7fff7ad2eee0, reenter_frame=0x7fff7ad2ee30, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+4503599627370497: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7fff7ad2eee0, task_type=ompt_task_initial=1, thread_num=0
+4503599627370497: __builtin_frame_address(0)=0x7fd9597f4220
+4503599627370497: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=4503599627370498, codeptr_ra=0x402e47
+4503599627370497: task level 0: parallel_id=281474976710663, task_id=4503599627370498, exit_frame=0x7fd9597f4270, reenter_frame=0x7fd9597f41e0, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+4503599627370497: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=4503599627370498, codeptr_ra=0x402e47
+4503599627370497: ompt_event_wait_barrier_end: parallel_id=281474976710663, task_id=4503599627370498, codeptr_ra=0x402e47
+4503599627370497: ompt_event_barrier_end: parallel_id=281474976710663, task_id=4503599627370498, codeptr_ra=0x402e47
+4503599627370497: fuzzy_address=0x402d or 0x402e or 0x402f or 0x4030 (0x402e48)
+4503599627370497: task level 0: parallel_id=281474976710663, task_id=4503599627370498, exit_frame=0x7fd9597f4270, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+4503599627370497: ompt_event_barrier_begin: parallel_id=281474976710663, task_id=4503599627370498, codeptr_ra=0x402d16
+4503599627370497: task level 0: parallel_id=281474976710663, task_id=4503599627370498, exit_frame=(nil), reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=3
+4503599627370497: ompt_event_wait_barrier_begin: parallel_id=281474976710663, task_id=4503599627370498, codeptr_ra=0x402d16
+4503599627370497: ompt_event_wait_barrier_end: parallel_id=0, task_id=4503599627370498, codeptr_ra=(nil)
+4503599627370497: ompt_event_barrier_end: parallel_id=0, task_id=4503599627370498, codeptr_ra=(nil)
+4503599627370497: ompt_event_implicit_task_end: parallel_id=0, task_id=4503599627370498, team_size=0, thread_num=3
+4503599627370497: ompt_event_thread_end: thread_id=4503599627370497

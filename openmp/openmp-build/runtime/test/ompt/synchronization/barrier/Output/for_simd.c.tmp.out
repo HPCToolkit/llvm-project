@@ -1,0 +1,11 @@
+0: NULL_POINTER=(nil)
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: ompt_event_barrier_begin: parallel_id=281474976710660, task_id=281474976710659, codeptr_ra=0x402c21
+281474976710658: task level 0: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7ffdefb07df0, task_type=ompt_task_initial=1, thread_num=0
+281474976710658: ompt_event_wait_barrier_begin: parallel_id=281474976710660, task_id=281474976710659, codeptr_ra=0x402c21
+281474976710658: ompt_event_wait_barrier_end: parallel_id=281474976710660, task_id=281474976710659, codeptr_ra=0x402c21
+281474976710658: ompt_event_barrier_end: parallel_id=281474976710660, task_id=281474976710659, codeptr_ra=0x402c21
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+0: ompt_event_runtime_shutdown

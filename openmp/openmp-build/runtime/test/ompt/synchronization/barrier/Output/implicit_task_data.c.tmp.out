@@ -1,0 +1,22 @@
+0: NULL_POINTER=(nil)
+0: ompt_event_runtime_shutdown
+281474976710657: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710657
+281474976710657: ompt_event_barrier_begin: parallel_id=0, task_id=281474976710658, codeptr_ra=0x400843
+281474976710657: ompt_event_wait_barrier_begin: parallel_id=0, task_id=281474976710658, codeptr_ra=0x400843
+281474976710657: ompt_event_wait_barrier_end: parallel_id=0, task_id=281474976710658, codeptr_ra=0x400843
+281474976710657: ompt_event_barrier_end: parallel_id=0, task_id=281474976710658, codeptr_ra=0x400843
+562949953421313: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=562949953421313
+562949953421313: ompt_event_barrier_begin: parallel_id=0, task_id=562949953421314, codeptr_ra=0x400843
+562949953421313: ompt_event_wait_barrier_begin: parallel_id=0, task_id=562949953421314, codeptr_ra=0x400843
+562949953421313: ompt_event_wait_barrier_end: parallel_id=0, task_id=562949953421314, codeptr_ra=(nil)
+562949953421313: ompt_event_barrier_end: parallel_id=0, task_id=562949953421314, codeptr_ra=(nil)
+844424930131969: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=844424930131969
+844424930131969: ompt_event_barrier_begin: parallel_id=0, task_id=844424930131970, codeptr_ra=0x400843
+844424930131969: ompt_event_wait_barrier_begin: parallel_id=0, task_id=844424930131970, codeptr_ra=0x400843
+844424930131969: ompt_event_wait_barrier_end: parallel_id=0, task_id=844424930131970, codeptr_ra=(nil)
+844424930131969: ompt_event_barrier_end: parallel_id=0, task_id=844424930131970, codeptr_ra=(nil)
+1125899906842625: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=1125899906842625
+1125899906842625: ompt_event_barrier_begin: parallel_id=0, task_id=1125899906842626, codeptr_ra=0x400843
+1125899906842625: ompt_event_wait_barrier_begin: parallel_id=0, task_id=1125899906842626, codeptr_ra=0x400843
+1125899906842625: ompt_event_wait_barrier_end: parallel_id=0, task_id=1125899906842626, codeptr_ra=(nil)
+1125899906842625: ompt_event_barrier_end: parallel_id=0, task_id=1125899906842626, codeptr_ra=(nil)

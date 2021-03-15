@@ -1,0 +1,6 @@
+0: NULL_POINTER=(nil)
+281474976710657: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710657
+281474976710657: ompt_event_parallel_begin: parent_task_id=0, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7ffe5a1aa380, parallel_id=281474976710658, requested_team_size=2, codeptr_ra=0x400b5a, invoker=2
+562949953421313: ompt_event_thread_begin: thread_type=ompt_thread_worker=2, thread_id=562949953421313
+281474976710657: ompt_event_parallel_begin: parent_task_id=0, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7ffe5a1aa380, parallel_id=281474976710659, requested_team_size=2, codeptr_ra=0x400b8b, invoker=2
+281474976710657: ompt_event_parallel_begin: parent_task_id=0, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7ffe5a1aa380, parallel_id=281474976710660, requested_team_size=2, codeptr_ra=0x400b5a, invoker=2

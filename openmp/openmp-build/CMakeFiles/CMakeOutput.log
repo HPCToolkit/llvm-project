@@ -1,0 +1,1392 @@
+The system is: Linux - 4.18.0-193.19.1.el8_2.x86_64 - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /usr/bin/gcc 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is GNU, found in "/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/3.15.7/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/bin/g++ 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/3.15.7/CompilerIdCXX/a.out"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_90c39/fast && /usr/bin/gmake -f CMakeFiles/cmTC_90c39.dir/build.make CMakeFiles/cmTC_90c39.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_90c39.dir/testCCompiler.c.o
+/usr/bin/gcc    -o CMakeFiles/cmTC_90c39.dir/testCCompiler.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_90c39
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_90c39.dir/link.txt --verbose=1
+/usr/bin/gcc      CMakeFiles/cmTC_90c39.dir/testCCompiler.c.o  -o cmTC_90c39 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1cb71/fast && /usr/bin/gmake -f CMakeFiles/cmTC_1cb71.dir/build.make CMakeFiles/cmTC_1cb71.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o
+/usr/bin/gcc   -v -o CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCCompilerABI.c
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gcc
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/cc1 -quiet -v /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o -version -o /tmp/ccCRQalc.s
+GNU C17 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/x86_64-redhat-linux/8/include
+ /usr/local/include
+ /usr/include
+End of search list.
+GNU C17 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 05177e1e355e69e1b38aef8ad67d6b80
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64'
+ as -v --64 -o CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o /tmp/ccCRQalc.s
+GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64'
+Linking C executable cmTC_1cb71
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1cb71.dir/link.txt --verbose=1
+/usr/bin/gcc     -v CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o  -o cmTC_1cb71 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gcc
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1cb71' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccnjoLBb.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_1cb71 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1cb71' '-mtune=generic' '-march=x86-64'
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Parsed C implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/include]
+    add: [/usr/local/include]
+    add: [/usr/include]
+  end of search list found
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/8/include]
+  collapse include dir [/usr/local/include] ==> [/usr/local/include]
+  collapse include dir [/usr/include] ==> [/usr/include]
+  implicit include dirs: [/usr/lib/gcc/x86_64-redhat-linux/8/include;/usr/local/include;/usr/include]
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/gmake cmTC_1cb71/fast && /usr/bin/gmake -f CMakeFiles/cmTC_1cb71.dir/build.make CMakeFiles/cmTC_1cb71.dir/build]
+  ignore line: [gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp']
+  ignore line: [Building C object CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/usr/bin/gcc   -v -o CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCCompilerABI.c]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gcc]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-redhat-linux]
+  ignore line: [Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64']
+  ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/8/cc1 -quiet -v /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o -version -o /tmp/ccCRQalc.s]
+  ignore line: [GNU C17 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)]
+  ignore line: [	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/include]
+  ignore line: [ /usr/local/include]
+  ignore line: [ /usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C17 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)]
+  ignore line: [	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: 05177e1e355e69e1b38aef8ad67d6b80]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64']
+  ignore line: [ as -v --64 -o CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o /tmp/ccCRQalc.s]
+  ignore line: [GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8]
+  ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64']
+  ignore line: [Linking C executable cmTC_1cb71]
+  ignore line: [/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1cb71.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/gcc     -v CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o  -o cmTC_1cb71 ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gcc]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-redhat-linux]
+  ignore line: [Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) ]
+  ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1cb71' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccnjoLBb.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_1cb71 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o -lgcc --as-needed -lgcc_s --no-as-needed -lc -lgcc --as-needed -lgcc_s --no-as-needed /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o]
+    arg [/usr/libexec/gcc/x86_64-redhat-linux/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccnjoLBb.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--no-add-needed] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_1cb71] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64]
+    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+    arg [-L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib] ==> dir [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../..]
+    arg [CMakeFiles/cmTC_1cb71.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [-lc] ==> lib [c]
+    arg [-lgcc] ==> lib [gcc]
+    arg [--as-needed] ==> ignore
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [--no-as-needed] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8] ==> [/usr/lib/gcc/x86_64-redhat-linux/8]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64] ==> [/usr/lib64]
+  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+  collapse library dir [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib] ==> [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../..] ==> [/usr/lib]
+  implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+  implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/8;/usr/lib64;/lib64;/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib;/usr/lib]
+  implicit fwks: []
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bdcbb/fast && /usr/bin/gmake -f CMakeFiles/cmTC_bdcbb.dir/build.make CMakeFiles/cmTC_bdcbb.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_bdcbb.dir/testCXXCompiler.cxx.o
+/usr/bin/g++     -o CMakeFiles/cmTC_bdcbb.dir/testCXXCompiler.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_bdcbb
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bdcbb.dir/link.txt --verbose=1
+/usr/bin/g++       CMakeFiles/cmTC_bdcbb.dir/testCXXCompiler.cxx.o  -o cmTC_bdcbb 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_660a1/fast && /usr/bin/gmake -f CMakeFiles/cmTC_660a1.dir/build.make CMakeFiles/cmTC_660a1.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/g++    -v -o CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp
+Using built-in specs.
+COLLECT_GCC=/usr/bin/g++
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/cc1plus -quiet -v -D_GNU_SOURCE /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o -version -o /tmp/ccCqhqBs.s
+GNU C++14 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward
+ /usr/lib/gcc/x86_64-redhat-linux/8/include
+ /usr/local/include
+ /usr/include
+End of search list.
+GNU C++14 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 6b667c67be32d4821a98ef9960b6da95
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ as -v --64 -o CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccCqhqBs.s
+GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+Linking CXX executable cmTC_660a1
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_660a1.dir/link.txt --verbose=1
+/usr/bin/g++      -v CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_660a1 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/g++
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_660a1' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccBrh8ov.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_660a1 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_660a1' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Parsed CXX implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8]
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux]
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward]
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/include]
+    add: [/usr/local/include]
+    add: [/usr/include]
+  end of search list found
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8] ==> [/usr/include/c++/8]
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux] ==> [/usr/include/c++/8/x86_64-redhat-linux]
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward] ==> [/usr/include/c++/8/backward]
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/8/include]
+  collapse include dir [/usr/local/include] ==> [/usr/local/include]
+  collapse include dir [/usr/include] ==> [/usr/include]
+  implicit include dirs: [/usr/include/c++/8;/usr/include/c++/8/x86_64-redhat-linux;/usr/include/c++/8/backward;/usr/lib/gcc/x86_64-redhat-linux/8/include;/usr/local/include;/usr/include]
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/gmake cmTC_660a1/fast && /usr/bin/gmake -f CMakeFiles/cmTC_660a1.dir/build.make CMakeFiles/cmTC_660a1.dir/build]
+  ignore line: [gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/g++    -v -o CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/g++]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-redhat-linux]
+  ignore line: [Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/8/cc1plus -quiet -v -D_GNU_SOURCE /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o -version -o /tmp/ccCqhqBs.s]
+  ignore line: [GNU C++14 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)]
+  ignore line: [	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/include]
+  ignore line: [ /usr/local/include]
+  ignore line: [ /usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C++14 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)]
+  ignore line: [	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: 6b667c67be32d4821a98ef9960b6da95]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  ignore line: [ as -v --64 -o CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o /tmp/ccCqhqBs.s]
+  ignore line: [GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8]
+  ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  ignore line: [Linking CXX executable cmTC_660a1]
+  ignore line: [/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_660a1.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/g++      -v CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_660a1 ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/g++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-redhat-linux]
+  ignore line: [Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) ]
+  ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_660a1' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccBrh8ov.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_660a1 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o]
+    arg [/usr/libexec/gcc/x86_64-redhat-linux/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccBrh8ov.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--no-add-needed] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_660a1] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64]
+    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+    arg [-L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib] ==> dir [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../..]
+    arg [CMakeFiles/cmTC_660a1.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8] ==> [/usr/lib/gcc/x86_64-redhat-linux/8]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64] ==> [/usr/lib64]
+  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+  collapse library dir [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib] ==> [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../..] ==> [/usr/lib]
+  implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+  implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/8;/usr/lib64;/lib64;/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib;/usr/lib]
+  implicit fwks: []
+
+
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WALL_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a40f3/fast && /usr/bin/gmake -f CMakeFiles/cmTC_a40f3.dir/build.make CMakeFiles/cmTC_a40f3.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a40f3.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WALL_FLAG   -Wall -o CMakeFiles/cmTC_a40f3.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_a40f3
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a40f3.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WALL_FLAG    CMakeFiles/cmTC_a40f3.dir/src.cxx.o  -o cmTC_a40f3 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WERROR_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_75d60/fast && /usr/bin/gmake -f CMakeFiles/cmTC_75d60.dir/build.make CMakeFiles/cmTC_75d60.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_75d60.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WERROR_FLAG   -Werror -o CMakeFiles/cmTC_75d60.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_75d60
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_75d60.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WERROR_FLAG    CMakeFiles/cmTC_75d60.dir/src.cxx.o  -o cmTC_75d60 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WCAST_QUAL_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8321f/fast && /usr/bin/gmake -f CMakeFiles/cmTC_8321f.dir/build.make CMakeFiles/cmTC_8321f.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8321f.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WCAST_QUAL_FLAG   -Wcast-qual -o CMakeFiles/cmTC_8321f.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_8321f
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8321f.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WCAST_QUAL_FLAG    CMakeFiles/cmTC_8321f.dir/src.cxx.o  -o cmTC_8321f 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WIMPLICIT_FALLTHROUGH_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ef0d7/fast && /usr/bin/gmake -f CMakeFiles/cmTC_ef0d7.dir/build.make CMakeFiles/cmTC_ef0d7.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_ef0d7.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WIMPLICIT_FALLTHROUGH_FLAG   -Wimplicit-fallthrough -o CMakeFiles/cmTC_ef0d7.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_ef0d7
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ef0d7.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WIMPLICIT_FALLTHROUGH_FLAG    CMakeFiles/cmTC_ef0d7.dir/src.cxx.o  -o cmTC_ef0d7 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WSIGN_COMPARE_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8599e/fast && /usr/bin/gmake -f CMakeFiles/cmTC_8599e.dir/build.make CMakeFiles/cmTC_8599e.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8599e.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WSIGN_COMPARE_FLAG   -Wsign-compare -o CMakeFiles/cmTC_8599e.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_8599e
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8599e.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WSIGN_COMPARE_FLAG    CMakeFiles/cmTC_8599e.dir/src.cxx.o  -o cmTC_8599e 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WNO_EXTRA_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_4ea00/fast && /usr/bin/gmake -f CMakeFiles/cmTC_4ea00.dir/build.make CMakeFiles/cmTC_4ea00.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_4ea00.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WNO_EXTRA_FLAG   -Wno-extra -o CMakeFiles/cmTC_4ea00.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_4ea00
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4ea00.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WNO_EXTRA_FLAG    CMakeFiles/cmTC_4ea00.dir/src.cxx.o  -o cmTC_4ea00 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WNO_PEDANTIC_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_27cee/fast && /usr/bin/gmake -f CMakeFiles/cmTC_27cee.dir/build.make CMakeFiles/cmTC_27cee.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_27cee.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WNO_PEDANTIC_FLAG   -Wno-pedantic -o CMakeFiles/cmTC_27cee.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_27cee
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_27cee.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WNO_PEDANTIC_FLAG    CMakeFiles/cmTC_27cee.dir/src.cxx.o  -o cmTC_27cee 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_WNO_MAYBE_UNINITIALIZED_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_1fc57/fast && /usr/bin/gmake -f CMakeFiles/cmTC_1fc57.dir/build.make CMakeFiles/cmTC_1fc57.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_1fc57.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_WNO_MAYBE_UNINITIALIZED_FLAG   -Wno-maybe-uninitialized -o CMakeFiles/cmTC_1fc57.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_1fc57
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1fc57.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_WNO_MAYBE_UNINITIALIZED_FLAG    CMakeFiles/cmTC_1fc57.dir/src.cxx.o  -o cmTC_1fc57 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_STD_GNUPP14_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_bd0f9/fast && /usr/bin/gmake -f CMakeFiles/cmTC_bd0f9.dir/build.make CMakeFiles/cmTC_bd0f9.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_bd0f9.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_STD_GNUPP14_FLAG   -std=gnu++14 -o CMakeFiles/cmTC_bd0f9.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_bd0f9
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bd0f9.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_STD_GNUPP14_FLAG    CMakeFiles/cmTC_bd0f9.dir/src.cxx.o  -o cmTC_bd0f9 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test OPENMP_HAVE_STD_CPP14_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_9450e/fast && /usr/bin/gmake -f CMakeFiles/cmTC_9450e.dir/build.make CMakeFiles/cmTC_9450e.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_9450e.dir/src.cxx.o
+/usr/bin/g++    -DOPENMP_HAVE_STD_CPP14_FLAG   -std=c++14 -o CMakeFiles/cmTC_9450e.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_9450e
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9450e.dir/link.txt --verbose=1
+/usr/bin/g++   -DOPENMP_HAVE_STD_CPP14_FLAG    CMakeFiles/cmTC_9450e.dir/src.cxx.o  -o cmTC_9450e 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
+Compiler: /usr/bin/gfortran 
+Build flags: 
+Id flags: -v 
+
+The output was:
+0
+Driving: /usr/bin/gfortran -v CMakeFortranCompilerId.F -l gfortran -l m -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/tmp/cc6sbLFj.f90 -quiet -v CMakeFortranCompilerId.F -quiet -dumpbase CMakeFortranCompilerId.F -mtune=generic -march=x86-64 -auxbase CMakeFortranCompilerId -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/8/finclude -o /tmp/cc1owbVo.s
+GNU Fortran (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/x86_64-redhat-linux/8/finclude
+ /usr/lib/gcc/x86_64-redhat-linux/8/include
+ /usr/local/include
+ /usr/include
+End of search list.
+GNU Fortran2008 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ as -v --64 -o /tmp/ccu8Nvdu.o /tmp/cc1owbVo.s
+GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8
+Reading specs from /usr/lib/gcc/x86_64-redhat-linux/8/libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccxakFwz.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. /tmp/ccu8Nvdu.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+
+
+Compilation of the Fortran compiler identification source "CMakeFortranCompilerId.F" produced "a.out"
+
+The Fortran compiler identification is GNU, found in "/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/3.15.7/CompilerIdFortran/a.out"
+
+Determining if the Fortran compiler works passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a6bb2/fast && /usr/bin/gmake -f CMakeFiles/cmTC_a6bb2.dir/build.make CMakeFiles/cmTC_a6bb2.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_a6bb2.dir/testFortranCompiler.f.o
+/usr/bin/gfortran    -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_a6bb2.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTC_a6bb2
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a6bb2.dir/link.txt --verbose=1
+/usr/bin/gfortran      CMakeFiles/cmTC_a6bb2.dir/testFortranCompiler.f.o  -o cmTC_a6bb2 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Detecting Fortran compiler ABI info compiled with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_4d575/fast && /usr/bin/gmake -f CMakeFiles/cmTC_4d575.dir/build.make CMakeFiles/cmTC_4d575.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o
+/usr/bin/gfortran   -v -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/f951 /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/tmp/ccGfc6Mw.f90 -quiet -v /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeFortranCompilerABI.F -quiet -dumpbase CMakeFortranCompilerABI.F -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/8/finclude -o /tmp/ccPiEhIC.s
+GNU Fortran (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/x86_64-redhat-linux/8/finclude
+ /usr/lib/gcc/x86_64-redhat-linux/8/include
+ /usr/local/include
+ /usr/include
+End of search list.
+GNU Fortran2008 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)
+	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64'
+ as -v --64 -o CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o /tmp/ccPiEhIC.s
+GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64'
+Linking Fortran executable cmTC_4d575
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4d575.dir/link.txt --verbose=1
+/usr/bin/gfortran   -v   CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o  -o cmTC_4d575 
+Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o -o cmTC_4d575 -l gfortran -l m -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-redhat-linux
+Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux
+Thread model: posix
+gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) 
+Reading specs from /usr/lib/gcc/x86_64-redhat-linux/8/libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_4d575' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/
+LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_4d575' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccnFizPz.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_4d575 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_4d575' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Parsed Fortran implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/finclude]
+    add: [/usr/lib/gcc/x86_64-redhat-linux/8/include]
+    add: [/usr/local/include]
+    add: [/usr/include]
+  end of search list found
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/finclude] ==> [/usr/lib/gcc/x86_64-redhat-linux/8/finclude]
+  collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/8/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/8/include]
+  collapse include dir [/usr/local/include] ==> [/usr/local/include]
+  collapse include dir [/usr/include] ==> [/usr/include]
+  implicit include dirs: [/usr/lib/gcc/x86_64-redhat-linux/8/finclude;/usr/lib/gcc/x86_64-redhat-linux/8/include;/usr/local/include;/usr/include]
+
+
+Parsed Fortran implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/gmake cmTC_4d575/fast && /usr/bin/gmake -f CMakeFiles/cmTC_4d575.dir/build.make CMakeFiles/cmTC_4d575.dir/build]
+  ignore line: [gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp']
+  ignore line: [Building Fortran object CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [/usr/bin/gfortran   -v -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-redhat-linux]
+  ignore line: [Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64']
+  ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/8/f951 /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/tmp/ccGfc6Mw.f90 -quiet -v /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CMakeFortranCompilerABI.F -quiet -dumpbase CMakeFortranCompilerABI.F -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/8/finclude -o /tmp/ccPiEhIC.s]
+  ignore line: [GNU Fortran (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)]
+  ignore line: [	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/include-fixed"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/finclude]
+  ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/8/include]
+  ignore line: [ /usr/local/include]
+  ignore line: [ /usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU Fortran2008 (GCC) version 8.3.1 20191121 (Red Hat 8.3.1-5) (x86_64-redhat-linux)]
+  ignore line: [	compiled by GNU C version 8.3.1 20191121 (Red Hat 8.3.1-5), GMP version 6.1.2, MPFR version 3.1.6-p2, MPC version 1.0.2, isl version isl-0.16.1-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64']
+  ignore line: [ as -v --64 -o CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o /tmp/ccPiEhIC.s]
+  ignore line: [GNU assembler version 2.30 (x86_64-redhat-linux) using BFD version version 2.30-79.el8]
+  ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=x86-64']
+  ignore line: [Linking Fortran executable cmTC_4d575]
+  ignore line: [/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4d575.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/gfortran   -v   CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o  -o cmTC_4d575 ]
+  ignore line: [Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o -o cmTC_4d575 -l gfortran -l m -shared-libgcc]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-redhat-linux]
+  ignore line: [Configured with: ../configure --enable-bootstrap --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugzilla.redhat.com/bugzilla --enable-shared --enable-threads=posix --enable-checking=release --enable-multilib --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --with-linker-hash-style=gnu --enable-plugin --enable-initfini-array --with-isl --disable-libmpx --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_32=x86-64 --build=x86_64-redhat-linux]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.1 20191121 (Red Hat 8.3.1-5) (GCC) ]
+  ignore line: [Reading specs from /usr/lib/gcc/x86_64-redhat-linux/8/libgfortran.spec]
+  ignore line: [rename spec lib to liborig]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_4d575' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/]
+  ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_4d575' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/libexec/gcc/x86_64-redhat-linux/8/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccnFizPz.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_4d575 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o]
+    arg [/usr/libexec/gcc/x86_64-redhat-linux/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/libexec/gcc/x86_64-redhat-linux/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccnFizPz.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lquadmath] ==> ignore
+    arg [-plugin-opt=-pass-through=-lm] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--no-add-needed] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_4d575] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o] ==> ignore
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64]
+    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+    arg [-L/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib] ==> dir [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib]
+    arg [-L/usr/lib/gcc/x86_64-redhat-linux/8/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../..]
+    arg [CMakeFiles/cmTC_4d575.dir/CMakeFortranCompilerABI.F.o] ==> ignore
+    arg [-lgfortran] ==> lib [gfortran]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lquadmath] ==> lib [quadmath]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/crtend.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o] ==> ignore
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8] ==> [/usr/lib/gcc/x86_64-redhat-linux/8]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64] ==> [/usr/lib64]
+  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+  collapse library dir [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib] ==> [/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/8/../../..] ==> [/usr/lib]
+  implicit libs: [gfortran;m;gcc_s;gcc;quadmath;m;gcc_s;gcc;c;gcc_s;gcc]
+  implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/8;/usr/lib64;/lib64;/home/la5/git/spack/opt/spack/linux-rhel8-zen/gcc-8.3.1/py-lit-0.7.1-ksdgblbma7infjhymii44o5t5axthwdf/lib;/usr/lib]
+  implicit fwks: []
+
+
+Determining if the Fortran compiler supports Fortran 90 passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b3273/fast && /usr/bin/gmake -f CMakeFiles/cmTC_b3273.dir/build.make CMakeFiles/cmTC_b3273.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_b3273.dir/testFortranCompilerF90.f90.o
+/usr/bin/gfortran    -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 -o CMakeFiles/cmTC_b3273.dir/testFortranCompilerF90.f90.o
+Linking Fortran executable cmTC_b3273
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b3273.dir/link.txt --verbose=1
+/usr/bin/gfortran      CMakeFiles/cmTC_b3273.dir/testFortranCompilerF90.f90.o  -o cmTC_b3273 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_FNO_EXCEPTIONS_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_290de/fast && /usr/bin/gmake -f CMakeFiles/cmTC_290de.dir/build.make CMakeFiles/cmTC_290de.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_290de.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_FNO_EXCEPTIONS_FLAG   -fno-exceptions -o CMakeFiles/cmTC_290de.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_290de
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_290de.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_FNO_EXCEPTIONS_FLAG    CMakeFiles/cmTC_290de.dir/src.cxx.o  -o cmTC_290de 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_FNO_RTTI_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fb6e0/fast && /usr/bin/gmake -f CMakeFiles/cmTC_fb6e0.dir/build.make CMakeFiles/cmTC_fb6e0.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fb6e0.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_FNO_RTTI_FLAG   -fno-rtti -o CMakeFiles/cmTC_fb6e0.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_fb6e0
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fb6e0.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_FNO_RTTI_FLAG    CMakeFiles/cmTC_fb6e0.dir/src.cxx.o  -o cmTC_fb6e0 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_CLASS_MEMACCESS_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_9e5c2/fast && /usr/bin/gmake -f CMakeFiles/cmTC_9e5c2.dir/build.make CMakeFiles/cmTC_9e5c2.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_9e5c2.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_CLASS_MEMACCESS_FLAG   -Wno-class-memaccess -o CMakeFiles/cmTC_9e5c2.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_9e5c2
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9e5c2.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_CLASS_MEMACCESS_FLAG    CMakeFiles/cmTC_9e5c2.dir/src.cxx.o  -o cmTC_9e5c2 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_COVERED_SWITCH_DEFAULT_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0b8a1/fast && /usr/bin/gmake -f CMakeFiles/cmTC_0b8a1.dir/build.make CMakeFiles/cmTC_0b8a1.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_0b8a1.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_COVERED_SWITCH_DEFAULT_FLAG   -Wno-covered-switch-default -o CMakeFiles/cmTC_0b8a1.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_0b8a1
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0b8a1.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_COVERED_SWITCH_DEFAULT_FLAG    CMakeFiles/cmTC_0b8a1.dir/src.cxx.o  -o cmTC_0b8a1 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_FRAME_ADDRESS_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c40e9/fast && /usr/bin/gmake -f CMakeFiles/cmTC_c40e9.dir/build.make CMakeFiles/cmTC_c40e9.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c40e9.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_FRAME_ADDRESS_FLAG   -Wno-frame-address -o CMakeFiles/cmTC_c40e9.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c40e9
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c40e9.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_FRAME_ADDRESS_FLAG    CMakeFiles/cmTC_c40e9.dir/src.cxx.o  -o cmTC_c40e9 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_STRICT_ALIASING_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c9046/fast && /usr/bin/gmake -f CMakeFiles/cmTC_c9046.dir/build.make CMakeFiles/cmTC_c9046.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c9046.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_STRICT_ALIASING_FLAG   -Wno-strict-aliasing -o CMakeFiles/cmTC_c9046.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c9046
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c9046.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_STRICT_ALIASING_FLAG    CMakeFiles/cmTC_c9046.dir/src.cxx.o  -o cmTC_c9046 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WSTRINGOP_OVERFLOW_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c892e/fast && /usr/bin/gmake -f CMakeFiles/cmTC_c892e.dir/build.make CMakeFiles/cmTC_c892e.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_c892e.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WSTRINGOP_OVERFLOW_FLAG   -Wstringop-overflow=0 -o CMakeFiles/cmTC_c892e.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c892e
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c892e.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WSTRINGOP_OVERFLOW_FLAG    CMakeFiles/cmTC_c892e.dir/src.cxx.o  -o cmTC_c892e 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_STRINGOP_TRUNCATION_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_47fdd/fast && /usr/bin/gmake -f CMakeFiles/cmTC_47fdd.dir/build.make CMakeFiles/cmTC_47fdd.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_47fdd.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_STRINGOP_TRUNCATION_FLAG   -Wno-stringop-truncation -o CMakeFiles/cmTC_47fdd.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_47fdd
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_47fdd.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_STRINGOP_TRUNCATION_FLAG    CMakeFiles/cmTC_47fdd.dir/src.cxx.o  -o cmTC_47fdd 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_SWITCH_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_fa199/fast && /usr/bin/gmake -f CMakeFiles/cmTC_fa199.dir/build.make CMakeFiles/cmTC_fa199.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_fa199.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_SWITCH_FLAG   -Wno-switch -o CMakeFiles/cmTC_fa199.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_fa199
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_fa199.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_SWITCH_FLAG    CMakeFiles/cmTC_fa199.dir/src.cxx.o  -o cmTC_fa199 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_UNINITIALIZED_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_8dbfc/fast && /usr/bin/gmake -f CMakeFiles/cmTC_8dbfc.dir/build.make CMakeFiles/cmTC_8dbfc.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8dbfc.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_UNINITIALIZED_FLAG   -Wno-uninitialized -o CMakeFiles/cmTC_8dbfc.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_8dbfc
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8dbfc.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_UNINITIALIZED_FLAG    CMakeFiles/cmTC_8dbfc.dir/src.cxx.o  -o cmTC_8dbfc 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_UNUSED_BUT_SET_VARIABLE_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_801e4/fast && /usr/bin/gmake -f CMakeFiles/cmTC_801e4.dir/build.make CMakeFiles/cmTC_801e4.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_801e4.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_UNUSED_BUT_SET_VARIABLE_FLAG   -Wno-unused-but-set-variable -o CMakeFiles/cmTC_801e4.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_801e4
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_801e4.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_UNUSED_BUT_SET_VARIABLE_FLAG    CMakeFiles/cmTC_801e4.dir/src.cxx.o  -o cmTC_801e4 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_RETURN_TYPE_C_LINKAGE_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ebc05/fast && /usr/bin/gmake -f CMakeFiles/cmTC_ebc05.dir/build.make CMakeFiles/cmTC_ebc05.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_ebc05.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_RETURN_TYPE_C_LINKAGE_FLAG   -Wno-return-type-c-linkage -o CMakeFiles/cmTC_ebc05.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_ebc05
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ebc05.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_RETURN_TYPE_C_LINKAGE_FLAG    CMakeFiles/cmTC_ebc05.dir/src.cxx.o  -o cmTC_ebc05 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_CAST_QUAL_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_5d4a9/fast && /usr/bin/gmake -f CMakeFiles/cmTC_5d4a9.dir/build.make CMakeFiles/cmTC_5d4a9.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_5d4a9.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_CAST_QUAL_FLAG   -Wno-cast-qual -o CMakeFiles/cmTC_5d4a9.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_5d4a9
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5d4a9.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_CAST_QUAL_FLAG    CMakeFiles/cmTC_5d4a9.dir/src.cxx.o  -o cmTC_5d4a9 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_WNO_INT_TO_VOID_POINTER_CAST_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ff781/fast && /usr/bin/gmake -f CMakeFiles/cmTC_ff781.dir/build.make CMakeFiles/cmTC_ff781.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_ff781.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_INT_TO_VOID_POINTER_CAST_FLAG   -Wno-int-to-void-pointer-cast -o CMakeFiles/cmTC_ff781.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_ff781
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ff781.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_WNO_INT_TO_VOID_POINTER_CAST_FLAG    CMakeFiles/cmTC_ff781.dir/src.cxx.o  -o cmTC_ff781 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_MSSE2_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7349d/fast && /usr/bin/gmake -f CMakeFiles/cmTC_7349d.dir/build.make CMakeFiles/cmTC_7349d.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_7349d.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_MSSE2_FLAG   -msse2 -o CMakeFiles/cmTC_7349d.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_7349d
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7349d.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_MSSE2_FLAG    CMakeFiles/cmTC_7349d.dir/src.cxx.o  -o cmTC_7349d 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_FTLS_MODEL_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b4730/fast && /usr/bin/gmake -f CMakeFiles/cmTC_b4730.dir/build.make CMakeFiles/cmTC_b4730.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b4730.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_FTLS_MODEL_FLAG   -ftls-model=initial-exec -o CMakeFiles/cmTC_b4730.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_b4730
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b4730.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_FTLS_MODEL_FLAG    CMakeFiles/cmTC_b4730.dir/src.cxx.o  -o cmTC_b4730 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main() { return 0; }
+Performing Fortran SOURCE FILE Test LIBOMP_HAVE_M32_FORTRAN_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_f9cec/fast && /usr/bin/gmake -f CMakeFiles/cmTC_f9cec.dir/build.make CMakeFiles/cmTC_f9cec.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_f9cec.dir/src.F.o
+/usr/bin/gfortran   -DLIBOMP_HAVE_M32_FORTRAN_FLAG   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.F -o CMakeFiles/cmTC_f9cec.dir/src.F.o
+Linking Fortran executable cmTC_f9cec
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f9cec.dir/link.txt --verbose=1
+/usr/bin/gfortran     -DLIBOMP_HAVE_M32_FORTRAN_FLAG CMakeFiles/cmTC_f9cec.dir/src.F.o  -o cmTC_f9cec 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+      program hello
+           print *, "Hello World!"
+      end program hello
+Determining if the shm_open exist passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_0d7ec/fast && /usr/bin/gmake -f CMakeFiles/cmTC_0d7ec.dir/build.make CMakeFiles/cmTC_0d7ec.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_0d7ec.dir/CheckSymbolExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized    -o CMakeFiles/cmTC_0d7ec.dir/CheckSymbolExists.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_0d7ec
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0d7ec.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized     CMakeFiles/cmTC_0d7ec.dir/CheckSymbolExists.c.o  -o cmTC_0d7ec -lrt 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+File /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <sys/mman.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef shm_open
+  return ((int*)(&shm_open))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Performing C Linker Flag test LIBOMP_HAVE_X_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/link_flag_check_LIBOMP_HAVE_X_FLAG/build
+
+Run Build Command(s):/usr/bin/gmake && Scanning dependencies of target foo
+[ 50%] Building C object CMakeFiles/foo.dir/src_to_link.c.o
+[100%] Linking C shared library libfoo.so
+[100%] Built target foo
+
+
+Source file was:
+int foo(int a) { return a*a; }
+Performing C Linker Flag test LIBOMP_HAVE_WARN_SHARED_TEXTREL_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/link_flag_check_LIBOMP_HAVE_WARN_SHARED_TEXTREL_FLAG/build
+
+Run Build Command(s):/usr/bin/gmake && Scanning dependencies of target foo
+[ 50%] Building C object CMakeFiles/foo.dir/src_to_link.c.o
+[100%] Linking C shared library libfoo.so
+[100%] Built target foo
+
+
+Source file was:
+int foo(int a) { return a*a; }
+Performing C Linker Flag test LIBOMP_HAVE_AS_NEEDED_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/link_flag_check_LIBOMP_HAVE_AS_NEEDED_FLAG/build
+
+Run Build Command(s):/usr/bin/gmake && Scanning dependencies of target foo
+[ 50%] Building C object CMakeFiles/foo.dir/src_to_link.c.o
+[100%] Linking C shared library libfoo.so
+[100%] Built target foo
+
+
+Source file was:
+int foo(int a) { return a*a; }
+Performing C Linker Flag test LIBOMP_HAVE_VERSION_SCRIPT_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/link_flag_check_LIBOMP_HAVE_VERSION_SCRIPT_FLAG/build
+
+Run Build Command(s):/usr/bin/gmake && Scanning dependencies of target foo
+[ 50%] Building C object CMakeFiles/foo.dir/src_to_link.c.o
+[100%] Linking C shared library libfoo.so
+[100%] Built target foo
+
+
+Source file was:
+int foo(int a) { return a*a; }
+Performing C Linker Flag test LIBOMP_HAVE_STATIC_LIBGCC_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/link_flag_check_LIBOMP_HAVE_STATIC_LIBGCC_FLAG/build
+
+Run Build Command(s):/usr/bin/gmake && Scanning dependencies of target foo
+[ 50%] Building C object CMakeFiles/foo.dir/src_to_link.c.o
+[100%] Linking C shared library libfoo.so
+[100%] Built target foo
+
+
+Source file was:
+int foo(int a) { return a*a; }
+Performing C Linker Flag test LIBOMP_HAVE_Z_NOEXECSTACK_FLAG succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/link_flag_check_LIBOMP_HAVE_Z_NOEXECSTACK_FLAG/build
+
+Run Build Command(s):/usr/bin/gmake && Scanning dependencies of target foo
+[ 50%] Building C object CMakeFiles/foo.dir/src_to_link.c.o
+[100%] Linking C shared library libfoo.so
+[100%] Built target foo
+
+
+Source file was:
+int foo(int a) { return a*a; }
+Determining if the include file pthread.h exists passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_61bd9/fast && /usr/bin/gmake -f CMakeFiles/cmTC_61bd9.dir/build.make CMakeFiles/cmTC_61bd9.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_61bd9.dir/CheckIncludeFile.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized    -o CMakeFiles/cmTC_61bd9.dir/CheckIncludeFile.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_61bd9
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_61bd9.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized     CMakeFiles/cmTC_61bd9.dir/CheckIncludeFile.c.o  -o cmTC_61bd9 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_ab80b/fast && /usr/bin/gmake -f CMakeFiles/cmTC_ab80b.dir/build.make CMakeFiles/cmTC_ab80b.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_ab80b.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_ab80b.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+Linking C executable cmTC_ab80b
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ab80b.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_ab80b.dir/CheckFunctionExists.c.o  -o cmTC_ab80b -lpthread 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the include file immintrin.h exists passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_39be9/fast && /usr/bin/gmake -f CMakeFiles/cmTC_39be9.dir/build.make CMakeFiles/cmTC_39be9.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_39be9.dir/CheckIncludeFile.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized    -o CMakeFiles/cmTC_39be9.dir/CheckIncludeFile.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_39be9
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_39be9.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized     CMakeFiles/cmTC_39be9.dir/CheckIncludeFile.c.o  -o cmTC_39be9 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_ATTRIBUTE_RTM succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_b454d/fast && /usr/bin/gmake -f CMakeFiles/cmTC_b454d.dir/build.make CMakeFiles/cmTC_b454d.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_b454d.dir/src.cxx.o
+/usr/bin/g++    -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_ATTRIBUTE_RTM   -o CMakeFiles/cmTC_b454d.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_b454d
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b454d.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_ATTRIBUTE_RTM    CMakeFiles/cmTC_b454d.dir/src.cxx.o  -o cmTC_b454d 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+__attribute__((target("rtm")))
+                             int main() {return 0;}
+Performing C++ SOURCE FILE Test LIBOMP_HAVE_RTM_INTRINSICS succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_a1aa1/fast && /usr/bin/gmake -f CMakeFiles/cmTC_a1aa1.dir/build.make CMakeFiles/cmTC_a1aa1.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_a1aa1.dir/src.cxx.o
+/usr/bin/g++  -DATTRIBUTE_RTM -DIMMINTRIN_H  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_RTM_INTRINSICS   -o CMakeFiles/cmTC_a1aa1.dir/src.cxx.o -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_a1aa1
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a1aa1.dir/link.txt --verbose=1
+/usr/bin/g++   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -std=gnu++14 -DLIBOMP_HAVE_RTM_INTRINSICS    CMakeFiles/cmTC_a1aa1.dir/src.cxx.o  -o cmTC_a1aa1 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+// check for attribute rtm and rtm intrinsics
+      #ifdef IMMINTRIN_H
+      #include <immintrin.h>
+      #endif
+      #ifdef INTRIN_H
+      #include <intrin.h>
+      #endif
+      #ifdef ATTRIBUTE_RTM
+      __attribute__((target("rtm")))
+      #endif
+      static inline int __kmp_xbegin() {
+        return _xbegin();
+      }
+      int main() { int a = __kmp_xbegin(); return a; }
+Performing C SOURCE FILE Test LIBOMP_HAVE_VERSION_SYMBOLS succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7b293/fast && /usr/bin/gmake -f CMakeFiles/cmTC_7b293.dir/build.make CMakeFiles/cmTC_7b293.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7b293.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_VERSION_SYMBOLS -Wl,--version-script=/home/vi3/gcc/llvm-project/openmp/openmp-build/runtime/__version_script.txt   -o CMakeFiles/cmTC_7b293.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_7b293
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7b293.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_VERSION_SYMBOLS -Wl,--version-script=/home/vi3/gcc/llvm-project/openmp/openmp-build/runtime/__version_script.txt    CMakeFiles/cmTC_7b293.dir/src.c.o  -o cmTC_7b293 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+#include <stdio.h>
+    void func1() { printf("Hello"); }
+    void func2() { printf("World"); }
+    __asm__(".symver func1, func@VER1");
+    __asm__(".symver func2, func@VER2");
+    int main() {
+      func1();
+      func2();
+      return 0;
+    }
+Performing C SOURCE FILE Test LIBOMP_HAVE___BUILTIN_FRAME_ADDRESS succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_52d93/fast && /usr/bin/gmake -f CMakeFiles/cmTC_52d93.dir/build.make CMakeFiles/cmTC_52d93.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_52d93.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE___BUILTIN_FRAME_ADDRESS   -o CMakeFiles/cmTC_52d93.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c: In function ‘main’:
+/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c:2:9: warning: unused variable ‘p’ [-Wunused-variable]
+   void* p = __builtin_frame_address(0);
+         ^
+Linking C executable cmTC_52d93
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_52d93.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE___BUILTIN_FRAME_ADDRESS    CMakeFiles/cmTC_52d93.dir/src.c.o  -o cmTC_52d93 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+int main(int argc, char** argv) {
+  void* p = __builtin_frame_address(0);
+  return 0;}
+Performing C SOURCE FILE Test LIBOMP_HAVE_WEAK_ATTRIBUTE succeeded with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_e5421/fast && /usr/bin/gmake -f CMakeFiles/cmTC_e5421.dir/build.make CMakeFiles/cmTC_e5421.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e5421.dir/src.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_WEAK_ATTRIBUTE   -o CMakeFiles/cmTC_e5421.dir/src.c.o   -c /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_e5421
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e5421.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DLIBOMP_HAVE_WEAK_ATTRIBUTE    CMakeFiles/cmTC_e5421.dir/src.c.o  -o cmTC_e5421 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+Source file was:
+__attribute__ ((weak)) int foo(int a) { return a*a; }
+  int main(int argc, char** argv) {
+  return foo(argc);}
+Determining if the function sqrt exists in the m passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_7cb23/fast && /usr/bin/gmake -f CMakeFiles/cmTC_7cb23.dir/build.make CMakeFiles/cmTC_7cb23.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_7cb23.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=sqrt   -o CMakeFiles/cmTC_7cb23.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+<command-line>: warning: conflicting types for built-in function ‘sqrt’ [-Wbuiltin-declaration-mismatch]
+/projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+   CHECK_FUNCTION_EXISTS(void);
+   ^~~~~~~~~~~~~~~~~~~~~
+Linking C executable cmTC_7cb23
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_7cb23.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=sqrt    CMakeFiles/cmTC_7cb23.dir/CheckFunctionExists.c.o  -o cmTC_7cb23 -lm 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+Change Dir: /home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake cmTC_c7059/fast && /usr/bin/gmake -f CMakeFiles/cmTC_c7059.dir/build.make CMakeFiles/cmTC_c7059.dir/build
+gmake[1]: Entering directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_c7059.dir/CheckFunctionExists.c.o
+/usr/bin/gcc   -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_c7059.dir/CheckFunctionExists.c.o   -c /projects/pkgs/cmake-3.15.7/share/cmake-3.15/Modules/CheckFunctionExists.c
+Linking C executable cmTC_c7059
+/projects/pkgs/cmake-3.15.7/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c7059.dir/link.txt --verbose=1
+/usr/bin/gcc  -Wall -Wcast-qual -Wimplicit-fallthrough -Wsign-compare -Wno-extra -Wno-pedantic -Wno-maybe-uninitialized -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_c7059.dir/CheckFunctionExists.c.o  -o cmTC_c7059 -lpthread 
+gmake[1]: Leaving directory '/home/vi3/gcc/llvm-project/openmp/openmp-build/CMakeFiles/CMakeTmp'
+
+
+

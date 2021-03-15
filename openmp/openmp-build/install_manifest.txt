@@ -1,0 +1,12 @@
+/home/vi3/gcc/llvm-project/openmp/openmp-install/lib/libomp.so
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/omp.h
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/omp-tools.h
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/ompt.h
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/omp_lib.h
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/omp_lib.mod
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/omp_lib_kinds.mod
+/home/vi3/gcc/llvm-project/openmp/openmp-install/lib/libomptarget.so
+/home/vi3/gcc/llvm-project/openmp/openmp-install/lib/libomptarget.rtl.cuda.so
+/home/vi3/gcc/llvm-project/openmp/openmp-install/lib/libarcher.so
+/home/vi3/gcc/llvm-project/openmp/openmp-install/lib/libarcher_static.a
+/home/vi3/gcc/llvm-project/openmp/openmp-install/include/ompt-multiplex.h

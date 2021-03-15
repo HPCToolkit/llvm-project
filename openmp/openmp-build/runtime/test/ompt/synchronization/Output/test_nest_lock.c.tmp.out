@@ -1,0 +1,17 @@
+0: NULL_POINTER=(nil)
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: ompt_event_init_nest_lock: wait_id=140733882693128, hint=0, impl=2, codeptr_ra=0x402c49 
+281474976710658: ompt_event_wait_nest_lock: wait_id=140733882693128, hint=0, impl=2, codeptr_ra=0x402c55 
+281474976710658: ompt_event_acquired_nest_lock_first: wait_id=140733882693128, codeptr_ra=0x402c55 
+281474976710658: ompt_event_release_nest_lock_last: wait_id=140733882693128, codeptr_ra=0x402c61 
+281474976710658: ompt_event_wait_nest_lock: wait_id=140733882693128, hint=0, impl=2, codeptr_ra=0x402c6d 
+281474976710658: ompt_event_acquired_nest_lock_first: wait_id=140733882693128, codeptr_ra=0x402c6d 
+281474976710658: ompt_event_wait_nest_lock: wait_id=140733882693128, hint=0, impl=2, codeptr_ra=0x402c79 
+281474976710658: ompt_event_acquired_nest_lock_next: wait_id=140733882693128, codeptr_ra=0x402c79 
+281474976710658: ompt_event_release_nest_lock_prev: wait_id=140733882693128, codeptr_ra=0x402c85 
+281474976710658: ompt_event_release_nest_lock_last: wait_id=140733882693128, codeptr_ra=0x402c91 
+281474976710658: ompt_event_destroy_nest_lock: wait_id=140733882693128, codeptr_ra=0x402c9d 
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+0: ompt_event_runtime_shutdown

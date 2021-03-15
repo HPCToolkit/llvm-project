@@ -1,0 +1,29 @@
+0: NULL_POINTER=(nil)
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: ompt_event_parallel_begin: parent_task_id=281474976710659, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7ffd2d1cf850, parallel_id=281474976710661, requested_team_size=1, codeptr_ra=0x402b49, invoker=2
+281474976710658: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=281474976710662, team_size=1, thread_num=0
+281474976710658: task level 0: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7ffd2d1cf850, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: task level 1: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7ffd2d1cf850, task_type=ompt_task_initial=1, thread_num=0
+281474976710658: ompt_event_parallel_begin: parent_task_id=281474976710662, parent_task_frame.exit=0x7ffd2d1cf850, parent_task_frame.reenter=0x7ffd2d1cf7b0, parallel_id=281474976710663, requested_team_size=1, codeptr_ra=0x402c06, invoker=2
+281474976710658: ompt_event_implicit_task_begin: parallel_id=281474976710663, task_id=281474976710664, team_size=1, thread_num=0
+281474976710658: task level 0: parallel_id=281474976710663, task_id=281474976710664, exit_frame=0x7ffd2d1cf7b0, reenter_frame=(nil), task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: task level 1: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7ffd2d1cf850, reenter_frame=0x7ffd2d1cf7b0, task_type=ompt_task_implicit=2, thread_num=0
+281474976710658: task level 2: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7ffd2d1cf850, task_type=ompt_task_initial=1, thread_num=0
+281474976710658: ompt_event_task_create: parent_task_id=281474976710664, parent_task_frame.exit=0x7ffd2d1cf7b0, parent_task_frame.reenter=0x7ffd2d1cf710, new_task_id=281474976710665, codeptr_ra=0x402c06, task_type=ompt_task_explicit|ompt_task_undeferred=134217732, has_dependences=no
+281474976710658: ompt_event_task_schedule: first_task_id=281474976710664, second_task_id=281474976710665, prior_task_status=ompt_task_switch=7
+281474976710658: task level 0: parallel_id=281474976710663, task_id=281474976710665, exit_frame=0x7ffd2d1cf4e0, reenter_frame=(nil), task_type=ompt_task_explicit|ompt_task_undeferred=134217732, thread_num=0
+281474976710658: task level 1: parallel_id=281474976710663, task_id=281474976710664, exit_frame=0x7ffd2d1cf7b0, reenter_frame=0x7ffd2d1cf710, task_type=ompt_task_implicit|ompt_task_undeferred=134217730, thread_num=0
+281474976710658: task level 2: parallel_id=281474976710661, task_id=281474976710662, exit_frame=0x7ffd2d1cf850, reenter_frame=0x7ffd2d1cf7b0, task_type=ompt_task_implicit=2, thread_num=0
+281474976710658: task level 3: parallel_id=281474976710660, task_id=281474976710659, exit_frame=(nil), reenter_frame=0x7ffd2d1cf850, task_type=ompt_task_initial=1, thread_num=0
+281474976710658: ompt_event_task_schedule: first_task_id=281474976710665, second_task_id=281474976710664, prior_task_status=ompt_task_complete=1
+281474976710658: ompt_event_task_end: task_id=281474976710665
+281474976710658: ompt_event_implicit_task_end: parallel_id=0, task_id=281474976710664, team_size=1, thread_num=0
+281474976710658: ompt_event_parallel_end: parallel_id=281474976710663, task_id=281474976710662, invoker=2, codeptr_ra=0x402c06
+281474976710658: fuzzy_address=0x402b or 0x402c or 0x402d or 0x402e (0x402c07)
+281474976710658: ompt_event_implicit_task_end: parallel_id=0, task_id=281474976710662, team_size=1, thread_num=0
+281474976710658: ompt_event_parallel_end: parallel_id=281474976710661, task_id=281474976710659, invoker=2, codeptr_ra=0x402b49
+281474976710658: fuzzy_address=0x402a or 0x402b or 0x402c or 0x402d (0x402b4a)
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+0: ompt_event_runtime_shutdown

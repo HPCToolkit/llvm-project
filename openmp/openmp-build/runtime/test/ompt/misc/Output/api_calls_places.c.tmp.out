@@ -1,0 +1,22 @@
+0: NULL_POINTER=(nil)
+281474976710658: ompt_event_thread_begin: thread_type=ompt_thread_initial=1, thread_id=281474976710658
+281474976710658: ompt_event_initial_task_begin: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=1, index=1, flags=1
+281474976710658: ompt_event_parallel_begin: parent_task_id=281474976710659, parent_task_frame.exit=(nil), parent_task_frame.reenter=0x7ffda1bd27d0, parallel_id=281474976710661, requested_team_size=1, codeptr_ra=0x402e5e, invoker=2
+281474976710658: ompt_event_implicit_task_begin: parallel_id=281474976710661, task_id=281474976710662, team_size=1, thread_num=0
+281474976710658: omp_get_num_places()=48
+281474976710658: ompt_get_num_places()=48
+281474976710658: omp_get_place_proc_ids(0)=(0,48)
+281474976710658: ompt_get_place_proc_ids(0)=(0,48)
+281474976710658: omp_get_place_num()=0
+281474976710658: ompt_get_place_num()=0
+281474976710658: omp_get_partition_place_nums(0)=(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47)
+281474976710658: ompt_get_partition_place_nums(0)=(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47)
+281474976710658: sched_getcpu()=0
+281474976710658: ompt_get_proc_id()=0
+281474976710658: omp_get_num_procs()=96
+281474976710658: ompt_get_num_procs()=96
+281474976710658: ompt_event_implicit_task_end: parallel_id=0, task_id=281474976710662, team_size=1, thread_num=0
+281474976710658: ompt_event_parallel_end: parallel_id=281474976710661, task_id=281474976710659, invoker=2, codeptr_ra=0x402e5e
+281474976710658: ompt_event_initial_task_end: parallel_id=281474976710660, task_id=281474976710659, actual_parallelism=0, index=1
+281474976710658: ompt_event_thread_end: thread_id=281474976710658
+0: ompt_event_runtime_shutdown
