@@ -117,7 +117,11 @@ static void print_ids(int level)
            frame->enter_frame.ptr, buffer, task_type, thread_num);
 }
 
+#if KMP_ARCH_PPC64
+#define get_frame_address(level) *(void **)__builtin_frame_address(level)
+#else
 #define get_frame_address(level) __builtin_frame_address(level)
+#endif
 
 #define print_frame(level)                                                     \
   printf("%" PRIu64 ": __builtin_frame_address(%d)=%p\n",                      \
