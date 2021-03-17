@@ -129,7 +129,7 @@ void ompt_fini(void);
 // always use the canonical frame address (known as CFA, which is the 
 // top of the caller's stack), which is available as 
 // __builtin_frame_address(1), for the OMPT frame pointer for a frame.
-#define OMPT_GET_FRAME_ADDRESS(level) __builtin_frame_address(1)
+#define OMPT_GET_FRAME_ADDRESS(level) __builtin_frame_address(level+1)
 #define OMPT_FRAME_POSITION_DEFAULT ompt_frame_cfa 
 #define OMPT_FRAME_POSITION_GCC4_TASK ompt_frame_cfa 
 #else
