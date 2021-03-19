@@ -94,13 +94,14 @@ EXTERN void __tgt_target_data_begin_mapper(ident_t *loc, int64_t device_id,
   TIMESCOPE_WITH_IDENT(loc);
   DP("Entering data begin region for device %" PRId64 " with %d mappings\n",
      device_id, arg_num);
+
+  ompt_interface.ompt_state_set(OMPT_GET_FRAME_ADDRESS(0), OMPT_GET_RETURN_ADDRESS(0));
+  ompt_interface.target_data_enter_begin(device_id);
+
   if (checkDeviceAndCtors(device_id, loc) != OFFLOAD_SUCCESS) {
     DP("Not offloading to device %" PRId64 "\n", device_id);
     return;
   }
-
-  ompt_interface.ompt_state_set(OMPT_GET_FRAME_ADDRESS(0), OMPT_GET_RETURN_ADDRESS(0));
-  ompt_interface.target_data_enter_begin(device_id);
 
   DeviceTy &Device = PM->Devices[device_id];
 

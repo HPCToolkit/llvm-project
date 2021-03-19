@@ -20,12 +20,16 @@
 #include <ompt.h>
 #include "private.h"
 
+
+
 /*******************************************************************************
  * macros
  *******************************************************************************/
 
 #define OMPT_CALLBACK(fn, args) if (ompt_enabled && fn) fn args
 #define fnptr_to_ptr(x) ((void *) (uint64_t) x)
+
+
 
 /*******************************************************************************
  * class
@@ -63,10 +67,11 @@ public:
 };
 #endif
 
+
+
 /*****************************************************************************
  * global data
  *****************************************************************************/
-
 
 static bool ompt_enabled = false;
 
@@ -83,10 +88,9 @@ FOREACH_OMPT_TARGET_CALLBACK(declare_name)
 
 #undef declare_name
 
-static const char *libomp_version_string;
-static unsigned int libomp_version_number;
-
 static libomptarget_rtl_finalizer_t libomptarget_rtl_finalizer;
+
+
 
 /*****************************************************************************
  * Thread local data
@@ -99,6 +103,8 @@ static thread_local uint64_t ompt_target_region_opid = 1;
 
 static std::atomic<uint64_t> ompt_target_region_id_ticket(1);
 static std::atomic<uint64_t> ompt_target_region_opid_ticket(1);
+
+
 
 /*****************************************************************************
  * OMPT callbacks
@@ -128,12 +134,10 @@ void OmptInterface::ompt_state_set
  void *codeptr_ra
 ) 
 {
-#if 0
   if (ompt_enabled) {
     ompt_state_set_helper(enter_frame, codeptr_ra, OMPT_FRAME_FLAGS,
       ompt_state_work_parallel);
   }
-#endif
 }
 
 
@@ -144,6 +148,8 @@ void OmptInterface::ompt_state_clear
 {
   if (ompt_enabled) ompt_state_set_helper(0, 0, 0, _state);
 }
+
+
 
 /*****************************************************************************
  * OMPT private operations
@@ -186,6 +192,8 @@ void OmptInterface::target_operation_end() {
        ompt_target_region_opid);
   }
 }
+
+
 
 /*****************************************************************************
  * OMPT public operations
@@ -384,6 +392,8 @@ void OmptInterface::target_end(int64_t device_id) {
   target_region_end();
 }
 
+
+
 /*****************************************************************************
  * OMPT interface operations
  *****************************************************************************/
@@ -459,7 +469,13 @@ void libomp_libomptarget_ompt_init(ompt_start_tool_result_t *result) {
 }
 
 
-void ompt_init() {
+
+
+/*****************************************************************************
+ * constructor
+ *****************************************************************************/
+
+__attribute__((constructor(102))) static void ompt_init() {
   static ompt_start_tool_result_t libomptarget_ompt_result;
   static bool initialized = false;
 
@@ -469,7 +485,8 @@ void ompt_init() {
     
     DP("in ompt_init\n");
     libomp_libomptarget_ompt_init_t libomp_libomptarget_ompt_init_fn = 
-      (libomp_libomptarget_ompt_init_t) (uint64_t) dlsym(NULL, "libomp_libomptarget_ompt_init");
+      (libomp_libomptarget_ompt_init_t) // (uint64_t)
+      dlsym(NULL, "libomp_libomptarget_ompt_init");
 
     if (libomp_libomptarget_ompt_init_fn) {
       libomp_libomptarget_ompt_init_fn(&libomptarget_ompt_result);
@@ -491,3 +508,4 @@ void libomptarget_rtl_ompt_init(ompt_start_tool_result_t *result) {
 }
 
 }
+
