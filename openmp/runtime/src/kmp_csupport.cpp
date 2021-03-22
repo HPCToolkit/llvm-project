@@ -292,9 +292,11 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
       if (lwt)
         task_frame = &(lwt->ompt_task_info.frame);
       else {
-        int tid = __kmp_tid_from_gtid(gtid);
-        task_frame = &(
-            parent_team->t.t_implicit_task_taskdata[tid].ompt_task_info.frame);
+        // Since a parallel construct may be nested inside an explicit task,
+        // use th_current_task in order to access to the task_frames.
+        // th_current_task may represent the innermost explicit task that
+        // encloses parallel region.
+        task_frame = &(master_th->th.th_current_task->ompt_task_info.frame);
       }
       OMPT_FRAME_SET(task_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		     (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
