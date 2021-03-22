@@ -770,12 +770,34 @@ void __kmpc_omp_wait_deps(ident_t *loc_ref, kmp_int32 gtid, kmp_int32 ndeps,
     return;
   }
 
+  // Since node is planned to be used outside of this function, allocate it
+  // on the heap, rather than on the stack. Look below in order to see the old
+  // implementation
+#if 0
   kmp_depnode_t node = {0};
   __kmp_init_node(&node);
   // the stack owns the node
   __kmp_node_ref(&node);
+#else
+#if USE_FAST_MEMORY
+  kmp_depnode_t *node =
+        (kmp_depnode_t *)__kmp_fast_allocate(thread, sizeof(kmp_depnode_t));
+#else
+  kmp_depnode_t *node =
+      (kmp_depnode_t *)__kmp_thread_malloc(thread, sizeof(kmp_depnode_t));
+#endif
+  __kmp_init_node(node);
+  // FIXME VI3: Do we really need to ref node here?
+  // (I don't think this node is going to be freed when the corresponding
+  // implicit task finishes.)
+  // If the ref id needed, then the node should be deref in the outer context
+  // or at the end of this function.
+  // TODO vi3-merge: Test this for clang compiler
+  __kmp_node_ref(node);
+#endif
 
-  if (!__kmp_check_deps(gtid, &node, NULL, &current_task->td_dephash,
+
+  if (!__kmp_check_deps(gtid, node, NULL, &current_task->td_dephash,
                         DEP_BARRIER, ndeps, dep_list, ndeps_noalias,
                         noalias_dep_list)) {
     KA_TRACE(10, ("__kmpc_omp_wait_deps(exit): T#%d has no blocking "
@@ -789,8 +811,8 @@ void __kmpc_omp_wait_deps(ident_t *loc_ref, kmp_int32 gtid, kmp_int32 ndeps,
 
   int thread_finished = FALSE;
   kmp_flag_32<false, false> flag(
-      (std::atomic<kmp_uint32> *)&node.dn.npredecessors, 0U);
-  while (node.dn.npredecessors > 0) {
+      (std::atomic<kmp_uint32> *)(&(node->dn.npredecessors)), 0U);
+  while (node->dn.npredecessors > 0) {
     flag.execute_tasks(thread, gtid, FALSE,
                        &thread_finished USE_ITT_BUILD_ARG(NULL),
                        __kmp_task_stealing_constraint);
