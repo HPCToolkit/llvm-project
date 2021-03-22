@@ -565,27 +565,8 @@ static inline void __ompt_task_init(kmp_taskdata_t *task, int tid) {
   task->ompt_task_info.task_data.value = 0;
   task->ompt_task_info.frame.exit_frame = ompt_data_none;
   task->ompt_task_info.frame.enter_frame = ompt_data_none;
-  // vi3-merge: I'll keep the code from our version.
-  // I suppose there's no any problems if we invalidae deps inforamtion.
   task->ompt_task_info.frame.exit_frame_flags = 0;
   task->ompt_task_info.frame.enter_frame_flags = 0;
-  // vi3-merge: It seems that these fields are removed.
-  //task->ompt_task_info.ndeps = 0;
-  // task->ompt_task_info.deps = NULL;
-  // vi3-merge: As far as I know, both enter an exit flags will have 0x20 value
-  // (this was the test cases I've been using, so I thinkg it should be fine
-  // to keep this. I'm pretty sure it is better to use OMPT_FRAME_POSITION_DEFAULT
-  // instead of ompt_frame_framepointer, since there should be the difference
-  // between power, arm and x86.
-  // task->ompt_task_info.frame.exit_frame_flags = ompt_frame_runtime | ompt_frame_framepointer;
-  // task->ompt_task_info.frame.enter_frame_flags = ompt_frame_runtime | ompt_frame_framepointer;
-#if 0 
-  //johnmc: this is the way the flas are set up in the main branch
-  task->ompt_task_info.frame.exit_frame_flags =
-      ompt_frame_runtime | ompt_frame_framepointer;
-  task->ompt_task_info.frame.enter_frame_flags =
-      ompt_frame_runtime | ompt_frame_framepointer;
-#endif
 }
 
 // __ompt_task_start:

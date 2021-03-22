@@ -92,7 +92,6 @@ class OmptInterface {
   int _state;
 }; 
 
-extern void ompt_init();
 
 extern thread_local OmptInterface ompt_interface; 
 

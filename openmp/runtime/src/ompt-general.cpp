@@ -267,8 +267,6 @@ ompt_try_start_tool(unsigned int omp_version, const char *runtime_version) {
     return ret;
   }
 
-  // vi3-merge: I don't think this #if is needed anymore
-//#if KMP_DYNAMIC_LIB
   // Try tool-libraries-var ICV
   OMPT_VERBOSE_INIT_CONTINUED_PRINT("Failed.\n");
   const char *tool_libs = getenv("OMP_TOOL_LIBRARIES");
