@@ -1135,8 +1135,9 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
 
     ompt_task_info_t *parent_task_info;
     parent_task_info = OMPT_CUR_TASK_INFO(this_thr);
+    // enter_frame must be set already
+    KMP_DEBUG_ASSERT(parent_task_info->frame.enter_frame.ptr);
 
-    parent_task_info->frame.enter_frame.ptr = OMPT_GET_FRAME_ADDRESS(0);
     if (ompt_enabled.ompt_callback_parallel_begin) {
       int team_size = 1;
       // FIXME VI3: What should be the value of invoker?
