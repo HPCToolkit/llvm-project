@@ -536,9 +536,8 @@ kmp_int32 __kmpc_omp_task_with_deps(ident_t *loc_ref, kmp_int32 gtid,
           ompt_task_explicit | TASK_TYPE_DETAILS_FORMAT(new_taskdata), 1,
           OMPT_LOAD_OR_GET_RETURN_ADDRESS(gtid));
     }
-
-    new_taskdata->ompt_task_info.frame.enter_frame.ptr =
-        OMPT_GET_FRAME_ADDRESS(0);
+    // Don't change task_frames of the new task. It may not even get scheduled
+    // at this moment.
   }
 
 #if OMPT_OPTIONAL
