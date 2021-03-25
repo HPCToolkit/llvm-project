@@ -27,7 +27,10 @@ int main() {
           print_frame(0);
         } else if (creator_frame == get_frame_address(1)) {
           printf("Assume this code was called from the application:\n");
-          print_frame(1);
+          // vi3-merge: Check whether the approach implemented inside function
+          // __kmpc_omp_task_begin_if0 is correct.
+          // print_frame(1);
+          print_frame(0);
         } else {
           // The exit frame must be our parent!
           printf("Assume this code was not inlined, exit frame must be our parent:\n");

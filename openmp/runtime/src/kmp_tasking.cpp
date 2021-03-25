@@ -612,7 +612,8 @@ static inline void __ompt_task_finish(kmp_task_t *task,
 template <bool ompt>
 static void __kmpc_omp_task_begin_if0_template(ident_t *loc_ref, kmp_int32 gtid,
                                                kmp_task_t *task,
-                                               void *frame_address,
+                                               void *enter_frame_address,
+                                               void *exit_frame_address,
                                                void *return_address) {
   kmp_taskdata_t *taskdata = KMP_TASK_TO_TASKDATA(task);
   kmp_taskdata_t *current_task = __kmp_threads[gtid]->th.th_current_task;
@@ -638,11 +639,13 @@ static void __kmpc_omp_task_begin_if0_template(ident_t *loc_ref, kmp_int32 gtid,
 #if OMPT_SUPPORT
   if (ompt) {
     if (current_task->ompt_task_info.frame.enter_frame.ptr == NULL) {
-      current_task->ompt_task_info.frame.enter_frame.ptr =
-          taskdata->ompt_task_info.frame.exit_frame.ptr = frame_address;
+      current_task->ompt_task_info.frame.enter_frame.ptr = enter_frame_address;
+      taskdata->ompt_task_info.frame.exit_frame.ptr = exit_frame_address;
+      // FIXME vi3-merge: whether ompt_frame_application can be used for enter_frame?
+      //  Standardard isn't completely clear about this.
       current_task->ompt_task_info.frame.enter_frame_flags =
           taskdata->ompt_task_info.frame.exit_frame_flags = ompt_frame_application | OMPT_FRAME_POSITION_DEFAULT;
-#if 0 
+#if 0
     //johnmc this is how flags are set up in main
           taskdata->ompt_task_info.frame.exit_frame_flags =
               ompt_frame_application | ompt_frame_framepointer;
@@ -668,9 +671,12 @@ static void __kmpc_omp_task_begin_if0_template(ident_t *loc_ref, kmp_int32 gtid,
 OMPT_NOINLINE
 static void __kmpc_omp_task_begin_if0_ompt(ident_t *loc_ref, kmp_int32 gtid,
                                            kmp_task_t *task,
-                                           void *frame_address,
+                                           void *enter_frame_address,
+                                           void *exit_frame_address,
                                            void *return_address) {
-  __kmpc_omp_task_begin_if0_template<true>(loc_ref, gtid, task, frame_address,
+  __kmpc_omp_task_begin_if0_template<true>(loc_ref, gtid, task,
+                                           enter_frame_address,
+                                           exit_frame_address,
                                            return_address);
 }
 #endif // OMPT_SUPPORT
@@ -686,13 +692,25 @@ void __kmpc_omp_task_begin_if0(ident_t *loc_ref, kmp_int32 gtid,
 #if OMPT_SUPPORT
   if (UNLIKELY(ompt_enabled.enabled)) {
     OMPT_STORE_RETURN_ADDRESS(gtid);
+    // enter_frame address points to the last application frame of the
+    // th_current_task (the caller of this function).
+    // exit_frame address points to this frame, which at the moment
+    // belongs to the runtime, but after this function returns,
+    // the frame will be swapped with the explicit task frame (that belongs
+    // to the application).
+    // The only inconsistency that the tool may see is if the sample
+    // is delevered after this function, but before starting to execute
+    // the new explicit task.
+    // vi3-merge: Note that OMPT_GET_FRAME_ADDRESS(1) belongs to the
+    // outer task so it may not be used as an exit_frame of the new task.
     __kmpc_omp_task_begin_if0_ompt(loc_ref, gtid, task,
                                    OMPT_GET_FRAME_ADDRESS(1),
+                                   OMPT_GET_FRAME_ADDRESS(0),
                                    OMPT_LOAD_RETURN_ADDRESS(gtid));
     return;
   }
 #endif
-  __kmpc_omp_task_begin_if0_template<false>(loc_ref, gtid, task, NULL, NULL);
+  __kmpc_omp_task_begin_if0_template<false>(loc_ref, gtid, task, NULL, NULL, NULL);
 }
 
 #ifdef TASK_UNUSED

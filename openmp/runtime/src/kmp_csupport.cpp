@@ -511,8 +511,12 @@ void __kmpc_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   bool runtime_caller = OMPT_FRAME_SET_P(parent_frame, enter);
   if (!runtime_caller) {
     // Set enter frame if the caller didn't.
-    OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
-                   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
+    // The enter_frame will point to the last application frame
+    // of the enclosing task (caller frame).
+    // Use ompt_frame_application, if it is allowed by the standard.
+    // Similar logic is done inside kmp_tasking.cpp: __kmpc_omp_task_begin_if0.
+    OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(1),
+                   (ompt_frame_application | OMPT_FRAME_POSITION_DEFAULT));
   }
   OMPT_STORE_RETURN_ADDRESS(global_tid);
 #endif
@@ -538,11 +542,11 @@ void __kmpc_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     child_frame = &OMPT_CUR_TASK_INFO(__kmp_threads[global_tid])->frame;
     OMPT_FRAME_SET(child_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
                    (ompt_frame_application | OMPT_FRAME_POSITION_DEFAULT));
+    // Note that at this point exit_frame points to the runtime frame.
+    // However, this frame will be replaced by the application frame after this
+    // function returns.
     // FIXME vi3-merge: Possible problem happens if the tool takes a sample after
     //  this and before starting to execute implicit task wrapper.
-    // FIXME vi3-merge: Since the parent_frame->enter_frame points to the frame
-    //  that belongs to the user code after this function returns,
-    //  maybe we should change the enter_frames too.
   }
 #endif
 
