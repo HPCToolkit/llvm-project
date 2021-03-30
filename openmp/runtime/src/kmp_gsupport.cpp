@@ -102,7 +102,7 @@ extern "C" {
     parent_frame = &OMPT_CUR_TASK_INFO(thr)->frame;			\
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),	\
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));	\
-    OMPT_STORE_RETURN_ADDRESS(gtid);					\
+    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);					\
   }
 
 #define OMPT_LOOP_BEFORE_TASK()						\
@@ -572,7 +572,9 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_START)(void (*task)(void *),
     parent_frame = &OMPT_CUR_TASK_INFO(thr)->frame;
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-    OMPT_STORE_RETURN_ADDRESS(gtid);
+    KMP_DEBUG_ASSERT(__builtin_return_address(0));
+    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
+    KMP_DEBUG_ASSERT(OMPT_LOAD_RETURN_ADDRESS(0));
   }
 #endif
 
@@ -608,7 +610,9 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)(void) {
     // reset exit_frame of the enclosing task region
     ompt_frame_t *child_frame = &OMPT_CUR_TASK_INFO(thr)->frame;
     OMPT_FRAME_CLEAR(child_frame, exit);
-    OMPT_STORE_RETURN_ADDRESS(gtid);
+    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
+    KMP_DEBUG_ASSERT(OMPT_LOAD_RETURN_ADDRESS(0));
+
     // Should this be after run_after_invoked_task
   }
 #endif
@@ -1252,11 +1256,11 @@ LOOP_DOACROSS_RUNTIME_START_ULL(
          gtid, lb, ub, str, chunk_sz));                                        \
                                                                                \
     ompt_pre();                                                                \
+                                                                               \
     __kmp_GOMP_fork_call(&loc, gtid, num_threads, 0u, task,                    \
                          (microtask_t)__kmp_GOMP_parallel_microtask_wrapper,   \
                          9, task, data, num_threads, &loc, (schedule), lb,     \
                          (str > 0) ? (ub - 1) : (ub + 1), str, chunk_sz);      \
-    IF_OMPT_SUPPORT(OMPT_STORE_RETURN_ADDRESS(gtid));                          \
                                                                                \
     KMP_DISPATCH_INIT(&loc, gtid, (schedule), lb,                              \
                       (str > 0) ? (ub - 1) : (ub + 1), str, chunk_sz,          \
@@ -1503,7 +1507,7 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS_START)(
     parent_frame = &OMPT_CUR_TASK_INFO(thr)->frame;
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-    OMPT_STORE_RETURN_ADDRESS(gtid);
+    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
   }
 #endif
 
@@ -1517,10 +1521,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS_START)(
 
 #if OMPT_SUPPORT
   GCC_START_SET_FRAMES(application);
-  // vi3-merge:
-  // fixme vi3: I'm not sure about this
-  OMPT_FRAME_CLEAR(parent_frame, enter);  // I suppose we should clear enter tasks
-  OMPT_CLEAR_RETURN_ADDRESS(gtid); // I suppose we should clear return address
 #endif
 
   KMP_DISPATCH_INIT(&loc, gtid, kmp_nm_dynamic_chunked, 1, count, 1, 1, TRUE);

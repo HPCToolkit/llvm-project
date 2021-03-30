@@ -1,5 +1,8 @@
 // RUN: %libomp-cxx-compile-and-run | %sort-threads | FileCheck %s
 // REQUIRES: ompt
+// UNSUPPORTED: gcc-4.8
+
+// The problem for gcc-4.8 represents the command line argument -std=c++14
 
 #include <iostream>
 #include <thread>

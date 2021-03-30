@@ -1,6 +1,8 @@
 // RUN: %libomp-compile-and-run | FileCheck %s
 // REQUIRES: ompt
-// XFAIL: gcc-4
+// UNSUPPORTED: gcc-4.8
+
+// It seems simd clause isn't supported by gcc-4.8
 
 #include "callback.h"
 #include <omp.h>
