@@ -572,9 +572,10 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_START)(void (*task)(void *),
     parent_frame = &OMPT_CUR_TASK_INFO(thr)->frame;
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
+    // FIXME VI3-merge: I don't know why, but it seems the
+    //   following assert can fail.
     KMP_DEBUG_ASSERT(__builtin_return_address(0));
     OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
-    KMP_DEBUG_ASSERT(OMPT_LOAD_RETURN_ADDRESS(0));
   }
 #endif
 
@@ -610,9 +611,10 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)(void) {
     // reset exit_frame of the enclosing task region
     ompt_frame_t *child_frame = &OMPT_CUR_TASK_INFO(thr)->frame;
     OMPT_FRAME_CLEAR(child_frame, exit);
+    // FIXME VI3-merge: It seems this assertion can fail from
+    //  time to time.
+    KMP_DEBUG_ASSERT(__builtin_return_address(0));
     OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
-    KMP_DEBUG_ASSERT(OMPT_LOAD_RETURN_ADDRESS(0));
-
     // Should this be after run_after_invoked_task
   }
 #endif
@@ -1237,12 +1239,6 @@ LOOP_DOACROSS_RUNTIME_START_ULL(
 //
 // There are no ull versions (yet).
 
-// vi3-merge:
-// ompt_pre and ompt_post are present on the origin/master
-// OMPT_LOOP_PRE and OMPT_LOOP_BEFORE_TASK_START from jmc bran
-// ompt_pre should match OMPT_LOOP_PRE
-// ompt_post should match OMPT_LOOP_POST
-// fixme: remove ompt_pre if we don't need this
 #define PARALLEL_LOOP_START(func, schedule, ompt_pre, ompt_post) \
   void func(void (*task)(void *), void *data, unsigned num_threads, long lb,   \
             long ub, long str, long chunk_sz) {                                \
@@ -1272,7 +1268,6 @@ LOOP_DOACROSS_RUNTIME_START_ULL(
     KA_TRACE(20, (KMP_STR(func) " exit: T#%d\n", gtid));                       \
   }
 
-// vi3-merge: Maybe we can omit parameters like OMPT_LOOP_PRE and OMPT_LOOP_POST
 PARALLEL_LOOP_START(
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_STATIC_START),
     kmp_sch_static, OMPT_LOOP_PRE, OMPT_LOOP_POST)
@@ -1658,11 +1653,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS)(void (*task)(void *),
   KA_TRACE(20, ("GOMP_parallel_sections exit: T#%d\n", gtid));
 }
 
-// vi3-merge: the similar as above
-// Second occurence of OMPT_STORE_RETURN_ADDRESS needs to be in separate scope
-// because of the used guard.
-// It seems that guard invalidated stored return address at the end of scope.
-// I hope this is done with the good reason.
 #define PARALLEL_LOOP(func, schedule, ompt_pre, ompt_post)    					       \
   void func(void (*task)(void *), void *data, unsigned num_threads, long lb,   \
             long ub, long str, long chunk_sz, unsigned flags) {                \
@@ -1702,8 +1692,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS)(void (*task)(void *),
     KA_TRACE(20, (KMP_STR(func) " exit: T#%d\n", gtid));                       \
   }
 
-// vi3-merge: I've added OMPT_LOOP_PRE and OMPT_LOOP_POST as arguments
-// It seems that some new scheduling policies have been introduced
 PARALLEL_LOOP(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_STATIC),
               kmp_sch_static, OMPT_LOOP_PRE, OMPT_LOOP_POST)
 PARALLEL_LOOP(KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_LOOP_DYNAMIC),

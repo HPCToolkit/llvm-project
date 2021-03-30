@@ -76,7 +76,7 @@ ompt_sync_region_t __ompt_get_barrier_kind(enum barrier_type, kmp_info_t *);
 inline void *__ompt_load_return_address(int gtid) {
   kmp_info_t *thr = __kmp_threads[gtid];
   void *return_address = thr->th.ompt_thread_info.return_address;
-  //thr->th.ompt_thread_info.return_address = NULL;
+  thr->th.ompt_thread_info.return_address = NULL;
   return return_address;
 }
 
