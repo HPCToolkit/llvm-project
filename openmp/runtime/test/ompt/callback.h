@@ -149,6 +149,10 @@ static void print_ids(int level)
   #endif
 #endif
 
+#define VI3_OLDER_GCC_FIX 1
+#if VI3_OLDER_GCC_FIX
+void *vi3_global_fuzzy_address;
+#endif
 // This macro helps to define a label at the current position that can be used
 // to get the current address in the code.
 //
@@ -160,15 +164,28 @@ static void print_ids(int level)
 //
 // (The empty block between "#pragma omp ..." and the __asm__ statement is a
 // workaround for a bug in the Intel Compiler.)
+#if VI3_OLDER_GCC_FIX
+#define define_ompt_label(id)                         \
+  {}                                                  \
+  __asm__("nop");                                     \
+  __asm__("ompt_label_" #id ":");                     \
+  __asm__("mov $ompt_label_" #id ", %rax");           \
+  __asm__("mov %rax, vi3_global_fuzzy_address(%rip)");
+#else
 #define define_ompt_label(id) \
   {} \
   __asm__("nop"); \
 ompt_label_##id:
+#endif
 
+#if VI3_OLDER_GCC_FIX
+#define get_ompt_label_address(id) vi3_global_fuzzy_address
+#else
 // This macro helps to get the address of a label that is inserted by the above
 // macro define_ompt_label(). The address is obtained with a GNU extension
 // (&&label) that has been tested with gcc, clang and icc.
 #define get_ompt_label_address(id) (&& ompt_label_##id)
+#endif
 
 // This macro prints the exact address that a previously called runtime function
 // returns to.

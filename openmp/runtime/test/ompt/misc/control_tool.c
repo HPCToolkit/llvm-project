@@ -1,6 +1,9 @@
 // RUN: %libomp-compile-and-run | FileCheck %s
 // REQUIRES: ompt
-// UNSUPPORTED: gcc-4, gcc-6
+
+// TODO VI3-MERGE: Check why this fails for gcc-4.8.5!
+// XFAIL: gcc-4.8
+
 #define TEST_NEED_PRINT_FRAME_FROM_OUTLINED_FN
 #include "callback.h"
 #include <omp.h>
