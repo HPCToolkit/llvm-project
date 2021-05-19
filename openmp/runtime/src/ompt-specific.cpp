@@ -357,7 +357,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     kmp_taskdata_t *taskdata = thr->th.th_current_task;
     if (taskdata == NULL)
       return 0;
-    kmp_team *team = thr->th.th_team, *prev_team = NULL;
+    kmp_team *team = taskdata->td_team, *prev_team = NULL;
     if (team == NULL)
       return 0;
     ompt_lw_taskteam_t *lwt = NULL,
@@ -425,8 +425,32 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       *parallel_data = team_info ? &(team_info->parallel_data) : NULL;
     }
     if (thread_num) {
-      if (level == 0)
-        *thread_num = __kmp_get_tid();
+      // FIXME VI3: Do we need to consider !prev_team?
+      if (level == 0) {
+        int tnum = __kmp_get_tid();
+        // NOTE: It is possible that master of the outer region
+        // is in the middle of process of creating/destroying the inner region.
+        // Even though thread finished updating/invalidating th_current_task
+        // (implicit task that corresponds to the innermost region), the ds_tid
+        // may not be updated yet. Since it remains zero for both inner and
+        // outer region, it is safe to return zero as thread_num.
+        // However, this is not case for the worker of outer regions.
+        // Handle this carefully.
+        if (team->t.t_threads[tnum] != thr) {
+          // Information stored inside th.th_info.ds.ds_tid doesn't match the
+          // thread_num inside the th_current_task->team.
+          // Either thread changed the ds_tid before invalidating
+          // th_current_task, or thread set newly formed implicit task as
+          // th_current_task, but hasn't updated ds_tid to be zero yet.
+          // "team" variable corresponds to the just finished/created implicit task.
+          // ds_tid matches thread_num inside "team"->t.t_parent.
+          // 0 is the thread_num of the thread inside the "team".
+          kmp_team_t *parent_team = team->t.t_parent;
+          assert(parent_team && parent_team->t.t_threads[tnum] == thr);
+          tnum = 0;
+        }
+        *thread_num = tnum;
+      }
       else if (prev_lwt)
         *thread_num = 0;
       else

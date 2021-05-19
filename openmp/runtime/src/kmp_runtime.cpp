@@ -915,8 +915,29 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
   KMP_DEBUG_ASSERT(master_gtid == __kmp_get_gtid());
   KMP_MB();
 
+  // Problem with atomicity: Values of ds_tid, th_team and th_current_task are
+  // inconsistent until the new implicit task is pushed by
+  // __kmp_initialize_info. The previous function is responsible to update
+  // th_current_task to match the implicit task of the team being formed here.
+  // The question is which task should be returned from
+  // __ompt_get_task_info_internal until __kmp_initialize_info finishes
+  // its job? I'm proposing to always use th_current_task as starting point.
+  // With this assumption, I've introduced a few changes here.
+
+  // If ds_tid and th_team are updated before the th_current_task, then
+  // they're matching the new team, while th_current_task still points to
+  // the enclosing task. By setting ds_tid to 0, we lost information about
+  // the thread_num of this thread in the team of the enclosing task.
+  // In order to prevent this, I'm proposing to push new implicit task first
+  // and then update ds_tid to 0.
+  // This eases the job of __ompt_get_task_info_internal to determine this case
+  // (the proceses of creating a new region).
+  // Otherwise, previous function needs to iterate over all of the threads
+  // present in th_curren_task->td_team in order to find the
+  // thread_num of this thread.
+  // FIXME: check if this is safe to do for hot teams!
   /* first, let's setup the primary thread */
-  master_th->th.th_info.ds.ds_tid = 0;
+  // master_th->th.th_info.ds.ds_tid = 0;
   master_th->th.th_team = team;
   master_th->th.th_team_nproc = team->t.t_nproc;
   master_th->th.th_team_master = master_th;
@@ -999,6 +1020,9 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
     __kmp_partition_places(team);
 #endif
   }
+
+  // Update ds_tid after updating the th_current_task.
+  master_th->th.th_info.ds.ds_tid = 0;
 
   if (__kmp_display_affinity && team->t.t_display_affinity != 1) {
     for (i = 0; i < team->t.t_nproc; i++) {
@@ -2539,6 +2563,11 @@ void __kmp_join_call(ident_t *loc, int gtid
   if (root->r.r_active != master_active)
     root->r.r_active = master_active;
 
+  // Read value of parallel_data before freeing the team.
+  // Since, ompt_callback_parallel_end is called after the team has been freed,
+  // it is possible that pointer to parallel_data points to a parallel_data
+  // of a new (recycled) team at the moment of dispatching the callback.
+  ompt_data_t old_parallel_data = *parallel_data;
   __kmp_free_team(root, team USE_NESTED_HOT_ARG(
                             master_th)); // this will free worker threads
 
@@ -2596,7 +2625,26 @@ void __kmp_join_call(ident_t *loc, int gtid
       ((team_microtask == (void *)__kmp_teams_master) ? ompt_parallel_league
                                                       : ompt_parallel_team);
   if (ompt_enabled.enabled) {
-    __kmp_join_ompt(gtid, master_th, parent_team, parallel_data, flags,
+    // parallel_data represents a pointer to ompt_data_t structure stored
+    // inside team descriptor (data structure).
+    // Data race may happened when sending parallel_data to
+    // ompt_callback_parallel_end
+    // after the team was freed after which it has been recycled.
+    // Consider the following example:
+    // 1. join has been called for parallel region A.
+    //    parallel_data points to a field in A's descriptor.
+    // 2. fork has been called for region B.
+    // 3. free A's team and its descriptor. parallel_data points to a field
+    //    contained in descriptor present in freelist.
+    // 4. allocate new team descriptor for B region by reusing previously
+    //    freed descriptor.
+    //    parallel_data now points to a field stored in B's descriptor.
+    // 5. Calls ompt_callback_parallel_end for A by sending parallel_data.
+    //    Aforementioned callbacks thinks that region B is ending instead of A.
+    // In order to avoid this data race, memoize the content of the
+    // A's parallel_data before freeing the descriptor.
+    // Send memoized value to the callback.
+    __kmp_join_ompt(gtid, master_th, parent_team, &old_parallel_data, flags,
                     codeptr);
   }
 #endif
@@ -4107,7 +4155,10 @@ static void __kmp_initialize_info(kmp_info_t *this_thr, kmp_team_t *team,
 
   TCW_SYNC_PTR(this_thr->th.th_team, team);
 
-  this_thr->th.th_info.ds.ds_tid = tid;
+  // Read the reason of postponing the ds_tid update after the
+  // __kmp_init_implicit_task finishes (Multiline comment at the beginning
+  // of the __kmp_fork_team_threads function).
+  //this_thr->th.th_info.ds.ds_tid = tid;
   this_thr->th.th_set_nproc = 0;
   if (__kmp_tasking_mode != tskm_immediate_exec)
     // When tasking is possible, threads are not safe to reap until they are
@@ -4134,6 +4185,9 @@ static void __kmp_initialize_info(kmp_info_t *this_thr, kmp_team_t *team,
 
   __kmp_init_implicit_task(this_thr->th.th_team_master->th.th_ident, this_thr,
                            team, tid, TRUE);
+
+  // Update ds_tid now.
+  this_thr->th.th_info.ds.ds_tid = tid;
 
   KF_TRACE(10, ("__kmp_initialize_info2: T#%d:%d this_thread=%p curtask=%p\n",
                 tid, gtid, this_thr, this_thr->th.th_current_task));
