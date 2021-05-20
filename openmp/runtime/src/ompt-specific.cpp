@@ -366,7 +366,9 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
 
     while (ancestor_level > 0) {
       // needed for thread_num
-      prev_team = team;
+      // FIXME: I guess this should be done only when encounter on an
+      //  implicit task?
+      //prev_team = team;
       prev_lwt = lwt;
       // next lightweight team (if any)
       if (lwt)
@@ -377,6 +379,8 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       if (!lwt && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
         if (taskdata->ompt_task_info.scheduling_parent) {
+          // FIXME: thread doesn't change the the team, so there's no need
+          //  to do prev_team = team?
           taskdata = taskdata->ompt_task_info.scheduling_parent;
         } else if (next_lwt) {
           lwt = next_lwt;
@@ -386,6 +390,9 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
           taskdata = taskdata->td_parent;
           if (team == NULL)
             return 0;
+          // Store current team as previous team only when encounter
+          // on an implicit task.
+          prev_team = team;
           team = team->t.t_parent;
           if (taskdata) {
             next_lwt = LWT_FROM_TEAM(taskdata->td_team);
@@ -425,8 +432,14 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       *parallel_data = team_info ? &(team_info->parallel_data) : NULL;
     }
     if (thread_num) {
-      // FIXME VI3: Do we need to consider !prev_team?
-      if (level == 0) {
+      if (level == 0 || !prev_team) {
+        // If "level" is greater than 0 and if there's no "prev_team",
+        // that means thread is executing a task (implicit or explicit)
+        // that belongs to the innermost region (which is not serialized).
+        // A few explicit tasks may be nested inside the innermost region.
+        // This stands with the assumption that "prev_team = team" is done
+        // only when encountering on an implicit task in the while loop above.
+        // Use ds_tid in order to get thread_num inside the team at level 0.
         int tnum = __kmp_get_tid();
         // NOTE: It is possible that master of the outer region
         // is in the middle of process of creating/destroying the inner region.
@@ -457,6 +470,8 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         *thread_num = prev_team->t.t_master_tid;
       //        *thread_num = team->t.t_master_tid;
     }
+    // FIXME: couldn't we check this before trying to provide
+    //  parallel_data, task_data, etc?
     return info ? 2 : 0;
   }
   return 0;

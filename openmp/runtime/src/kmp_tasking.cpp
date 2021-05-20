@@ -532,6 +532,19 @@ static void __kmp_task_start(kmp_int32 gtid, kmp_task_t *task,
   }
 #endif /* BUILD_TIED_TASK_STACK */
 
+#if OMPT_SUPPORT
+  // FIXME: Check whether calling the __ompt_task_start makes more sense.
+  // Fully initialize taskdata before setting it as th_current_task.
+  // This especially stands for correctly initializing scheduling parent used
+  // by __ompt_get_task_info_internal.
+  // Otherwise, if someone calls ompt_get_task_info(1) immediately after
+  // th_current_task is set as the th_current_task, but before
+  // scheduling_parent is correctly initialized, then outdated
+  // (maybe even recycled) reference to
+  // scheduling_parent will be used and cause the tool to receive
+  // the inconsistent information.
+  taskdata->ompt_task_info.scheduling_parent = current_task;
+#endif
   // mark starting task as executing and as current task
   thread->th.th_current_task = taskdata;
 
@@ -586,6 +599,9 @@ static inline void __ompt_task_start(kmp_task_t *task,
         &(current_task->ompt_task_info.task_data), status,
         &(taskdata->ompt_task_info.task_data));
   }
+  // FIXME: This is set inside __kmp_task_start before updating th_current_task.
+  //  Is it safe to remove it from here? Or is it ok to call this function
+  //  from __kmp_task_start?
   taskdata->ompt_task_info.scheduling_parent = current_task;
 }
 
