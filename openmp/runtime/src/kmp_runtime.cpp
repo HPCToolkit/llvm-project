@@ -1346,10 +1346,6 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     __ompt_lw_taskteam_link(&lw_taskteam, this_thr, 1);
     // don't use lw_taskteam after linking. content was swaped
 
-    ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
-    OMPT_FRAME_SET(task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
-		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-
     /* OMPT implicit task begin */
     implicit_task_data = OMPT_CUR_TASK_DATA(this_thr);
     if (ompt_enabled.ompt_callback_implicit_task) {
@@ -1363,8 +1359,9 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
 
     /* OMPT state */
     this_thr->th.ompt_thread_info.state = ompt_state_work_parallel;
-    OMPT_CUR_TASK_INFO(this_thr)->frame.exit_frame.ptr =
-        OMPT_GET_FRAME_ADDRESS(0);
+    ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
+    OMPT_FRAME_SET(task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
+                   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
   }
 #endif
 }
@@ -1868,10 +1865,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
             /* OMPT implicit task begin */
             implicit_task_data = OMPT_CUR_TASK_DATA(master_th);
             if (ompt_enabled.ompt_callback_implicit_task) {
-	            ompt_frame_t *frame = &task_info->frame;
-	            // vi3-merge: I'm not sure whether exit frame should be set.
-	            OMPT_FRAME_SET(frame, exit, OMPT_GET_FRAME_ADDRESS(0),
-			          (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
 	            task_info->thread_num = __kmp_tid_from_gtid(gtid);
               ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
                   ompt_scope_begin, OMPT_CUR_TEAM_DATA(master_th),
@@ -1903,22 +1896,15 @@ int __kmp_fork_call(ident_t *loc, int gtid,
 	          ompt_frame_t *frame = &task_info->frame;
 	          OMPT_FRAME_CLEAR(frame, exit);
             if (ompt_enabled.ompt_callback_implicit_task) {
-	            // vi3-merge: Again, I'm not sure whether exit frame should be set
-              OMPT_FRAME_SET(frame, exit, OMPT_GET_FRAME_ADDRESS(0),
-			            (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
               ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
                   ompt_scope_end, NULL, &(task_info->task_data), 1,
                   OMPT_CUR_TASK_INFO(master_th)->thread_num,
                   ompt_task_implicit); // TODO: Can this be ompt_task_initial?
-	            OMPT_FRAME_CLEAR(frame, exit);
             }
 
             ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
             __ompt_lw_taskteam_unlink(master_th);
             if (ompt_enabled.ompt_callback_parallel_end) {
-	            // vi3-merge: I'm pretty sure the exit frame should not be set.
-              OMPT_FRAME_SET(frame, exit, OMPT_GET_FRAME_ADDRESS(0),
-			            (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
               // vi3-merge: It is possible that we're missing ompt_parallel_team
               // or league at some places where ompt_callback_parallel_* are
               // dispatched
@@ -1926,7 +1912,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
                   &ompt_parallel_data, parent_task_data,
                   OMPT_INVOKER(call_context) | ompt_parallel_team,
                   return_address);
-	            OMPT_FRAME_CLEAR(frame, exit);
             }
             master_th->th.ompt_thread_info.state = ompt_state_overhead;
           }
