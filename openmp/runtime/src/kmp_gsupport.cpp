@@ -102,7 +102,7 @@ extern "C" {
     parent_frame = &OMPT_CUR_TASK_INFO(thr)->frame;			\
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),	\
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));	\
-    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);					\
+    OMPT_STORE_RETURN_ADDRESS(gtid);					\
   }
 
 #define OMPT_LOOP_BEFORE_TASK()						\
@@ -112,10 +112,6 @@ extern "C" {
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));	\
   }
 
-#define OMPT_LOOP_BEFORE_TASK_START()					\
-  if (ompt_enabled.enabled) {						\
-    GCC_START_SET_FRAMES(application);					\
-  }
 
 #define OMPT_LOOP_POST()						\
   if (ompt_enabled.enabled) {						\
@@ -128,42 +124,9 @@ extern "C" {
 
 #define OMPT_LOOP_BEFORE_TASK()
 
-#define OMPT_LOOP_BEFORE_TASK_START()
-
 #define OMPT_LOOP_POST()
 
 #endif
-  
-  
-#define GCC_START_SET_FRAMES(exit_context)				\
-  if (ompt_enabled.enabled) {						\
-    /* record a pointer to the frame pointer in the current frame. */	\
-    /* after returning from this routine, the master will call     */	\
-    /* task(). the recorded address will (most likely) point into  */	\
-    /* the stack of task. we can't be more precise without writing */	\
-    /* this in assembly code. */					\
-    void *frame_address = OMPT_GET_FRAME_ADDRESS(0);			\
-    									\
-    /* set enter_frame of encountering task*/				\
-    OMPT_FRAME_SET(parent_frame, enter, frame_address,			\
-		   (ompt_frame_runtime |				\
-		    OMPT_FRAME_POSITION_GCC4_TASK));			\
-    									\
-    /* set exit_frame of implicit task */				\
-    ompt_frame_t *implicit_task_frame =					\
-      &OMPT_CUR_TASK_INFO(thr)->frame;					\
-    OMPT_FRAME_SET(implicit_task_frame, exit, frame_address,		\
-		   (ompt_frame_ ## exit_context |			\
-		    OMPT_FRAME_POSITION_GCC4_TASK));			\
-    									\
-    /* clear enter_frame of implicit task */				\
-    OMPT_FRAME_CLEAR(implicit_task_frame, enter);			\
-    									\
-    /* tool approach: if implicit_task_frame->exit_frame.ptr == */	\
-    /* parent_frame->enter_frame.ptr, there are no */			\
-    /* runtime frames between the two tasks.*/				\
-  }
-  
 
 void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_BARRIER)(void) {
   int gtid = __kmp_entry_gtid();
@@ -575,7 +538,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_START)(void (*task)(void *),
     // FIXME VI3-merge: I don't know why, but it seems the
     //   following assert can fail.
     KMP_DEBUG_ASSERT(__builtin_return_address(0));
-    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
   }
 #endif
 
@@ -585,10 +547,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_START)(void (*task)(void *),
   __kmp_GOMP_fork_call(&loc, gtid, num_threads, 0u, task,
                        (microtask_t)__kmp_GOMP_microtask_wrapper, 2, task,
                        data);
-
-#if OMPT_SUPPORT
-  GCC_START_SET_FRAMES(application);
-#endif
 }
 
 
@@ -614,7 +572,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)(void) {
     // FIXME VI3-merge: It seems this assertion can fail from
     //  time to time.
     KMP_DEBUG_ASSERT(__builtin_return_address(0));
-    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
     // Should this be after run_after_invoked_task
   }
 #endif
@@ -1263,7 +1220,6 @@ LOOP_DOACROSS_RUNTIME_START_ULL(
                       (schedule) != kmp_sch_static);                           \
                                                                                \
     ompt_post();                                                               \
-    OMPT_LOOP_BEFORE_TASK_START();					                                   \
                                                                                \
     KA_TRACE(20, (KMP_STR(func) " exit: T#%d\n", gtid));                       \
   }
@@ -1502,7 +1458,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS_START)(
     parent_frame = &OMPT_CUR_TASK_INFO(thr)->frame;
     OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(0),
 		   (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
-    OMPT_STORE_RETURN_ADDRESS_GCC4(gtid);
   }
 #endif
 
@@ -1513,10 +1468,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS_START)(
                        (microtask_t)__kmp_GOMP_parallel_microtask_wrapper, 9,
                        task, data, num_threads, &loc, kmp_nm_dynamic_chunked,
                        (kmp_int)1, (kmp_int)count, (kmp_int)1, (kmp_int)1);
-
-#if OMPT_SUPPORT
-  GCC_START_SET_FRAMES(application);
-#endif
 
   KMP_DISPATCH_INIT(&loc, gtid, kmp_nm_dynamic_chunked, 1, count, 1, 1, TRUE);
 
@@ -1686,7 +1637,6 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_SECTIONS)(void (*task)(void *),
                                                                                \
     KMP_EXPAND_NAME(KMP_API_NAME_GOMP_PARALLEL_END)(); 	                       \
                                                                                \
-    OMPT_LOOP_POST();							                                             \
     ompt_post();                                                               \
                                                                                \
     KA_TRACE(20, (KMP_STR(func) " exit: T#%d\n", gtid));                       \
