@@ -304,10 +304,12 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     link_lwt->parent = my_parent;
     thr->th.th_team->t.ompt_serialized_team_info = link_lwt;
   } else {
-    // this is the first serialized team, so we just store the values in the
-    // team and drop the taskteam-object
-    *OMPT_CUR_TEAM_INFO(thr) = lwt->ompt_team_info;
-    *OMPT_CUR_TASK_INFO(thr) = lwt->ompt_task_info;
+    // Must not copy parallel_data from lwt or the content
+    // potentially stored inside signal handler after the
+    // moment of dispatching the ompt_callback_parallel_end may be lost.
+    OMPT_CUR_TEAM_INFO(thr)->master_return_address =
+        lwt->ompt_team_info.master_return_address;
+    // TODO VI3-NOW: Check whether some task information needs to be copied.
   }
 }
 
@@ -316,9 +318,20 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   if (lwtask) {
     thr->th.th_team->t.ompt_serialized_team_info = lwtask->parent;
 
+    // TODO VI3-NOW: Make this process atomic from the tool perspective.
+    // Memoize the content of parallel_data, before invalidating it
+    // by unlinikg the lwt. Also, memoize the master_return_address.
+    ompt_data_t old_parallel_data = OMPT_CUR_TEAM_INFO(thr)->parallel_data;
+    void *old_master_return_address = OMPT_CUR_TEAM_INFO(thr)->master_return_address;
+
     ompt_team_info_t tmp_team = lwtask->ompt_team_info;
     lwtask->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
     *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
+
+    // Store the content of the old_parallel_data and old_master_return_address
+    // in order to be sent to the following ompt_callback_parallel_end.
+    OMPT_CUR_TEAM_INFO(thr)->old_parallel_data = old_parallel_data;
+    OMPT_CUR_TEAM_INFO(thr)->old_master_return_address = old_master_return_address;
 
     ompt_task_info_t tmp_task = lwtask->ompt_task_info;
     lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
@@ -328,6 +341,14 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
       __kmp_free(lwtask);
       lwtask = NULL;
     }
+  } else {
+    // Copy the value of master_return_address in order to be sent to the
+    // ompt_callback_parallel_end.
+    // By doing this, we don't need to care whether the unlinking happened
+    // before or after the loading of the return address inside
+    // __kmp_end_serialized function.
+    OMPT_CUR_TEAM_INFO(thr)->old_master_return_address =
+        OMPT_CUR_TEAM_INFO(thr)->master_return_address;
   }
   //    return lwtask;
 }

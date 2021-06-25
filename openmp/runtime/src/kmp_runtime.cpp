@@ -1105,7 +1105,8 @@ static void __kmp_alloc_argv_entries(int argc, kmp_team_t *team,
 
 /* Run a parallel region that has been serialized, so runs only in a team of the
    single primary thread. */
-void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
+void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
+                               ompt_data_t ompt_parallel_data, void *codeptr) {
   kmp_info_t *this_thr;
   kmp_team_t *serial_team;
 
@@ -1151,9 +1152,7 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   this_thr->th.th_set_proc_bind = proc_bind_default;
 
 #if OMPT_SUPPORT
-  ompt_data_t ompt_parallel_data = ompt_data_none;
   ompt_data_t *implicit_task_data;
-  void *codeptr = OMPT_LOAD_RETURN_ADDRESS(global_tid);
   if (ompt_enabled.enabled &&
       this_thr->th.ompt_thread_info.state != ompt_state_overhead) {
 
@@ -1233,6 +1232,8 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     KMP_ASSERT(this_thr->th.th_current_task->td_flags.executing == 1);
     this_thr->th.th_current_task->td_flags.executing = 0;
 
+    // copy the parallel_data content stored inside ompt_callback_parallel_end
+    serial_team->t.ompt_team_info.parallel_data = ompt_parallel_data;
     __kmp_push_current_task_to_thread(this_thr, serial_team, 0);
 
     /* TODO: GEH: do ICVs work for nested serialized teams? Don't we need an
@@ -1333,7 +1334,8 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   if (__kmp_env_consistency_check)
     __kmp_push_parallel(global_tid, NULL);
 #if OMPT_SUPPORT
-  serial_team->t.ompt_team_info.master_return_address = codeptr;
+  // master_return_address is going to be set inside
+  // __ompt_lw_taskteam_link function.
   if (ompt_enabled.enabled &&
       this_thr->th.ompt_thread_info.state != ompt_state_overhead) {
     OMPT_CUR_TASK_INFO(this_thr)->frame.exit_frame.ptr =
@@ -1365,6 +1367,181 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   }
 #endif
 }
+
+/* End a parallel region that has been serialized.
+ * This function is internally called. */
+/*!
+@ingroup PARALLEL
+@param loc  source location information
+@param global_tid  global thread number
+
+Leave a serialized parallel construct.
+ This function is internally called.
+*/
+void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
+  kmp_internal_control_t *top;
+  kmp_info_t *this_thr;
+  kmp_team_t *serial_team;
+
+  KC_TRACE(10,
+           ("__kmp_end_serialized_parallel: called by T#%d\n", global_tid));
+
+  /* skip all this code for autopar serialized loops since it results in
+     unacceptable overhead */
+  if (loc != NULL && (loc->flags & KMP_IDENT_AUTOPAR))
+    return;
+
+  // Not autopar code
+  __kmp_assert_valid_gtid(global_tid);
+  if (!TCR_4(__kmp_init_parallel))
+    __kmp_parallel_initialize();
+
+  __kmp_resume_if_soft_paused();
+
+  this_thr = __kmp_threads[global_tid];
+  serial_team = this_thr->th.th_serial_team;
+
+  // clear exit_frame for clang (It has already been cleared for gcc)
+#if OMPT_SUPPORT
+  if (ompt_enabled.enabled) {
+    ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
+    OMPT_FRAME_CLEAR(task_frame, exit);
+  }
+#endif
+
+  kmp_task_team_t *task_team = this_thr->th.th_task_team;
+  // we need to wait for the proxy tasks before finishing the thread
+  if (task_team != NULL && task_team->tt.tt_found_proxy_tasks)
+    __kmp_task_team_wait(this_thr, serial_team USE_ITT_BUILD_ARG(NULL));
+
+  KMP_MB();
+  KMP_DEBUG_ASSERT(serial_team);
+  KMP_ASSERT(serial_team->t.t_serialized);
+  KMP_DEBUG_ASSERT(this_thr->th.th_team == serial_team);
+  KMP_DEBUG_ASSERT(serial_team != this_thr->th.th_root->r.r_root_team);
+  KMP_DEBUG_ASSERT(serial_team->t.t_threads);
+  KMP_DEBUG_ASSERT(serial_team->t.t_threads[0] == this_thr);
+
+#if OMPT_SUPPORT
+  if (ompt_enabled.enabled &&
+    this_thr->th.ompt_thread_info.state != ompt_state_overhead) {
+    if (ompt_enabled.ompt_callback_implicit_task) {
+      //printf("kmp_csupport.cpp:595 >>> ompt_callback_implicit_task (end)\n");
+      ompt_task_info_t *task_info = OMPT_CUR_TASK_INFO(this_thr);
+      ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
+          ompt_scope_end, NULL, OMPT_CUR_TASK_DATA(this_thr), 1,
+          task_info->thread_num, ompt_task_implicit);
+    }
+
+    __ompt_lw_taskteam_unlink(this_thr);
+    this_thr->th.ompt_thread_info.state = ompt_state_overhead;
+  }
+#endif
+
+  /* If necessary, pop the internal control stack values and replace the team
+   * values */
+  top = serial_team->t.t_control_stack_top;
+  if (top && top->serial_nesting_level == serial_team->t.t_serialized) {
+    copy_icvs(&serial_team->t.t_threads[0]->th.th_current_task->td_icvs, top);
+    serial_team->t.t_control_stack_top = top->next;
+    __kmp_free(top);
+  }
+
+  // if( serial_team -> t.t_serialized > 1 )
+  serial_team->t.t_level--;
+
+  /* pop dispatch buffers stack */
+  KMP_DEBUG_ASSERT(serial_team->t.t_dispatch->th_disp_buffer);
+  {
+    dispatch_private_info_t *disp_buffer =
+        serial_team->t.t_dispatch->th_disp_buffer;
+    serial_team->t.t_dispatch->th_disp_buffer =
+        serial_team->t.t_dispatch->th_disp_buffer->next;
+    __kmp_free(disp_buffer);
+  }
+  this_thr->th.th_def_allocator = serial_team->t.t_def_allocator; // restore
+
+  --serial_team->t.t_serialized;
+  if (serial_team->t.t_serialized == 0) {
+
+    /* return to the parallel section */
+
+#if KMP_ARCH_X86 || KMP_ARCH_X86_64
+    if (__kmp_inherit_fp_control && serial_team->t.t_fp_control_saved) {
+      __kmp_clear_x87_fpu_status_word();
+      __kmp_load_x87_fpu_control_word(&serial_team->t.t_x87_fpu_control_word);
+      __kmp_load_mxcsr(&serial_team->t.t_mxcsr);
+    }
+#endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
+
+    this_thr->th.th_team = serial_team->t.t_parent;
+    this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
+
+    /* restore values cached in the thread */
+    this_thr->th.th_team_nproc = serial_team->t.t_parent->t.t_nproc; /*  JPH */
+    this_thr->th.th_team_master =
+        serial_team->t.t_parent->t.t_threads[0]; /* JPH */
+    this_thr->th.th_team_serialized = this_thr->th.th_team->t.t_serialized;
+
+    /* TODO the below shouldn't need to be adjusted for serialized teams */
+    this_thr->th.th_dispatch =
+        &this_thr->th.th_team->t.t_dispatch[serial_team->t.t_master_tid];
+
+    __kmp_pop_current_task_from_thread(this_thr);
+    // Save the content of parallel_data after marking the corresponding
+    // implicit task as finished.
+    serial_team->t.ompt_team_info.old_parallel_data = serial_team->t.ompt_team_info.parallel_data;
+
+    KMP_ASSERT(this_thr->th.th_current_task->td_flags.executing == 0);
+    this_thr->th.th_current_task->td_flags.executing = 1;
+
+    if (__kmp_tasking_mode != tskm_immediate_exec) {
+      // Copy the task team from the new child / old parent team to the thread.
+      this_thr->th.th_task_team =
+          this_thr->th.th_team->t.t_task_team[this_thr->th.th_task_state];
+      KA_TRACE(20,
+               ("__kmp_end_serialized_parallel: T#%d restoring task_team %p / "
+                "team %p\n",
+                   global_tid, this_thr->th.th_task_team, this_thr->th.th_team));
+    }
+  } else {
+    if (__kmp_tasking_mode != tskm_immediate_exec) {
+      KA_TRACE(20, ("__kmp_end_serialized_parallel: T#%d decreasing nesting "
+                    "depth of serial team %p to %d\n",
+          global_tid, serial_team, serial_team->t.t_serialized));
+    }
+  }
+
+  if (__kmp_env_consistency_check)
+    __kmp_pop_parallel(global_tid, NULL);
+#if OMPT_SUPPORT
+  if (ompt_enabled.enabled)
+    this_thr->th.ompt_thread_info.state =
+        ((this_thr->th.th_team_serialized) ? ompt_state_work_serial
+                                           : ompt_state_work_parallel);
+#endif
+
+#if OMPT_SUPPORT
+  if(ompt_enabled.enabled) {
+    if (ompt_enabled.ompt_callback_parallel_end) {
+      // Parent task of the previously finished implicit task is the new
+      // current implicit task. This is the reason why 0 is used as the
+      // ancestor_level.
+      ompt_data_t *parent_task_data;
+      // reset clear the task id only after unlinking the task
+      __ompt_get_task_info_internal(0, NULL, &parent_task_data, NULL, NULL, NULL);
+
+      int invoker = (loc ? ompt_parallel_invoker_runtime : ompt_parallel_invoker_program);
+      ompt_callbacks.ompt_callback(ompt_callback_parallel_end)(
+          &(serial_team->t.ompt_team_info.old_parallel_data), parent_task_data,
+          invoker | ompt_parallel_team,
+          serial_team->t.ompt_team_info.old_master_return_address);
+    }
+  }
+#endif
+
+}
+
 
 /* most of the work for a fork */
 /* return true if we really went parallel, false if serialized */
@@ -1557,12 +1734,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
           }
           ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
           __ompt_lw_taskteam_unlink(master_th);
-          if (ompt_enabled.ompt_callback_parallel_end) {
-            ompt_callbacks.ompt_callback(ompt_callback_parallel_end)(
-                &ompt_parallel_data, OMPT_CUR_TASK_DATA(master_th),
-                OMPT_INVOKER(call_context) | ompt_parallel_team,
-                return_address);
-          }
           master_th->th.ompt_thread_info.state = ompt_state_overhead;
         }
 #endif
@@ -1722,7 +1893,29 @@ int __kmp_fork_call(ident_t *loc, int gtid,
       KA_TRACE(20,
                ("__kmp_fork_call: T#%d serializing parallel region\n", gtid));
 
-      __kmpc_serialized_parallel(loc, gtid);
+      // If the outermost serialized parallel region is created, the following
+      // function is responsible to initialize new implicit task.
+      // Consider the following event order:
+      // 1. The ompt_callback_parallel_begin is dispatched first for the
+      //    outermost serialized parallel region. The tool may store some
+      //    value A inside the corresponding parallel_data
+      //    (local variable ompt_parallel_data).
+      // 2. __kmp_serialized_parallel initializes the new implicit task
+      // 3. The tool may receive asynchronous sample which is processed inside
+      //    the signal handler. If the ompt_get_task_info is invoked at this
+      //    moment, the tool will receive the information about new implicit
+      //    task as well as the parallel_data stored inside the
+      //    serial_team.th.ompt_team_info.
+      //    Assume that the store some value B
+      // 4. Linking function copies the content of the ompt_parallel_data to
+      //    serial_team->th.ompt_team_info.parallel_data, so it contains value A.
+      // As we may notice, the value B has been lost.
+      // In order to prevent this, send the content of ompt_parallel_data to
+      // __kmp_serialized parallel in order to be copied to
+      // serial_team->th.ompt_team_info.parallel_data. Avoid overriding the
+      // content of this memory by omitting linking function.
+      // TODO: See whether something similar needs to be done for task_data too.
+      __kmp_serialized_parallel(loc, gtid, ompt_parallel_data, return_address);
 
       if (call_context == fork_context_intel) {
         /* TODO this sucks, use the compiler itself to pass args! :) */
@@ -1749,10 +1942,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
             task_info = OMPT_CUR_TASK_INFO(master_th);
             exit_frame_p = &(task_info->frame.exit_frame.ptr);
             if (ompt_enabled.ompt_callback_implicit_task) {
-              // vi3-merge: I agree that team is exiting the runtime code.
-              // However it doesn't enter the user code. It is not going to
-              // execute the implicit task, but the tool's code.
-              //*exit_frame_p = OMPT_GET_FRAME_ADDRESS(0);
               OMPT_CUR_TASK_INFO(master_th)->thread_num = 
 	          __kmp_tid_from_gtid(gtid);
               ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
@@ -1793,12 +1982,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
             }
             ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
             __ompt_lw_taskteam_unlink(master_th);
-            if (ompt_enabled.ompt_callback_parallel_end) {
-              ompt_callbacks.ompt_callback(ompt_callback_parallel_end)(
-                  &ompt_parallel_data, parent_task_data,
-                  OMPT_INVOKER(call_context) | ompt_parallel_team,
-                  return_address);
-            }
             master_th->th.ompt_thread_info.state = ompt_state_overhead;
           }
 #endif
@@ -1853,7 +2036,7 @@ int __kmp_fork_call(ident_t *loc, int gtid,
           ompt_task_info_t *task_info;
 
           ompt_lw_taskteam_t lw_taskteam;
-
+          // NOTE: Previous two branches haven't been tested, only this one has.
           if (ompt_enabled.enabled) {
             __ompt_lw_taskteam_init(&lw_taskteam, master_th, gtid,
                                     &ompt_parallel_data, return_address);
@@ -1865,11 +2048,17 @@ int __kmp_fork_call(ident_t *loc, int gtid,
             /* OMPT implicit task begin */
             implicit_task_data = OMPT_CUR_TASK_DATA(master_th);
             if (ompt_enabled.ompt_callback_implicit_task) {
+              // FIXME VI3-NOW: Some tests are failing if I remove setting exit frames (chkompt.h).
+              ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(master_th)->frame;
+              OMPT_FRAME_SET(task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
+                             (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
 	            task_info->thread_num = __kmp_tid_from_gtid(gtid);
               ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
                   ompt_scope_begin, OMPT_CUR_TEAM_DATA(master_th),
                   implicit_task_data, 1, task_info->thread_num,
                   ompt_task_implicit); // TODO: Can this be ompt_task_initial?
+              // FIXME VI3-NOW: chkompt.h crashes if the frame is cleared here
+              //OMPT_FRAME_CLEAR(task_frame, exit);
             }
 
             /* OMPT state */
@@ -1880,6 +2069,7 @@ int __kmp_fork_call(ident_t *loc, int gtid,
 #endif
 
           {
+            // TODO VI3-NOW: Check whether exit_frame_p is properly set.
             KMP_TIME_PARTITIONED_BLOCK(OMP_parallel);
             KMP_SET_THREAD_STATE_BLOCK(IMPLICIT_TASK);
             __kmp_invoke_microtask(microtask, gtid, 0, argc, args
@@ -1904,23 +2094,11 @@ int __kmp_fork_call(ident_t *loc, int gtid,
 
             ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
             __ompt_lw_taskteam_unlink(master_th);
-            if (ompt_enabled.ompt_callback_parallel_end) {
-              // vi3-merge: It is possible that we're missing ompt_parallel_team
-              // or league at some places where ompt_callback_parallel_* are
-              // dispatched
-              ompt_callbacks.ompt_callback(ompt_callback_parallel_end)(
-                  &ompt_parallel_data, parent_task_data,
-                  OMPT_INVOKER(call_context) | ompt_parallel_team,
-                  return_address);
-            }
             master_th->th.ompt_thread_info.state = ompt_state_overhead;
           }
 #endif
         }
       } else if (call_context == fork_context_gnu) {
-      // vi3-merge:
-//      else if ((call_context == fork_context_gnu_task_library) |
-//		 (call_context == fork_context_gnu_task_program)) {
 #if OMPT_SUPPORT
         ompt_lw_taskteam_t lwt;
         __ompt_lw_taskteam_init(&lwt, master_th, gtid, &ompt_parallel_data,
@@ -2320,7 +2498,7 @@ void __kmp_join_call(ident_t *loc, int gtid
 #if OMPT_SUPPORT
   void *team_microtask = (void *)team->t.t_pkfn;
   // For GOMP interface with serialized parallel, need the
-  // __kmpc_end_serialized_parallel to call hooks for OMPT end-implicit-task
+  // __kmp_end_serialized_parallel to call hooks for OMPT end-implicit-task
   // and end-parallel events.
   if (ompt_enabled.enabled &&
       !(team->t.t_serialized && fork_context == fork_context_gnu)) {
@@ -2352,11 +2530,11 @@ void __kmp_join_call(ident_t *loc, int gtid
       } else if (level == tlevel + 1) {
         // AC: we are exiting parallel inside teams, need to increment
         // serialization in order to restore it in the next call to
-        // __kmpc_end_serialized_parallel
+        // __kmp_end_serialized_parallel
         team->t.t_serialized++;
       }
     }
-    __kmpc_end_serialized_parallel(loc, gtid);
+    __kmp_end_serialized_parallel(loc, gtid);
 
 #if OMPT_SUPPORT
     if (ompt_enabled.enabled) {
@@ -7341,6 +7519,7 @@ int __kmp_invoke_task_func(int gtid) {
   int ompt_team_size;
   ompt_frame_t *task_frame;
 
+  // FIXME VI3-NOW: Should this be set after dispatching the callback?
   if (ompt_enabled.enabled) {
     exit_frame_p = &(team->t.t_implicit_task_taskdata[tid]
 		         .ompt_task_info.frame.exit_frame.ptr);

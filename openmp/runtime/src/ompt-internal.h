@@ -77,6 +77,9 @@ typedef struct {
 typedef struct {
   ompt_data_t parallel_data;
   void *master_return_address;
+  // used after unlinking of the corresponding lwt
+  ompt_data_t old_parallel_data;
+  void *old_master_return_address;
 } ompt_team_info_t;
 
 typedef struct ompt_lw_taskteam_s {
