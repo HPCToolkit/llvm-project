@@ -289,6 +289,11 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     }
     link_lwt->heap = on_heap;
 
+    // It is not safe to use information stored inside OMPT_CUR_TEAM_INFO,
+    // OMPT_CUR_TASK_INFO and link_lwt, until the lw task is fully linked.
+    // Mark that process of linking has just begun.
+    OMPT_CUR_TASK_INFO(thr)->linking_lwt = true;
+
     // would be swap in the (on_stack) case.
     ompt_team_info_t tmp_team = lwt->ompt_team_info;
     link_lwt->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
@@ -303,6 +308,10 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
         thr->th.th_team->t.ompt_serialized_team_info;
     link_lwt->parent = my_parent;
     thr->th.th_team->t.ompt_serialized_team_info = link_lwt;
+
+    // Mark tha the linking process has just ended.
+    // This may be redundant, since tmp_task->linking_lwt should be false.
+    OMPT_CUR_TASK_INFO(thr)->linking_lwt = false;
   } else {
     // Must not copy parallel_data from lwt or the content
     // potentially stored inside signal handler after the
@@ -324,6 +333,11 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     ompt_data_t old_parallel_data = OMPT_CUR_TEAM_INFO(thr)->parallel_data;
     void *old_master_return_address = OMPT_CUR_TEAM_INFO(thr)->master_return_address;
 
+    // It is not safe to use information stored inside OMPT_CUR_TEAM_INFO,
+    // OMPT_CUR_TASK_INFO and link_lwt, until the lw task is fully unlinked.
+    // Mark that the process of linking has just begun.
+    OMPT_CUR_TASK_INFO(thr)->linking_lwt = true;
+
     ompt_team_info_t tmp_team = lwtask->ompt_team_info;
     lwtask->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
     *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
@@ -336,6 +350,10 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     ompt_task_info_t tmp_task = lwtask->ompt_task_info;
     lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
     *OMPT_CUR_TASK_INFO(thr) = tmp_task;
+
+    // Mark that the process of unlinking has just ended.
+    // This may be redundant, since tmp_task->linking_lwt should be false.
+    OMPT_CUR_TASK_INFO(thr)->linking_lwt = false;
 
     if (lwtask->heap) {
       __kmp_free(lwtask);
@@ -385,10 +403,21 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
                        *next_lwt = LWT_FROM_TEAM(taskdata->td_team),
                        *prev_lwt = NULL;
 
+    if (taskdata->ompt_task_info.linking_lwt) {
+      // The linking process is in progress.
+      // It is not safe to use taskdata->ompt_task_info, as well as
+      // team->ompt_team_info. However, all other fields should be use safely.
+      if (level == 0) {
+        // Inform the tool that there exist the task at this level, but
+        // the information cannot be provided yet. The tool can inquire
+        // the information about the ancestor tasks though.
+        return 1;
+      }
+    }
+
     while (ancestor_level > 0) {
       // needed for thread_num
-      // FIXME: I guess this should be done only when encounter on an
-      //  implicit task?
+      // TODO VI3-NOW: Check whether this is ok to use to detect thread_num.
       //prev_team = team;
       prev_lwt = lwt;
       // next lightweight team (if any)
@@ -400,8 +429,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       if (!lwt && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
         if (taskdata->ompt_task_info.scheduling_parent) {
-          // FIXME: thread doesn't change the the team, so there's no need
-          //  to do prev_team = team?
+          // NOTE: thread doesn't change the the team, does it?
           taskdata = taskdata->ompt_task_info.scheduling_parent;
         } else if (next_lwt) {
           lwt = next_lwt;
@@ -418,6 +446,8 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
           if (taskdata) {
             next_lwt = LWT_FROM_TEAM(taskdata->td_team);
           }
+          // invalidate prev_lwt, since the regular team has been updated
+          prev_lwt = NULL;
         }
       }
       ancestor_level--;
@@ -453,7 +483,11 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       *parallel_data = team_info ? &(team_info->parallel_data) : NULL;
     }
     if (thread_num) {
-      if (level == 0 || !prev_team) {
+      if (prev_lwt)
+        *thread_num = 0;
+      else if (level == 0 || !prev_team) {
+        // FIXME VI3-NOW: This needs to be fixed
+        // TODO VI3-NOW: Reorder the branches after fixing this.
         // If "level" is greater than 0 and if there's no "prev_team",
         // that means thread is executing a task (implicit or explicit)
         // that belongs to the innermost region (which is not serialized).
@@ -485,8 +519,6 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         }
         *thread_num = tnum;
       }
-      else if (prev_lwt)
-        *thread_num = 0;
       else
         *thread_num = prev_team->t.t_master_tid;
       //        *thread_num = team->t.t_master_tid;

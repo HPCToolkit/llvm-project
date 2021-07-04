@@ -1401,14 +1401,6 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   this_thr = __kmp_threads[global_tid];
   serial_team = this_thr->th.th_serial_team;
 
-  // clear exit_frame for clang (It has already been cleared for gcc)
-#if OMPT_SUPPORT
-  if (ompt_enabled.enabled) {
-    ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
-    OMPT_FRAME_CLEAR(task_frame, exit);
-  }
-#endif
-
   kmp_task_team_t *task_team = this_thr->th.th_task_team;
   // we need to wait for the proxy tasks before finishing the thread
   if (task_team != NULL && task_team->tt.tt_found_proxy_tasks)

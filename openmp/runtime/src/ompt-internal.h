@@ -72,6 +72,8 @@ typedef struct {
   ompt_data_t task_data;
   struct kmp_taskdata *scheduling_parent;
   int thread_num;
+  // Process of linking/unlinking the lwt is in progress.
+  bool linking_lwt;
 } ompt_task_info_t;
 
 typedef struct {
