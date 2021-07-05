@@ -275,6 +275,8 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
   lwt->ompt_task_info.scheduling_parent = NULL;
   lwt->heap = 0;
   lwt->parent = 0;
+  // lwt is implicit by default
+  lwt->explicit_task = false;
 }
 
 void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
@@ -302,6 +304,12 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     ompt_task_info_t tmp_task = lwt->ompt_task_info;
     link_lwt->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
     *OMPT_CUR_TASK_INFO(thr) = tmp_task;
+
+    // copy flags
+    // th_current_task may be explicit
+    link_lwt->explicit_task = thr->th.th_current_task->td_flags.tasktype;
+    // linking process always happens for an implicit task
+    thr->th.th_current_task->td_flags.tasktype = 0;
 
     // link the taskteam into the list of taskteams:
     ompt_lw_taskteam_t *my_parent =
@@ -350,6 +358,9 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     ompt_task_info_t tmp_task = lwtask->ompt_task_info;
     lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
     *OMPT_CUR_TASK_INFO(thr) = tmp_task;
+
+    // copy flags
+    thr->th.th_current_task->td_flags.tasktype = lwtask->explicit_task;
 
     // Mark that the process of unlinking has just ended.
     // This may be redundant, since tmp_task->linking_lwt should be false.

@@ -89,6 +89,8 @@ typedef struct ompt_lw_taskteam_s {
   ompt_task_info_t ompt_task_info;
   int heap;
   struct ompt_lw_taskteam_s *parent;
+  // task type flags (see whether we need more flags)
+  bool explicit_task;
 } ompt_lw_taskteam_t;
 
 typedef struct {
