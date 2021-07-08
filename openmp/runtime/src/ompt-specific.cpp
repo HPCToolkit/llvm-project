@@ -357,7 +357,10 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     kmp_taskdata_t *taskdata = thr->th.th_current_task;
     if (taskdata == NULL)
       return 0;
-    kmp_team *team = taskdata->td_team, *prev_team = NULL;
+    // NOTE: taskdata->td_team and thr->th.th_team may differ if thread
+    //  is forming new region, or destroying the one that has recently
+    //  finished.
+    kmp_team *team = taskdata->td_team, *prev_team = thr->th.th_team;
     if (team == NULL)
       return 0;
     ompt_lw_taskteam_t *lwt = NULL,
@@ -428,26 +431,20 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // FIXME VI3: Do we need to consider !prev_team?
       if (level == 0) {
         int tnum = __kmp_get_tid();
-        // NOTE: It is possible that master of the outer region
-        // is in the middle of process of creating/destroying the inner region.
-        // Even though thread finished updating/invalidating th_current_task
-        // (implicit task that corresponds to the innermost region), the ds_tid
-        // may not be updated yet. Since it remains zero for both inner and
-        // outer region, it is safe to return zero as thread_num.
-        // However, this is not case for the worker of outer regions.
-        // Handle this carefully.
-        if (team->t.t_threads[tnum] != thr) {
-          // Information stored inside th.th_info.ds.ds_tid doesn't match the
-          // thread_num inside the th_current_task->team.
-          // Either thread changed the ds_tid before invalidating
-          // th_current_task, or thread set newly formed implicit task as
-          // th_current_task, but hasn't updated ds_tid to be zero yet.
-          // "team" variable corresponds to the just finished/created implicit task.
-          // ds_tid matches thread_num inside "team"->t.t_parent.
-          // 0 is the thread_num of the thread inside the "team".
-          kmp_team_t *parent_team = team->t.t_parent;
-          assert(parent_team && parent_team->t.t_threads[tnum] == thr);
-          tnum = 0;
+        if (team != prev_team) {
+          // Two potential cases:
+          // 1. Thread is creating the new parallel region. The team has been
+          //    initialized and th_team is updated. However, the corresponding
+          //    implicit task is still not created, so th_current_task points
+          //    to the parent task.
+          // 2. Thread is in the middle of the process of finishing the parallel
+          //    region. It has just finished with executing the corresponding
+          //    implicit task. This means that the th_current_task points to
+          //    the parent task.
+          // In both cases, the corresponding parallel team is
+          // th_team->t.t_parent == taskdata->td_team, so the thread num
+          // is stored inside th_team->t.t_master_tid.order.
+          tnum = prev_team->t.t_master_tid;
         }
         *thread_num = tnum;
       }
