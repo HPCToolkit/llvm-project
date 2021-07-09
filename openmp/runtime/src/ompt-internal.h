@@ -17,6 +17,7 @@
 
 #include "ompt-event-specific.h"
 #include "omp-tools.h"
+#include "kmp_tasking_flags.h"
 
 #define OMPT_VERSION 1
 
@@ -89,8 +90,8 @@ typedef struct ompt_lw_taskteam_s {
   ompt_task_info_t ompt_task_info;
   int heap;
   struct ompt_lw_taskteam_s *parent;
-  // task type flags (see whether we need more flags)
-  bool explicit_task;
+  // maybe we don't need all task flags
+  kmp_tasking_flags_t td_flags;
 } ompt_lw_taskteam_t;
 
 typedef struct {
