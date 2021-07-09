@@ -407,7 +407,10 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     kmp_taskdata_t *taskdata = thr->th.th_current_task;
     if (taskdata == NULL)
       return 0;
-    kmp_team *team = taskdata->td_team, *prev_team = NULL;
+    // NOTE: taskdata->td_team and thr->th.th_team may differ if thread
+    //  is forming the new region, or destroying the one that has recently
+    //  finished.
+    kmp_team *team = taskdata->td_team, *prev_team = thr->th.th_team;
     if (team == NULL)
       return 0;
     ompt_lw_taskteam_t *lwt = NULL,
@@ -428,8 +431,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
 
     while (ancestor_level > 0) {
       // needed for thread_num
-      // TODO VI3-NOW: Check whether this is ok to use to detect thread_num.
-      //prev_team = team;
+      prev_team = team;
       prev_lwt = lwt;
       // next lightweight team (if any)
       if (lwt)
@@ -440,7 +442,6 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       if (!lwt && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
         if (taskdata->ompt_task_info.scheduling_parent) {
-          // NOTE: thread doesn't change the the team, does it?
           taskdata = taskdata->ompt_task_info.scheduling_parent;
         } else if (next_lwt) {
           lwt = next_lwt;
@@ -450,9 +451,6 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
           taskdata = taskdata->td_parent;
           if (team == NULL)
             return 0;
-          // Store current team as previous team only when encounter
-          // on an implicit task.
-          prev_team = team;
           team = team->t.t_parent;
           if (taskdata) {
             next_lwt = LWT_FROM_TEAM(taskdata->td_team);
@@ -494,42 +492,28 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       *parallel_data = team_info ? &(team_info->parallel_data) : NULL;
     }
     if (thread_num) {
-      if (prev_lwt)
-        *thread_num = 0;
-      else if (level == 0 || !prev_team) {
-        // FIXME VI3-NOW: This needs to be fixed
-        // TODO VI3-NOW: Reorder the branches after fixing this.
-        // If "level" is greater than 0 and if there's no "prev_team",
-        // that means thread is executing a task (implicit or explicit)
-        // that belongs to the innermost region (which is not serialized).
-        // A few explicit tasks may be nested inside the innermost region.
-        // This stands with the assumption that "prev_team = team" is done
-        // only when encountering on an implicit task in the while loop above.
-        // Use ds_tid in order to get thread_num inside the team at level 0.
-        int tnum = __kmp_get_tid();
-        // NOTE: It is possible that master of the outer region
-        // is in the middle of process of creating/destroying the inner region.
-        // Even though thread finished updating/invalidating th_current_task
-        // (implicit task that corresponds to the innermost region), the ds_tid
-        // may not be updated yet. Since it remains zero for both inner and
-        // outer region, it is safe to return zero as thread_num.
-        // However, this is not case for the worker of outer regions.
-        // Handle this carefully.
-        if (team->t.t_threads[tnum] != thr) {
-          // Information stored inside th.th_info.ds.ds_tid doesn't match the
-          // thread_num inside the th_current_task->team.
-          // Either thread changed the ds_tid before invalidating
-          // th_current_task, or thread set newly formed implicit task as
-          // th_current_task, but hasn't updated ds_tid to be zero yet.
-          // "team" variable corresponds to the just finished/created implicit task.
-          // ds_tid matches thread_num inside "team"->t.t_parent.
-          // 0 is the thread_num of the thread inside the "team".
-          kmp_team_t *parent_team = team->t.t_parent;
-          assert(parent_team && parent_team->t.t_threads[tnum] == thr);
-          tnum = 0;
+      if (level == 0) {
+        if (team != prev_team) {
+          // Two potential cases:
+          // 1. Thread is creating the new parallel region. The team has been
+          //    initialized and th_team is updated. However, the corresponding
+          //    implicit task is still not created, so th_current_task points
+          //    to the parent task.
+          // 2. Thread is in the middle of the process of finishing the parallel
+          //    region. It has just finished with executing the corresponding
+          //    implicit task. This means that the th_current_task points to
+          //    the parent task.
+          // In both cases, the corresponding parallel team is
+          // th_team->t.t_parent == taskdata->td_team, so the thread num
+          // is stored inside th_team->t.t_master_tid.order.
+          *thread_num = prev_team->t.t_master_tid;
+        } else {
+          *thread_num = __kmp_get_tid();
         }
-        *thread_num = tnum;
-      }
+      } else if (prev_lwt)
+        *thread_num = 0; // encounter on outermost serialized parallel region
+      else if (lwt)
+        *thread_num = 0; // encounter on nested serialized parallel region
       else
         *thread_num = prev_team->t.t_master_tid;
       //        *thread_num = team->t.t_master_tid;

@@ -915,29 +915,9 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
   KMP_DEBUG_ASSERT(master_gtid == __kmp_get_gtid());
   KMP_MB();
 
-  // Problem with atomicity: Values of ds_tid, th_team and th_current_task are
-  // inconsistent until the new implicit task is pushed by
-  // __kmp_initialize_info. The previous function is responsible to update
-  // th_current_task to match the implicit task of the team being formed here.
-  // The question is which task should be returned from
-  // __ompt_get_task_info_internal until __kmp_initialize_info finishes
-  // its job? I'm proposing to always use th_current_task as starting point.
-  // With this assumption, I've introduced a few changes here.
-
-  // If ds_tid and th_team are updated before the th_current_task, then
-  // they're matching the new team, while th_current_task still points to
-  // the enclosing task. By setting ds_tid to 0, we lost information about
-  // the thread_num of this thread in the team of the enclosing task.
-  // In order to prevent this, I'm proposing to push new implicit task first
-  // and then update ds_tid to 0.
-  // This eases the job of __ompt_get_task_info_internal to determine this case
-  // (the proceses of creating a new region).
-  // Otherwise, previous function needs to iterate over all of the threads
-  // present in th_curren_task->td_team in order to find the
-  // thread_num of this thread.
   // FIXME: check if this is safe to do for hot teams!
   /* first, let's setup the primary thread */
-  // master_th->th.th_info.ds.ds_tid = 0;
+  master_th->th.th_info.ds.ds_tid = 0;
   master_th->th.th_team = team;
   master_th->th.th_team_nproc = team->t.t_nproc;
   master_th->th.th_team_master = master_th;
@@ -1020,9 +1000,6 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
     __kmp_partition_places(team);
 #endif
   }
-
-  // Update ds_tid after updating the th_current_task.
-  master_th->th.th_info.ds.ds_tid = 0;
 
   if (__kmp_display_affinity && team->t.t_display_affinity != 1) {
     for (i = 0; i < team->t.t_nproc; i++) {
@@ -4310,10 +4287,7 @@ static void __kmp_initialize_info(kmp_info_t *this_thr, kmp_team_t *team,
 
   TCW_SYNC_PTR(this_thr->th.th_team, team);
 
-  // Read the reason of postponing the ds_tid update after the
-  // __kmp_init_implicit_task finishes (Multiline comment at the beginning
-  // of the __kmp_fork_team_threads function).
-  //this_thr->th.th_info.ds.ds_tid = tid;
+  this_thr->th.th_info.ds.ds_tid = tid;
   this_thr->th.th_set_nproc = 0;
   if (__kmp_tasking_mode != tskm_immediate_exec)
     // When tasking is possible, threads are not safe to reap until they are
@@ -4340,9 +4314,6 @@ static void __kmp_initialize_info(kmp_info_t *this_thr, kmp_team_t *team,
 
   __kmp_init_implicit_task(this_thr->th.th_team_master->th.th_ident, this_thr,
                            team, tid, TRUE);
-
-  // Update ds_tid now.
-  this_thr->th.th_info.ds.ds_tid = tid;
 
   KF_TRACE(10, ("__kmp_initialize_info2: T#%d:%d this_thread=%p curtask=%p\n",
                 tid, gtid, this_thr, this_thr->th.th_current_task));
