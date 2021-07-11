@@ -412,8 +412,9 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       return 0;
     // NOTE: taskdata->td_team and thr->th.th_team may differ if thread
     //  is forming the new region, or destroying the one that has recently
-    //  finished.
-    kmp_team *team = taskdata->td_team, *prev_team = thr->th.th_team;
+    //  finished. This will be used later to detect the thread_num for the
+    //  ancestor_level=0.
+    kmp_team *team = taskdata->td_team, *prev_team = NULL;
     if (team == NULL)
       return 0;
     ompt_lw_taskteam_t *lwt = NULL,
@@ -434,7 +435,6 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
 
     while (ancestor_level > 0) {
       // needed for thread_num
-      prev_team = team;
       prev_lwt = lwt;
       // next lightweight team (if any)
       if (lwt)
@@ -454,6 +454,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
           taskdata = taskdata->td_parent;
           if (team == NULL)
             return 0;
+          prev_team = team;
           team = team->t.t_parent;
           if (taskdata) {
             next_lwt = LWT_FROM_TEAM(taskdata->td_team);
@@ -496,7 +497,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     }
     if (thread_num) {
       if (level == 0) {
-        if (team != prev_team) {
+        if (team != thr->th.th_team) {
           // Two potential cases:
           // 1. Thread is creating the new parallel region. The team has been
           //    initialized and th_team is updated. However, the corresponding
@@ -508,8 +509,8 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
           //    the parent task.
           // In both cases, the corresponding parallel team is
           // th_team->t.t_parent == taskdata->td_team, so the thread num
-          // is stored inside th_team->t.t_master_tid.order.
-          *thread_num = prev_team->t.t_master_tid;
+          // is stored inside th_team->t.t_master_tid.
+          *thread_num = thr->th.th_team->t.t_master_tid;
         } else {
           *thread_num = __kmp_get_tid();
         }
@@ -517,7 +518,14 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         *thread_num = 0; // encounter on outermost serialized parallel region
       else if (lwt)
         *thread_num = 0; // encounter on nested serialized parallel region
-      else
+      else if(!prev_team) {
+        // Since the prev_team is still NULL, this means that the thread is
+        // the explicit nested inside the innermost parallel region or it is
+        // executing the corresponding implicit task. Use the __kmp_get_tid to
+        // find the thread_num.
+        // NOTE: Take care about the order of the if-else branches.
+        *thread_num = __kmp_get_tid();
+      } else
         *thread_num = prev_team->t.t_master_tid;
       //        *thread_num = team->t.t_master_tid;
     }
