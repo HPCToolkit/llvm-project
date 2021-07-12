@@ -37,6 +37,15 @@
 
 #define OMPT_THREAD_ID_BITS 16
 
+#define LWT_MASK(ptr) \
+  ptr = (ompt_lw_taskteam_t *)((uint64_t)ptr | 0x1)
+
+#define LWT_UNMASK(ptr) \
+  ptr = (ompt_lw_taskteam_t *)((uint64_t)ptr & (0xFFFFFFFFFFFFFFFE))
+
+#define LWT_LINKING_IN_PROGRESS(thr) \
+  (uint64_t)thr->th.th_team->t.ompt_serialized_team_info & 0x1
+
 //******************************************************************************
 // private operations
 //******************************************************************************
@@ -292,37 +301,36 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     }
     link_lwt->heap = on_heap;
 
-    // It is not safe to use information stored inside OMPT_CUR_TEAM_INFO,
-    // OMPT_CUR_TASK_INFO and link_lwt, until the lw task is fully linked.
-    // Mark that process of linking has just begun.
-    OMPT_CUR_TASK_INFO(thr)->linking_lwt = true;
-
     // would be swap in the (on_stack) case.
     ompt_team_info_t tmp_team = lwt->ompt_team_info;
-    link_lwt->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
-    *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
-
     ompt_task_info_t tmp_task = lwt->ompt_task_info;
+    link_lwt->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
     link_lwt->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
-    *OMPT_CUR_TASK_INFO(thr) = tmp_task;
-
-    // copy flags
+    // copy task flags
     link_lwt->td_flags = thr->th.th_current_task->td_flags;
-    // linking process always happens for an implicit task
-    // (this is redundant, if the following statement is used)
-    thr->th.th_current_task->td_flags.tasktype = 0;
-    // FIXME VI3-NOW: Do we need to clear other flags too?
-    memset(&thr->th.th_current_task->td_flags, 0, sizeof(kmp_tasking_flags_t));
-
     // link the taskteam into the list of taskteams:
     ompt_lw_taskteam_t *my_parent =
         thr->th.th_team->t.ompt_serialized_team_info;
     link_lwt->parent = my_parent;
+    // Mark that link_lwt contains the information from both
+    // th_current_task and th_team data structures. They are not safe
+    // to be used until the linking process is finished.
+    LWT_MASK(link_lwt);
+    // link the taskteam into the list of taskteams:
     thr->th.th_team->t.ompt_serialized_team_info = link_lwt;
 
-    // Mark tha the linking process has just ended.
-    // This may be redundant, since tmp_task->linking_lwt should be false.
-    OMPT_CUR_TASK_INFO(thr)->linking_lwt = false;
+    *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
+    *OMPT_CUR_TASK_INFO(thr) = tmp_task;
+
+    // linking process always happens for an implicit task
+    // (this is redundant, if the following statement is used)
+    thr->th.th_current_task->td_flags.tasktype = 0;
+    // FIXME VI3-NOW: Is it safe to clear other flags?
+    memset(&thr->th.th_current_task->td_flags, 0, sizeof(kmp_tasking_flags_t));
+
+    // Mark that linking process has been successfully finished and
+    // that both th_current_task and th_team are safe to be used.
+    LWT_UNMASK( thr->th.th_team->t.ompt_serialized_team_info);
   } else {
     // Must not copy parallel_data from lwt or the content
     // potentially stored inside signal handler after the
@@ -331,43 +339,50 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
         lwt->ompt_team_info.master_return_address;
     // TODO VI3-NOW: Check whether some task information needs to be copied.
   }
+  // LWT pointer should be even
+  KMP_DEBUG_ASSERT(~ (((uint64_t)link_lwt & 0x1) ^ 0x0));
 }
 
 void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   ompt_lw_taskteam_t *lwtask = thr->th.th_team->t.ompt_serialized_team_info;
   if (lwtask) {
-    thr->th.th_team->t.ompt_serialized_team_info = lwtask->parent;
+    ompt_lw_taskteam_t *lwt_parent = lwtask->parent;
 
-    // TODO VI3-NOW: Make this process atomic from the tool perspective.
+    ompt_team_info_t tmp_team = lwtask->ompt_team_info;
+    ompt_task_info_t tmp_task = lwtask->ompt_task_info;
+    // Mark that it is not safe to use neither th_current_task nor th_team
+    // until unlinking process is finished.
+    LWT_MASK(thr->th.th_team->t.ompt_serialized_team_info);
+
     // Memoize the content of parallel_data, before invalidating it
     // by unlinikg the lwt. Also, memoize the master_return_address.
     ompt_data_t old_parallel_data = OMPT_CUR_TEAM_INFO(thr)->parallel_data;
     void *old_master_return_address = OMPT_CUR_TEAM_INFO(thr)->master_return_address;
 
-    // It is not safe to use information stored inside OMPT_CUR_TEAM_INFO,
-    // OMPT_CUR_TASK_INFO and link_lwt, until the lw task is fully unlinked.
-    // Mark that the process of linking has just begun.
-    OMPT_CUR_TASK_INFO(thr)->linking_lwt = true;
-
-    ompt_team_info_t tmp_team = lwtask->ompt_team_info;
+#if 0
+    // NOTE: if this is needed, we may need to unmask lwtask
+    // This is not used anywhere.
     lwtask->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
-    *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
+    lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
+#endif
 
+    *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
+    *OMPT_CUR_TASK_INFO(thr) = tmp_task;
     // Store the content of the old_parallel_data and old_master_return_address
     // in order to be sent to the following ompt_callback_parallel_end.
     OMPT_CUR_TEAM_INFO(thr)->old_parallel_data = old_parallel_data;
     OMPT_CUR_TEAM_INFO(thr)->old_master_return_address = old_master_return_address;
-
-    ompt_task_info_t tmp_task = lwtask->ompt_task_info;
-    lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
-    *OMPT_CUR_TASK_INFO(thr) = tmp_task;
-
     // copy back the task flags
     thr->th.th_current_task->td_flags = lwtask->td_flags;
 
-    // Mark that the process of unlinking has just ended.
-    // This may be redundant, since tmp_task->linking_lwt should be false.
-    OMPT_CUR_TASK_INFO(thr)->linking_lwt = false;
+    // Finally unlink the lwtask from the list of serialized teams.
+    thr->th.th_team->t.ompt_serialized_team_info = lwt_parent;
+    // No need to redundantly unmask the lwt_parent, since it has already
+    // been unmasked.
+
+    // I think this could be avoided, since lwtask should not be used after this
+    // function finishes.
+    LWT_UNMASK(lwtask);
 
     if (lwtask->heap) {
       __kmp_free(lwtask);
@@ -382,7 +397,6 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     OMPT_CUR_TEAM_INFO(thr)->old_master_return_address =
         OMPT_CUR_TEAM_INFO(thr)->master_return_address;
   }
-  //    return lwtask;
 }
 
 //----------------------------------------------------------
@@ -421,16 +435,16 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
                        *next_lwt = LWT_FROM_TEAM(taskdata->td_team),
                        *prev_lwt = NULL;
 
-    if (taskdata->ompt_task_info.linking_lwt) {
-      // The linking process is in progress.
-      // It is not safe to use taskdata->ompt_task_info, as well as
-      // team->ompt_team_info. However, all other fields should be use safely.
-      if (level == 0) {
-        // Inform the tool that there exist the task at this level, but
-        // the information cannot be provided yet. The tool can inquire
-        // the information about the ancestor tasks though.
-        return 1;
-      }
+    if (LWT_LINKING_IN_PROGRESS(thr)) {
+      // Linking is in progress. It is not safe to use neither th_current_task
+      // nor th_team. Use the recently linked lwt task that contains the copy
+      // of the information present inside th_current_task and th_team right
+      // before the linking process has begun.
+      lwt = next_lwt;
+      LWT_UNMASK(lwt);
+      // next_lwt is not needed for this group of nested serialized parallel
+      // regions, since we're directly using the lwt for the ancestor_level=0.
+      next_lwt = NULL;
     }
 
     while (ancestor_level > 0) {
