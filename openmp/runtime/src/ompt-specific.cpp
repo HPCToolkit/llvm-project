@@ -447,16 +447,31 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       next_lwt = NULL;
     }
 
+    bool tasks_share_lwt = false;
+
     while (ancestor_level > 0) {
       // needed for thread_num
       prev_lwt = lwt;
-      // next lightweight team (if any)
-      if (lwt)
+      // Detect whether we need to access to the next lightweight team
+      // or to share lwt->ompt_team_info among multiple tasks.
+      if (lwt && !tasks_share_lwt) {
+        if (lwt->ompt_task_info.scheduling_parent) {
+          // lwt is created by linking an explicit task.
+          // Access to the scheduling_parent;
+          taskdata = lwt->ompt_task_info.scheduling_parent;
+          tasks_share_lwt = true;
+          // Note that lwt->ompt_team_info is goind to be reused.
+          ancestor_level--;
+          next_lwt = NULL;
+          continue;
+        }
+        // next lightweight team (if any)
         lwt = lwt->parent;
+      }
 
       // next heavyweight team (if any) after
       // lightweight teams are exhausted
-      if (!lwt && taskdata) {
+      if ((!lwt || tasks_share_lwt) && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
         if (taskdata->ompt_task_info.scheduling_parent) {
           taskdata = taskdata->ompt_task_info.scheduling_parent;
@@ -464,26 +479,41 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
           lwt = next_lwt;
           next_lwt = NULL;
         } else {
-          // then go for implicit tasks
-          taskdata = taskdata->td_parent;
-          if (team == NULL)
-            return 0;
-          prev_team = team;
-          team = team->t.t_parent;
-          if (taskdata) {
-            next_lwt = LWT_FROM_TEAM(taskdata->td_team);
+          if (lwt && lwt->parent && tasks_share_lwt) {
+            // All tasks that share the lwt->ompt_team_info are exhausted.
+            // Access to the next lwt.
+            lwt = lwt->parent;
+            tasks_share_lwt = false;
+          } else {
+            // Even though tasks_share_lwt may be true, there are no more lwts.
+
+            // then go for implicit tasks
+            taskdata = taskdata->td_parent;
+            if (team == NULL)
+              return 0;
+            prev_team = team;
+            team = team->t.t_parent;
+            if (taskdata) {
+              next_lwt = LWT_FROM_TEAM(taskdata->td_team);
+            }
+            // invalidate prev_lwt, since the regular team has been updated
+            prev_lwt = NULL;
+            // Since the new team is accessed, the tasks cannot share lwt.
+            tasks_share_lwt = false;
           }
-          // invalidate prev_lwt, since the regular team has been updated
-          prev_lwt = NULL;
         }
       }
       ancestor_level--;
     }
 
     if (lwt) {
-      info = &lwt->ompt_task_info;
+      // If multiple tasks are reusing the same lwt, then use the
+      // taskdata->ompt_task_info and lwt->ompt_team_info.
+      info =
+          tasks_share_lwt ? &taskdata->ompt_task_info : &lwt->ompt_task_info;
       team_info = &lwt->ompt_team_info;
       if (type) {
+        // FIXME VI3-NOW: This needs to be fixed
         *type = ompt_task_implicit;
       }
     } else if (taskdata) {
