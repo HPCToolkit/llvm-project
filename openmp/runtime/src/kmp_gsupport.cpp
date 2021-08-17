@@ -275,21 +275,21 @@ int KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SINGLE_START)(void) {
       if (ompt_enabled.ompt_callback_work) {
         ompt_callbacks.ompt_callback(ompt_callback_work)(
             ompt_work_single_executor, ompt_scope_begin,
-            &(team->t.ompt_team_info.parallel_data),
-            &(team->t.t_implicit_task_taskdata[tid].ompt_task_info.task_data),
+            &(team->t.ompt_team_info->parallel_data),
+            &(team->t.t_implicit_task_taskdata[tid].ompt_task_info->task_data),
             1, OMPT_GET_RETURN_ADDRESS(0));
       }
     } else {
       if (ompt_enabled.ompt_callback_work) {
         ompt_callbacks.ompt_callback(ompt_callback_work)(
             ompt_work_single_other, ompt_scope_begin,
-            &(team->t.ompt_team_info.parallel_data),
-            &(team->t.t_implicit_task_taskdata[tid].ompt_task_info.task_data),
+            &(team->t.ompt_team_info->parallel_data),
+            &(team->t.t_implicit_task_taskdata[tid].ompt_task_info->task_data),
             1, OMPT_GET_RETURN_ADDRESS(0));
         ompt_callbacks.ompt_callback(ompt_callback_work)(
             ompt_work_single_other, ompt_scope_end,
-            &(team->t.ompt_team_info.parallel_data),
-            &(team->t.t_implicit_task_taskdata[tid].ompt_task_info.task_data),
+            &(team->t.ompt_team_info->parallel_data),
+            &(team->t.t_implicit_task_taskdata[tid].ompt_task_info->task_data),
             1, OMPT_GET_RETURN_ADDRESS(0));
       }
     }

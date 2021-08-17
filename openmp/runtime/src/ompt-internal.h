@@ -83,9 +83,26 @@ typedef struct {
   void *old_master_return_address;
 } ompt_team_info_t;
 
-typedef struct ompt_lw_taskteam_s {
+#include <utility>
+
+typedef struct ompt_info_pair_s {
   ompt_team_info_t ompt_team_info;
   ompt_task_info_t ompt_task_info;
+} ompt_info_pair_t;
+
+typedef struct ompt_lw_taskteam_s {
+  // ompt_team_info and ompt_task_info represents the ompt information about
+  // the serialized parallel region and the corresponding implicit task.
+  // There are two copies of this pair (ompt_info_pair). The first one is
+  // maintained by the runtime during the linking phase __ompt_lw_taskteam_link,
+  // while the second one is maintained by the signal handler if needed
+  // (inside __ompt_get_task_info_internal).
+  // This is needed in order to resolve the pontential race condition during
+  // the linking phase of the new lightweight task.
+  ompt_info_pair_t ompt_info_pairs[2];
+  ompt_info_pair_t *ompt_info;
+  //ompt_team_info_t ompt_team_info;
+  //ompt_task_info_t ompt_task_info;
   int heap;
   struct ompt_lw_taskteam_s *parent;
   // maybe we don't need all task flags

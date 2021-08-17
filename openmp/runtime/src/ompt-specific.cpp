@@ -95,14 +95,14 @@ ompt_team_info_t *__ompt_get_teaminfo(int depth, int *size) {
         *size = 1;
 
       // return team info for lightweight team
-      return &lwt->ompt_team_info;
+      return &lwt->ompt_info->ompt_team_info;
     } else if (team) {
       // extract size from heavyweight team
       if (size)
         *size = team->t.t_nproc;
 
       // return team info for heavyweight team
-      return &team->t.ompt_team_info;
+      return team->t.ompt_team_info;
     }
   }
 
@@ -140,9 +140,9 @@ ompt_task_info_t *__ompt_get_task_info_object(int depth) {
     }
 
     if (lwt) {
-      info = &lwt->ompt_task_info;
+      info = &lwt->ompt_info->ompt_task_info;
     } else if (taskdata) {
-      info = &taskdata->ompt_task_info;
+      info = taskdata->ompt_task_info;
     }
   }
 
@@ -168,8 +168,8 @@ ompt_task_info_t *__ompt_get_scheduling_taskinfo(int depth) {
       // lightweight teams are exhausted
       if (!lwt && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
-        if (taskdata->ompt_task_info.scheduling_parent) {
-          taskdata = taskdata->ompt_task_info.scheduling_parent;
+        if (taskdata->ompt_task_info->scheduling_parent) {
+          taskdata = taskdata->ompt_task_info->scheduling_parent;
         } else if (next_lwt) {
           lwt = next_lwt;
           next_lwt = NULL;
@@ -185,9 +185,9 @@ ompt_task_info_t *__ompt_get_scheduling_taskinfo(int depth) {
     }
 
     if (lwt) {
-      info = &lwt->ompt_task_info;
+      info = &lwt->ompt_info->ompt_task_info;
     } else if (taskdata) {
-      info = &taskdata->ompt_task_info;
+      info = taskdata->ompt_task_info;
     }
   }
 
@@ -270,10 +270,32 @@ int __ompt_get_parallel_info_internal(int ancestor_level,
 // lightweight task team support
 //----------------------------------------------------------
 
+static inline void
+__ompt_lw_copy_ompt_info_pair
+(
+  ompt_info_pair_t *ompt_pair_ptr,
+  ompt_data_t *ompt_pid,
+  void *codeptr
+)
+{
+  ompt_pair_ptr->ompt_team_info.parallel_data = *ompt_pid;
+  ompt_pair_ptr->ompt_team_info.master_return_address = codeptr;
+  ompt_pair_ptr->ompt_task_info.task_data.value = 0;
+  ompt_pair_ptr->ompt_task_info.frame.enter_frame = ompt_data_none;
+  ompt_pair_ptr->ompt_task_info.frame.enter_frame_flags = 0;;
+  ompt_pair_ptr->ompt_task_info.frame.exit_frame = ompt_data_none;
+  ompt_pair_ptr->ompt_task_info.frame.exit_frame_flags = 0;;
+  ompt_pair_ptr->ompt_task_info.scheduling_parent = NULL;
+}
+
+
 void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
                              ompt_data_t *ompt_pid, void *codeptr) {
+  // Indicator that lwt is not properly initialized.
+  lwt->ompt_info = NULL;
   // initialize parallel_data with input, return address to parallel_data on
   // exit
+#if 0
   lwt->ompt_team_info.parallel_data = *ompt_pid;
   lwt->ompt_team_info.master_return_address = codeptr;
   lwt->ompt_task_info.task_data.value = 0;
@@ -282,6 +304,10 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
   lwt->ompt_task_info.frame.exit_frame = ompt_data_none;
   lwt->ompt_task_info.frame.exit_frame_flags = 0;;
   lwt->ompt_task_info.scheduling_parent = NULL;
+#endif
+  __ompt_lw_copy_ompt_info_pair(&lwt->ompt_info_pairs[0], ompt_pid, codeptr);
+  __ompt_lw_copy_ompt_info_pair(&lwt->ompt_info_pairs[1], ompt_pid, codeptr);
+
   lwt->heap = 0;
   lwt->parent = 0;
   // FIXME VI3-NOW: Is this ok to do?
@@ -300,12 +326,16 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
           (ompt_lw_taskteam_t *)__kmp_allocate(sizeof(ompt_lw_taskteam_t));
     }
     link_lwt->heap = on_heap;
+    // lwt is on stack
+    __ompt_lwt_initialize(lwt);
+    // link_lwt may be on heap
+    __ompt_lwt_initialize(link_lwt);
 
     // would be swap in the (on_stack) case.
-    ompt_team_info_t tmp_team = lwt->ompt_team_info;
-    ompt_task_info_t tmp_task = lwt->ompt_task_info;
-    link_lwt->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
-    link_lwt->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
+    ompt_team_info_t tmp_team = lwt->ompt_info->ompt_team_info;
+    ompt_task_info_t tmp_task = lwt->ompt_info->ompt_task_info;
+    link_lwt->ompt_info->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
+    link_lwt->ompt_info->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
     // copy task flags
     link_lwt->td_flags = thr->th.th_current_task->td_flags;
     // link the taskteam into the list of taskteams:
@@ -332,11 +362,13 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     // that both th_current_task and th_team are safe to be used.
     LWT_UNMASK( thr->th.th_team->t.ompt_serialized_team_info);
   } else {
+    // initialize ompt_info if needed
+    __ompt_lwt_initialize(lwt);
     // Must not copy parallel_data from lwt or the content
     // potentially stored inside signal handler after the
     // moment of dispatching the ompt_callback_parallel_end may be lost.
     OMPT_CUR_TEAM_INFO(thr)->master_return_address =
-        lwt->ompt_team_info.master_return_address;
+        lwt->ompt_info->ompt_team_info.master_return_address;
     // TODO VI3-NOW: Check whether some task information needs to be copied.
   }
   // LWT pointer should be even
@@ -348,8 +380,8 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   if (lwtask) {
     ompt_lw_taskteam_t *lwt_parent = lwtask->parent;
 
-    ompt_team_info_t tmp_team = lwtask->ompt_team_info;
-    ompt_task_info_t tmp_task = lwtask->ompt_task_info;
+    ompt_team_info_t tmp_team = lwtask->ompt_info->ompt_team_info;
+    ompt_task_info_t tmp_task = lwtask->ompt_info->ompt_task_info;
     // Mark that it is not safe to use neither th_current_task nor th_team
     // until unlinking process is finished.
     LWT_MASK(thr->th.th_team->t.ompt_serialized_team_info);
@@ -455,10 +487,10 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // Detect whether we need to access to the next lightweight team
       // or to share lwt->ompt_team_info among multiple tasks.
       if (lwt && !tasks_share_lwt) {
-        if (lwt->ompt_task_info.scheduling_parent) {
+        if (lwt->ompt_info->ompt_task_info.scheduling_parent) {
           // lwt is created by linking an explicit task.
           // Access to the scheduling_parent;
-          taskdata = lwt->ompt_task_info.scheduling_parent;
+          taskdata = lwt->ompt_info->ompt_task_info.scheduling_parent;
           tasks_share_lwt = true;
           // Note that lwt->ompt_team_info is goind to be reused.
           ancestor_level--;
@@ -473,8 +505,8 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // lightweight teams are exhausted
       if ((!lwt || tasks_share_lwt) && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
-        if (taskdata->ompt_task_info.scheduling_parent) {
-          taskdata = taskdata->ompt_task_info.scheduling_parent;
+        if (taskdata->ompt_task_info->scheduling_parent) {
+          taskdata = taskdata->ompt_task_info->scheduling_parent;
         } else if (next_lwt) {
           lwt = next_lwt;
           next_lwt = NULL;
@@ -510,15 +542,15 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // If multiple tasks are reusing the same lwt, then use the
       // taskdata->ompt_task_info and lwt->ompt_team_info.
       info =
-          tasks_share_lwt ? &taskdata->ompt_task_info : &lwt->ompt_task_info;
-      team_info = &lwt->ompt_team_info;
+          tasks_share_lwt ? taskdata->ompt_task_info : &lwt->ompt_info->ompt_task_info;
+      team_info = &lwt->ompt_info->ompt_team_info;
       if (type) {
         // FIXME VI3-NOW: This needs to be fixed
         *type = ompt_task_implicit;
       }
     } else if (taskdata) {
-      info = &taskdata->ompt_task_info;
-      team_info = &team->t.ompt_team_info;
+      info = taskdata->ompt_task_info;
+      team_info = team->t.ompt_team_info;
       if (type) {
         if (taskdata->td_parent) {
           *type = (taskdata->td_flags.tasktype ? ompt_task_explicit
@@ -637,9 +669,42 @@ __ompt_set_frame_enter_internal
 //----------------------------------------------------------
 // team support
 //----------------------------------------------------------
+void __ompt_team_info_initialize(kmp_team_t *team) {
+  if (!team->t.ompt_team_info) {
+    // NOTE VI3-NOW: It is possible that the tam may be duplicated.
+    // See the __ompt_task_info_initialize function.
+    // initialize the ompt_team_info ptr if not
+    team->t.ompt_team_info = &team->t.ompt_team_info_pair[0];
+  }
+  // TODO VI3-NOW: Check whether this may already have been initialized.
+}
+
+void __ompt_task_info_initialize(kmp_taskdata_t *taskdata) {
+  if (!taskdata->ompt_task_info ||
+      (taskdata->ompt_task_info != &taskdata->ompt_task_info_pair[0])) {
+    // If ompt_task_info is NULL, it means that the taskdata has been recently
+    // allocated.
+    // If ompt_task_info doesn't point to the first element in omp_task_info_pair,
+    // it means that the taskdata has been created by duplicating another
+    // taskdata (so the ompt_task_info points to another taskdata struct).
+    // In both cases, ompt_task_info needs to be properly initialized.
+    taskdata->ompt_task_info = &taskdata->ompt_task_info_pair[0];
+  }
+  // TODO VI3-NOW: Check whether this may already have been initialized.
+}
+
+void __ompt_lwt_initialize(ompt_lw_taskteam_t *lwt) {
+  if (!lwt->ompt_info) {
+    // initialized ompt_info ptr if not
+    lwt->ompt_info = &lwt->ompt_info_pairs[0];
+  }
+}
+
 
 void __ompt_team_assign_id(kmp_team_t *team, ompt_data_t ompt_pid) {
-  team->t.ompt_team_info.parallel_data = ompt_pid;
+  // before initializing parallel_data, need to initialize ompt_team_info first.
+  __ompt_team_info_initialize(team);
+  team->t.ompt_team_info->parallel_data = ompt_pid;
 }
 
 //----------------------------------------------------------

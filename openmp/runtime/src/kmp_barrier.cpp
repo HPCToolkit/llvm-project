@@ -1723,7 +1723,7 @@ void __kmp_join_barrier(int gtid) {
     int ds_tid = this_thr->th.th_info.ds.ds_tid;
     if (ompt_callbacks.ompt_callback(ompt_callback_sync_region_wait) ||
          ompt_callbacks.ompt_callback(ompt_callback_sync_region))
-      codeptr = team->t.ompt_team_info.master_return_address;
+      codeptr = team->t.ompt_team_info->master_return_address;
     my_task_data = OMPT_CUR_TASK_DATA(this_thr);
     my_parallel_data = OMPT_CUR_TEAM_DATA(this_thr);
     if (ompt_enabled.ompt_callback_sync_region) {
@@ -2010,7 +2010,7 @@ void __kmp_fork_barrier(int gtid, int tid) {
     if (KMP_MASTER_TID(ds_tid) &&
         (ompt_callbacks.ompt_callback(ompt_callback_sync_region_wait) ||
          ompt_callbacks.ompt_callback(ompt_callback_sync_region)))
-      codeptr = team->t.ompt_team_info.master_return_address;
+      codeptr = team->t.ompt_team_info->master_return_address;
     if (ompt_enabled.ompt_callback_sync_region_wait) {
       ompt_callbacks.ompt_callback(ompt_callback_sync_region_wait)(
           ompt_sync_region_barrier_implicit, ompt_scope_end, NULL, task_data,
