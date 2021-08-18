@@ -106,7 +106,9 @@ typedef struct ompt_lw_taskteam_s {
   int heap;
   struct ompt_lw_taskteam_s *parent;
   // maybe we don't need all task flags
-  kmp_tasking_flags_t td_flags;
+  // FIXME VI3-NOW: Do we really need this?
+  kmp_tasking_flags_t td_flags_pair[2];
+  kmp_tasking_flags_t *td_flags;
 } ompt_lw_taskteam_t;
 
 typedef struct {
