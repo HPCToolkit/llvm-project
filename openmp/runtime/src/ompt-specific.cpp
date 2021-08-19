@@ -47,6 +47,9 @@
 #define LWT_UNMASK_STATE(ptr) \
   ptr = (ompt_lw_taskteam_t *)((uint64_t)ptr & 0xFFFFFFFFFFFFFFFC)
 
+#define LWT_GET_UNMASKED(ptr) \
+  (ompt_lw_taskteam_t *)((uint64_t)ptr & 0xFFFFFFFFFFFFFFFC)
+
 // masking lower bit
 #define PTR_MASK_LOWER_BIT(ptr, type) \
   ptr = (type *)((uint64_t)ptr | 0x1)
@@ -55,7 +58,7 @@
   ptr = (type *)((uint64_t)ptr & (0xFFFFFFFFFFFFFFFE))
 
 #define PTR_GET_UNMASKED(ptr, type) \
-  (type *)((uint64_t)ptr & (0xFFFFFFFFFFFFFFFE))
+  ((type *)((uint64_t)ptr & (0xFFFFFFFFFFFFFFFE)))
 
 #define PTR_HAS_MASKED_LOWER_BIT(ptr) \
   (uint64_t)ptr & 0x1
@@ -415,7 +418,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                                      &link_lwt->ompt_info_pairs[0]);
     }
 
-    // Copy the information to th_team if needed
+    // Copy the information to cur_team if needed
     ompt_team_info_t *old_team_info = cur_team->ompt_team_info;
     if (PTR_HAS_MASKED_LOWER_BIT(old_team_info)) {
       // The lower bit is still masked, which means that the signal handler
@@ -428,7 +431,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                                      &cur_team->ompt_team_info_pair[0]);
     }
 
-    // Copy the information to th_current_task if needed.
+    // Copy the information to cur_task if needed.
     // This works in the similar as copying of ompt_team_info to cur_team.
     ompt_task_info_t *old_task_info = cur_task->ompt_task_info;
     if (PTR_HAS_MASKED_LOWER_BIT(old_task_info)) {
@@ -585,6 +588,109 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
 // task support
 //----------------------------------------------------------
 
+// helper function that extends logic of linking/unlinking lwts
+static void __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
+  // serve to ease the access
+  kmp_base_team_t *cur_team = &thr->th.th_team->t;
+  kmp_taskdata_t *cur_task = thr->th.th_current_task;
+  ompt_lw_taskteam_t *lwt = LWT_GET_UNMASKED(cur_team->ompt_serialized_team_info);
+  KMP_DEBUG_ASSERT(LWT_STATE_IS_ACTIVE(cur_team->ompt_serialized_team_info)
+                         & LWT_STATE_LINKING);
+  // unmask pointers in order to ease the access
+  ompt_team_info_t *cur_team_info =
+      PTR_GET_UNMASKED(cur_team->ompt_team_info, ompt_team_info_t);
+  ompt_task_info_t *cur_task_info =
+      PTR_GET_UNMASKED(cur_task->ompt_task_info, ompt_task_info_t);
+
+  // The following information will be eventually copied to
+  // cur_team and cur_task.
+  ompt_team_info_t tmp_team = lwt->ompt_info_pairs[1].ompt_team_info;
+  ompt_task_info_t tmp_task = lwt->ompt_info_pairs[1].ompt_task_info;
+
+  if (!lwt->ompt_info) {
+    // copy the information from cur_team and cur_task to lwt
+    lwt->ompt_info_pairs[1].ompt_team_info = *cur_team_info;
+    lwt->ompt_info_pairs[1].ompt_task_info = *cur_task_info;
+    // Mark that the information is copied to lwt, so the runtime doesn't need
+    // to do it.
+    lwt->ompt_info = &lwt->ompt_info_pairs[1];
+  }
+
+  if (PTR_HAS_MASKED_LOWER_BIT(cur_team->ompt_team_info)) {
+    // copy the information to cur_team
+    cur_team->ompt_team_info_pair[1] = tmp_team;
+    // Mark that the information is copied, so that the runtime won't do that.
+    cur_team->ompt_team_info = &cur_team->ompt_team_info_pair[1];
+  }
+
+  if (PTR_HAS_MASKED_LOWER_BIT(cur_task->ompt_task_info)) {
+    // Copy the information to cur_task
+    cur_task->ompt_task_info_pair[1] = tmp_task;
+    // Mark that the information is copied, so that the runtime won't do that.
+    cur_task->ompt_task_info = &cur_task->ompt_task_info[1];
+  }
+
+  if (!lwt->td_flags) {
+    // Copy the td_flags to lwt
+    lwt->td_flags_pair[1] = cur_task->td_flags;
+    // Mark that the information is copied, so that the runtime won't do that.
+    lwt->td_flags = &lwt->td_flags_pair[1];
+    // Invalidate td_flags present in cur_task
+    cur_task->td_flags.tasktype = 1; // this line may be redundant
+    memset(&cur_task->td_flags, 0, sizeof(kmp_tasking_flags_t));
+  }
+
+  // Mark that the linking process has been sucessfully finished.
+  LWT_UNMASK_STATE(cur_team->ompt_serialized_team_info);
+
+}
+
+static void __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
+  // serve to ease the accesss
+  kmp_base_team_t *cur_team = &thr->th.th_team->t;
+  kmp_taskdata_t *cur_task = thr->th.th_current_task;
+  ompt_lw_taskteam_t *lwt = LWT_GET_UNMASKED(cur_team->ompt_serialized_team_info);
+  KMP_DEBUG_ASSERT(LWT_STATE_IS_ACTIVE(cur_team->ompt_serialized_team_info)
+                         & LWT_STATE_UNLINKING);
+  ompt_team_info_t *lwt_team_info = &lwt->ompt_info->ompt_team_info;
+  // unmask pointer in order to ease the access
+  ompt_team_info_t *cur_team_info =
+      PTR_GET_UNMASKED(cur_team->ompt_team_info, ompt_team_info_t);
+
+  if (!lwt_team_info->old_parallel_data.ptr) {
+    // Copy the parallel_data from cur_team_info
+    lwt_team_info->old_parallel_data.ptr = cur_team_info->parallel_data.ptr;
+  }
+
+  if (!lwt_team_info->old_master_return_address) {
+    // Copy the master_return_address from cur_team_info
+    lwt_team_info->old_master_return_address =
+        cur_team_info->master_return_address;
+  }
+
+  if (PTR_HAS_MASKED_LOWER_BIT(cur_team->ompt_team_info)) {
+    // Copy the information from lwt to cur_team
+    cur_team->ompt_team_info_pair[1] = lwt->ompt_info->ompt_team_info;
+    // Mark that the information is copied so that the runtime doesn't need
+    // to do that.
+    cur_team->ompt_team_info = &cur_team->ompt_team_info_pair[1];
+  }
+
+  if (PTR_HAS_MASKED_LOWER_BIT(cur_task->ompt_task_info)) {
+    // Copy the information from lwt to cur_task
+    cur_task->ompt_task_info_pair[1] = lwt->ompt_info->ompt_task_info;
+    // Mark that the information is copied so that the runtime won't do that.
+    cur_task->ompt_task_info = &cur_task->ompt_task_info_pair[1];
+  }
+
+  // Copy the td_flags
+  cur_task->td_flags = *lwt->td_flags;
+
+  // Pop the lwt from lwt's list as the indication that the unlinking has been
+  // successfully done by the signal handler.
+  cur_team->ompt_serialized_team_info = lwt->parent;
+}
+
 int __ompt_get_task_info_internal(int ancestor_level, int *type,
                                   ompt_data_t **task_data,
                                   ompt_frame_t **task_frame,
@@ -617,16 +723,35 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
                        *next_lwt = LWT_FROM_TEAM(taskdata->td_team),
                        *prev_lwt = NULL;
 
-    if (LWT_LINKING_IN_PROGRESS(thr)) {
-      // Linking is in progress. It is not safe to use neither th_current_task
-      // nor th_team. Use the recently linked lwt task that contains the copy
-      // of the information present inside th_current_task and th_team right
-      // before the linking process has begun.
+    int lwt_state = LWT_STATE_IS_ACTIVE(next_lwt);
+    if (lwt_state == LWT_STATE_LINKING) {
+      // linking
+      __ompt_lw_taskteam_link_signal_handler(thr);
+      if (ancestor_level == 0) {
+        // The thread is in the middle of creating a new serialized parallel
+        // region. The information is not fully available, so inform the tool,
+        // which may inquire the information about the task at higher levels.
+        return 1;
+      }
+      // decrease the ancestor level
+      ancestor_level--;
+      // Use the innermost lwt at level 1.
       lwt = next_lwt;
-      LWT_UNMASK_STATE(lwt);
-      // next_lwt is not needed for this group of nested serialized parallel
-      // regions, since we're directly using the lwt for the ancestor_level=0.
       next_lwt = NULL;
+    } else if (lwt_state == LWT_STATE_UNLINKING) {
+      // unlinking
+      __ompt_lw_taskteam_unlink_signal_handler(thr);
+      if (ancestor_level == 0) {
+        // The thread is in the middle of destroying the innermost serialized
+        // parallel region. The information is not available at this moment,
+        // so inform the tool that it may inquire the information about the
+        // task at higher levels.
+        return 1;
+      }
+      // decrease the ancestor_level
+      ancestor_level--;
+      // Update next_lwt, since it has been changed while unlinking process.
+      next_lwt = LWT_FROM_TEAM(taskdata->td_team);
     }
 
     bool tasks_share_lwt = false;
@@ -655,8 +780,10 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // lightweight teams are exhausted
       if ((!lwt || tasks_share_lwt) && taskdata) {
         // first try scheduling parent (for explicit task scheduling)
-        if (taskdata->ompt_task_info->scheduling_parent) {
-          taskdata = taskdata->ompt_task_info->scheduling_parent;
+        if (PTR_GET_UNMASKED(taskdata->ompt_task_info,
+                             ompt_task_info_t)->scheduling_parent) {
+          taskdata = PTR_GET_UNMASKED(taskdata->ompt_task_info,
+                                      ompt_task_info_t)->scheduling_parent;
         } else if (next_lwt) {
           lwt = next_lwt;
           next_lwt = NULL;
@@ -692,15 +819,17 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // If multiple tasks are reusing the same lwt, then use the
       // taskdata->ompt_task_info and lwt->ompt_team_info.
       info =
-          tasks_share_lwt ? taskdata->ompt_task_info : &lwt->ompt_info->ompt_task_info;
+          tasks_share_lwt
+            ? PTR_GET_UNMASKED(taskdata->ompt_task_info, ompt_task_info_t)
+            : &lwt->ompt_info->ompt_task_info;
       team_info = &lwt->ompt_info->ompt_team_info;
       if (type) {
         // FIXME VI3-NOW: This needs to be fixed
         *type = ompt_task_implicit;
       }
     } else if (taskdata) {
-      info = taskdata->ompt_task_info;
-      team_info = team->t.ompt_team_info;
+      info = PTR_GET_UNMASKED(taskdata->ompt_task_info, ompt_task_info_t);
+      team_info = PTR_GET_UNMASKED(team->t.ompt_team_info, ompt_team_info_t);
       if (type) {
         if (taskdata->td_parent) {
           *type = (taskdata->td_flags.tasktype ? ompt_task_explicit
