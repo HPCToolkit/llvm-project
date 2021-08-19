@@ -63,6 +63,9 @@
 #define LWT_LINKING_IN_PROGRESS(thr) \
   (uint64_t)thr->th.th_team->t.ompt_serialized_team_info & 0x1
 
+#define LWT_STATE_IS_ACTIVE(ptr) \
+  (uint64_t)ptr & 0x3
+
 //******************************************************************************
 // private operations
 //******************************************************************************
@@ -479,41 +482,89 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   if (lwtask) {
     ompt_lw_taskteam_t *lwt_parent = lwtask->parent;
 
-    ompt_team_info_t tmp_team = lwtask->ompt_info->ompt_team_info;
-    ompt_task_info_t tmp_task = lwtask->ompt_info->ompt_task_info;
-    // Mark that it is not safe to use neither th_current_task nor th_team
-    // until unlinking process is finished.
-    LWT_MASK_STATE(thr->th.th_team->t.ompt_serialized_team_info, LWT_STATE_UNLINKING);
+    // the following variables should ease the access
+    kmp_base_team_t *cur_team = &thr->th.th_team->t;
+    kmp_taskdata_t *cur_task = thr->th.th_current_task;
+    // store pointers before masking them
+    ompt_team_info_t *cur_team_info = cur_team->ompt_team_info;
+    ompt_team_info_t *lwt_team_info = &lwtask->ompt_info->ompt_team_info;
 
-    // Memoize the content of parallel_data, before invalidating it
-    // by unlinikg the lwt. Also, memoize the master_return_address.
-    ompt_data_t old_parallel_data = OMPT_CUR_TEAM_INFO(thr)->parallel_data;
-    void *old_master_return_address = OMPT_CUR_TEAM_INFO(thr)->master_return_address;
+    // mark that ompt_team_info and ompt_task_info should be copied
+    PTR_MASK_LOWER_BIT(cur_team->ompt_team_info, ompt_team_info_t);
+    PTR_MASK_LOWER_BIT(cur_task->ompt_task_info, ompt_task_info_t);
 
-#if 0
-    // NOTE: if this is needed, we may need to unmask lwtask
-    // This is not used anywhere.
-    lwtask->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
-    lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
-#endif
+    // ensure that old_parallel_data and old_master_return_address are NULL
+    lwt_team_info->old_parallel_data.ptr = NULL;
+    lwt_team_info->old_master_return_address = NULL;
 
-    *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
-    *OMPT_CUR_TASK_INFO(thr) = tmp_task;
-    // Store the content of the old_parallel_data and old_master_return_address
-    // in order to be sent to the following ompt_callback_parallel_end.
-    OMPT_CUR_TEAM_INFO(thr)->old_parallel_data = old_parallel_data;
-    OMPT_CUR_TEAM_INFO(thr)->old_master_return_address = old_master_return_address;
-    // copy back the task flags
-    thr->th.th_current_task->td_flags = *lwtask->td_flags;
+    // mark that unlinking process is in progress
+    LWT_MASK_STATE(cur_team->ompt_serialized_team_info, LWT_STATE_UNLINKING);
 
-    // Finally unlink the lwtask from the list of serialized teams.
-    thr->th.th_team->t.ompt_serialized_team_info = lwt_parent;
-    // No need to redundantly unmask the lwt_parent, since it has already
-    // been unmasked.
+    // From this point, runtime (this function) and signal handler
+    // (__ompt_get_task_info_internal) may interleave.
 
-    // I think this could be avoided, since lwtask should not be used after this
-    // function finishes.
-    LWT_UNMASK_STATE(lwtask);
+    void *old_parallel_data = lwt_team_info->old_parallel_data.ptr;
+    if (!old_parallel_data) {
+      // Try to atomically copy parallel_data content, if the signal handler
+      // hasn't done it yet.
+      // Note that cur_team_info may be outdated. If so, the signal handler
+      // has finished the unlinking process, so the CAS fails anyway.
+      KMP_COMPARE_AND_STORE_PTR(&lwt_team_info->old_parallel_data.ptr,
+                                old_parallel_data,
+                                cur_team_info->parallel_data.ptr);
+    }
+
+    // Note that there might be race condition if
+    // cur_team_info->parallel_data.ptr == NULL. In that case, both runtime and
+    // signal handler will do write operations that result with the same
+    // result (NULL value inside lwt->team_info->old_parallel_data.ptr).
+    // The similar stands for old_master_return_address that follows.
+
+    void *old_master_return_address = lwt_team_info->old_master_return_address;
+    if (!old_master_return_address) {
+      // Try to atomically copy master_return_address if the signal handler
+      // hasn't done it yet.
+      // Note that cur_team_info may be outdated. If so, the signal handler
+      // has finished the unlinking process, so the CAS fails anyway.
+      KMP_COMPARE_AND_STORE_PTR(&lwt_team_info->old_master_return_address,
+                                old_master_return_address,
+                                cur_team_info->master_return_address);
+    }
+
+    // copy ompt_team_info
+    ompt_team_info_t *old_ompt_team_info = cur_team->ompt_team_info;
+    if (PTR_HAS_MASKED_LOWER_BIT(old_ompt_team_info)) {
+      // The signal handler hasn't copied the information from lwtask to
+      // cur_team, let's do it now.
+      cur_team->ompt_team_info_pair[0] = lwtask->ompt_info->ompt_team_info;
+      // Try to mark that the information is successfully copied.
+      // The CAS fails if the signal handler has done it in the meantime.
+      KMP_COMPARE_AND_STORE_PTR(&cur_team->ompt_team_info, old_ompt_team_info,
+                                &cur_team->ompt_team_info_pair[0]);
+
+    }
+
+    // copy_ompt_task_info on similar way
+    ompt_task_info_t *old_ompt_task_info = cur_task->ompt_task_info;
+    if (PTR_HAS_MASKED_LOWER_BIT(old_ompt_task_info)) {
+      cur_task->ompt_task_info_pair[0] = lwtask->ompt_info->ompt_task_info;
+      KMP_COMPARE_AND_STORE_PTR(&cur_task->ompt_task_info, old_ompt_task_info,
+                                &cur_task->ompt_task_info_pair[0]);
+    }
+
+    // Copy td_flags.
+    // Note that there is a race condition. However, both runtime and signal
+    // handler write the same value, so the result is deterministic.
+    cur_task->td_flags = *lwtask->td_flags;
+
+    // Pop the lwtask from the list of lwts.
+    ompt_lw_taskteam_t *old_first_lwt = cur_team->ompt_serialized_team_info;
+    if (LWT_STATE_IS_ACTIVE(old_first_lwt)) {
+      // The signal handler hasn't finished unlinking, so do that now.
+      KMP_COMPARE_AND_STORE_PTR(&cur_team->ompt_serialized_team_info,
+                                old_first_lwt,
+                                lwt_parent);
+    }
 
     if (lwtask->heap) {
       __kmp_free(lwtask);
