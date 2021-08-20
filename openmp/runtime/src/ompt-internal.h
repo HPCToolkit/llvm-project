@@ -73,6 +73,8 @@ typedef struct {
   ompt_data_t task_data;
   struct kmp_taskdata *scheduling_parent;
   int thread_num;
+  // indicator whether the linking/unlinking has been finished by signal handler
+  char lwt_done_sh;
 } ompt_task_info_t;
 
 typedef struct {
