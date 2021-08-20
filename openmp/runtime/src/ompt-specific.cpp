@@ -727,6 +727,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     if (lwt_state == LWT_STATE_LINKING) {
       // linking
       __ompt_lw_taskteam_link_signal_handler(thr);
+#if 0
       if (ancestor_level == 0) {
         // The thread is in the middle of creating a new serialized parallel
         // region. The information is not fully available, so inform the tool,
@@ -738,9 +739,11 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // Use the innermost lwt at level 1.
       lwt = next_lwt;
       next_lwt = NULL;
+#endif
     } else if (lwt_state == LWT_STATE_UNLINKING) {
       // unlinking
       __ompt_lw_taskteam_unlink_signal_handler(thr);
+#if 0
       if (ancestor_level == 0) {
         // The thread is in the middle of destroying the innermost serialized
         // parallel region. The information is not available at this moment,
@@ -752,7 +755,10 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       ancestor_level--;
       // Update next_lwt, since it has been changed while unlinking process.
       next_lwt = LWT_FROM_TEAM(taskdata->td_team);
+#endif
     }
+    // Read it again, since it may have been unmsked in the meantime.
+    next_lwt = LWT_FROM_TEAM(taskdata->td_team);
 
     bool tasks_share_lwt = false;
 
