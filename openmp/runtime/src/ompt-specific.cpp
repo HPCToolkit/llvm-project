@@ -604,7 +604,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
 //----------------------------------------------------------
 
 // helper function that extends logic of linking/unlinking lwts
-static void __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
+static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
   if (PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
                        ompt_task_info_t)->lwt_done_sh) {
     // The signal handler has already finished the linking process, so there's
@@ -649,7 +649,7 @@ static void __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
     // Copy the information to cur_task
     cur_task->ompt_task_info_pair[1] = tmp_task;
     // Mark that the information is copied, so that the runtime won't do that.
-    cur_task->ompt_task_info = &cur_task->ompt_task_info[1];
+    cur_task->ompt_task_info = &cur_task->ompt_task_info_pair[1];
   }
 
   if (!lwt->td_flags) {
@@ -658,7 +658,7 @@ static void __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
     // Mark that the information is copied, so that the runtime won't do that.
     lwt->td_flags = &lwt->td_flags_pair[1];
     // Invalidate td_flags present in cur_task
-    cur_task->td_flags.tasktype = 1; // this line may be redundant
+    cur_task->td_flags.tasktype = 0; // this line may be redundant
     memset(&cur_task->td_flags, 0, sizeof(kmp_tasking_flags_t));
   }
 
@@ -675,7 +675,7 @@ static void __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
   cur_task->ompt_task_info->lwt_done_sh = 1;
 }
 
-static void __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
+static void inline __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
   if (PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
                        ompt_task_info_t)->lwt_done_sh) {
     // The signal handler has already finished the unlinking process,
@@ -781,7 +781,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // decrease the ancestor level
       ancestor_level--;
       // Use the innermost lwt at level 1.
-      lwt = next_lwt;
+      lwt = LWT_GET_UNMASKED(next_lwt);
       next_lwt = NULL;
     } else if (lwt_state == LWT_STATE_UNLINKING) {
       // unlinking
