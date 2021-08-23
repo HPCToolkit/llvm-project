@@ -917,8 +917,8 @@ static void __kmp_fork_team_threads(kmp_root_t *root, kmp_team_t *team,
 
   // FIXME: check if this is safe to do for hot teams!
   /* first, let's setup the primary thread */
-  master_th->th.th_info.ds.ds_tid = 0;
   master_th->th.th_team = team;
+  master_th->th.th_info.ds.ds_tid = 0;
   master_th->th.th_team_nproc = team->t.t_nproc;
   master_th->th.th_team_master = master_th;
   master_th->th.th_team_serialized = FALSE;
@@ -1204,6 +1204,8 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
     serial_team->t.t_sched.sched = this_thr->th.th_team->t.t_sched.sched;
     this_thr->th.th_team = serial_team;
     serial_team->t.t_master_tid = this_thr->th.th_info.ds.ds_tid;
+    // update thread_id before pushing the task
+    this_thr->th.th_info.ds.ds_tid = 0;
 
     KF_TRACE(10, ("__kmpc_serialized_parallel: T#d curtask=%p\n", global_tid,
                   this_thr->th.th_current_task));
@@ -1236,7 +1238,6 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
 #if USE_DEBUGGER
     serial_team->t.t_pkfn = (microtask_t)(~0); // For the debugger.
 #endif
-    this_thr->th.th_info.ds.ds_tid = 0;
 
     /* set thread cache values */
     this_thr->th.th_team_nproc = 1;
@@ -1442,9 +1443,6 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     }
 #endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
 
-    this_thr->th.th_team = serial_team->t.t_parent;
-    this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
-
     /* restore values cached in the thread */
     this_thr->th.th_team_nproc = serial_team->t.t_parent->t.t_nproc; /*  JPH */
     this_thr->th.th_team_master =
@@ -1459,6 +1457,10 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     // Save the content of parallel_data after marking the corresponding
     // implicit task as finished.
     serial_team->t.ompt_team_info->old_parallel_data = serial_team->t.ompt_team_info->parallel_data;
+    // NOTE: This must be done after the task has been popped in order to make
+    // ompt_get_task_info to work.
+    this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
+    this_thr->th.th_team = serial_team->t.t_parent;
 
     KMP_ASSERT(this_thr->th.th_current_task->td_flags.executing == 0);
     this_thr->th.th_current_task->td_flags.executing = 1;
@@ -2637,7 +2639,12 @@ void __kmp_join_call(ident_t *loc, int gtid
   }
 
   /* do cleanup and restore the parent team */
-  master_th->th.th_info.ds.ds_tid = team->t.t_master_tid;
+  // This must be done after popping the current task in order to
+  // make __ompt_get_task_info_internal to work.
+  // NOTE vi3: See whether the following line beofore lock can be moved to?
+  //   I'm not completely sure I undestand their purpose, so I would rather
+  //   not to touch them.
+  // master_th->th.th_info.ds.ds_tid = team->t.t_master_tid;
   master_th->th.th_local.this_construct = team->t.t_master_this_cons;
 
   master_th->th.th_dispatch = &parent_team->t.t_dispatch[team->t.t_master_tid];
@@ -2707,6 +2714,9 @@ void __kmp_join_call(ident_t *loc, int gtid
      reallocated and the hierarchy appears inconsistent. it is actually safe to
      run and won't cause any bugs, but will cause those assertion failures. it's
      only one deref&assign so might as well put this in the critical region */
+  // This needs to be done after popping the current task, but before updating
+  // the th_team.
+  master_th->th.th_info.ds.ds_tid = team->t.t_master_tid;
   master_th->th.th_team = parent_team;
   master_th->th.th_team_nproc = parent_team->t.t_nproc;
   master_th->th.th_team_master = parent_team->t.t_threads[0];

@@ -532,11 +532,18 @@ Leave a serialized parallel construct.
  Note: this function is called by the clang compiler.
 */
 void __kmpc_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
-  __kmp_end_serialized_parallel(loc, global_tid);
-  kmp_info_t *this_thr = __kmp_threads[global_tid];
 #if OMPT_SUPPORT
-  ompt_task_info_t *task_info = OMPT_CUR_TASK_INFO(this_thr);
-  ompt_frame_t *task_frame = &task_info->frame;
+  kmp_info_t *this_thr = __kmp_threads[global_tid];
+  ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
+  // clear exit frame set inside __kmpc_serialized_parallel
+  OMPT_FRAME_CLEAR(task_frame, exit);
+#endif
+  // FIXME VI3-NOW: How about clearing exit_frames.
+  __kmp_end_serialized_parallel(loc, global_tid);
+#if OMPT_SUPPORT
+  task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
+  // clear enter frame of parent set inside __kmpc_serialized_parallel
+  // Note: task_frame changed after __kmp_end_serialized_parallel finished.
   OMPT_FRAME_CLEAR(task_frame, enter);
 #endif
 }
