@@ -1443,6 +1443,16 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     }
 #endif /* KMP_ARCH_X86 || KMP_ARCH_X86_64 */
 
+    __kmp_pop_current_task_from_thread(this_thr);
+    // Save the content of parallel_data after marking the corresponding
+    // implicit task as finished.
+    serial_team->t.ompt_team_info->old_parallel_data = serial_team->t.ompt_team_info->parallel_data;
+
+    // NOTE: This must be done after the task has been popped in order to make
+    // ompt_get_task_info to work.
+    this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
+    this_thr->th.th_team = serial_team->t.t_parent;
+
     /* restore values cached in the thread */
     this_thr->th.th_team_nproc = serial_team->t.t_parent->t.t_nproc; /*  JPH */
     this_thr->th.th_team_master =
@@ -1452,15 +1462,6 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     /* TODO the below shouldn't need to be adjusted for serialized teams */
     this_thr->th.th_dispatch =
         &this_thr->th.th_team->t.t_dispatch[serial_team->t.t_master_tid];
-
-    __kmp_pop_current_task_from_thread(this_thr);
-    // Save the content of parallel_data after marking the corresponding
-    // implicit task as finished.
-    serial_team->t.ompt_team_info->old_parallel_data = serial_team->t.ompt_team_info->parallel_data;
-    // NOTE: This must be done after the task has been popped in order to make
-    // ompt_get_task_info to work.
-    this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
-    this_thr->th.th_team = serial_team->t.t_parent;
 
     KMP_ASSERT(this_thr->th.th_current_task->td_flags.executing == 0);
     this_thr->th.th_current_task->td_flags.executing = 1;
@@ -2645,6 +2646,10 @@ void __kmp_join_call(ident_t *loc, int gtid
   //   I'm not completely sure I undestand their purpose, so I would rather
   //   not to touch them.
   // master_th->th.th_info.ds.ds_tid = team->t.t_master_tid;
+  // Since ds_tid is going to be updated after the team has been freed,
+  // in order to avoid reading from potentially recycled memory chunk,
+  // memoize t_master_tid now and use it later.
+  int old_t_master_id = team->t.t_master_tid;
   master_th->th.th_local.this_construct = team->t.t_master_this_cons;
 
   master_th->th.th_dispatch = &parent_team->t.t_dispatch[team->t.t_master_tid];
@@ -2716,7 +2721,7 @@ void __kmp_join_call(ident_t *loc, int gtid
      only one deref&assign so might as well put this in the critical region */
   // This needs to be done after popping the current task, but before updating
   // the th_team.
-  master_th->th.th_info.ds.ds_tid = team->t.t_master_tid;
+  master_th->th.th_info.ds.ds_tid = old_t_master_id;
   master_th->th.th_team = parent_team;
   master_th->th.th_team_nproc = parent_team->t.t_nproc;
   master_th->th.th_team_master = parent_team->t.t_threads[0];
