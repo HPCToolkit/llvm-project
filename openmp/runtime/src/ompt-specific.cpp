@@ -605,11 +605,20 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
 
 // helper function that extends logic of linking/unlinking lwts
 static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
-  if (PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
-                       ompt_task_info_t)->lwt_done_sh) {
-    // The signal handler has already finished the linking process, so there's
-    // no need to do that again.
-    return;
+  char lwt_done_sh = PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
+                                      ompt_task_info_t)->lwt_done_sh;
+  switch (lwt_done_sh) {
+    case 1:
+      // The signal handler has already finished the linking process, so there's
+      // no need to do that again.
+      return;
+    case 0:
+      break;
+    default:
+      // The taskdata should have been recently allocated and lwt_done_sh field
+      // hasn't been invalidated to zero. Finish the linking process and then
+      // set lwt_done_sh to 1.
+      break;
   }
 
   // serve to ease the access
@@ -676,11 +685,18 @@ static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
 }
 
 static void inline __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
-  if (PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
-                       ompt_task_info_t)->lwt_done_sh) {
-    // The signal handler has already finished the unlinking process,
-    // so there's no need to do that again.
-    return;
+  char lwt_done_sh = PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
+                                      ompt_task_info_t)->lwt_done_sh;
+  switch (lwt_done_sh) {
+    case 1:
+      // The signal handler has already finished the linking process, so there's
+      // no need to do that again.
+      return;
+    case 0:
+      break;
+    default:
+      // This should never happen.
+      KMP_DEBUG_ASSERT(false);
   }
 
   // serve to ease the accesss
@@ -870,8 +886,11 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
             : &lwt->ompt_info->ompt_task_info;
       team_info = &lwt->ompt_info->ompt_team_info;
       if (type) {
-        // FIXME VI3-NOW: This needs to be fixed
-        *type = ompt_task_implicit;
+        kmp_tasking_flags_t *td_flags =
+            tasks_share_lwt ? &taskdata->td_flags : lwt->td_flags;
+        KMP_DEBUG_ASSERT(td_flags)
+        // FIXME: Do we need any other flags?
+        *type = td_flags->tasktype ? ompt_task_explicit : ompt_task_implicit;
       }
     } else if (taskdata) {
       info = PTR_GET_UNMASKED(taskdata->ompt_task_info, ompt_task_info_t);
