@@ -317,6 +317,8 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
   // Indicator that lwt is not properly initialized.
   lwt->ompt_info = NULL;
   lwt->td_flags = NULL;
+  lwt->ompt_info_pairs[0].ompt_task_info.lwt_done_sh = 0;
+  lwt->ompt_info_pairs[0].ompt_task_info.lwt_done_sh = 0;
   // initialize parallel_data with input, return address to parallel_data on
   // exit
 #if 0
@@ -367,9 +369,6 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 
     kmp_base_team_t *cur_team = &thr->th.th_team->t;
     kmp_taskdata_t *cur_task = thr->th.th_current_task;
-    // ensure that signal handler hasn't finished linking process,
-    // since it hasn't yet officially begun.
-    cur_task->ompt_task_info->lwt_done_sh = 0;
     // mark that ompt_team_info is going to be updated inside cur_team
     PTR_MASK_LOWER_BIT(cur_team->ompt_team_info, ompt_team_info_t);
     // mark that ompt_task_info is going to be updated inside cur_task
@@ -471,7 +470,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 
     // Since the linking process has officially finished, invalidate
     // the following field which won't be used by signal handler
-    cur_task->ompt_task_info->lwt_done_sh = 0;
+    link_lwt->ompt_info->ompt_task_info.lwt_done_sh = 0;
 
   } else {
     // initialize ompt_info if needed
@@ -498,10 +497,6 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     // store pointers before masking them
     ompt_team_info_t *cur_team_info = cur_team->ompt_team_info;
     ompt_team_info_t *lwt_team_info = &lwtask->ompt_info->ompt_team_info;
-
-    // ensure that signal handler hasn't finished linking process,
-    // since it hasn't yet officially begun.
-    cur_task->ompt_task_info->lwt_done_sh = 0;
 
     // mark that ompt_team_info and ompt_task_info should be copied
     PTR_MASK_LOWER_BIT(cur_team->ompt_team_info, ompt_team_info_t);
@@ -582,7 +577,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
 
     // Since unlinking has been officially finished, invalidate the
     // following field which won't be used by signal handler.
-    cur_task->ompt_task_info->lwt_done_sh = 0;
+    lwtask->ompt_info->ompt_task_info.lwt_done_sh = 0;
 
     if (lwtask->heap) {
       __kmp_free(lwtask);
@@ -604,9 +599,12 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
 //----------------------------------------------------------
 
 // helper function that extends logic of linking/unlinking lwts
-static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
-  char lwt_done_sh = PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
-                                      ompt_task_info_t)->lwt_done_sh;
+static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr,
+                                                          ompt_lw_taskteam_t *lwt) {
+  // If there is ompt_info set, then check lwt_done_sh, otherwise the link
+  // hasn't happened yet.
+  char lwt_done_sh =
+      lwt->ompt_info ? lwt->ompt_info->ompt_task_info.lwt_done_sh : 0;
   switch (lwt_done_sh) {
     case 1:
       // The signal handler has already finished the linking process, so there's
@@ -615,16 +613,13 @@ static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
     case 0:
       break;
     default:
-      // The taskdata should have been recently allocated and lwt_done_sh field
-      // hasn't been invalidated to zero. Finish the linking process and then
-      // set lwt_done_sh to 1.
+      KMP_DEBUG_ASSERT(false);
       break;
   }
 
   // serve to ease the access
   kmp_base_team_t *cur_team = &thr->th.th_team->t;
   kmp_taskdata_t *cur_task = thr->th.th_current_task;
-  ompt_lw_taskteam_t *lwt = LWT_GET_UNMASKED(cur_team->ompt_serialized_team_info);
   KMP_DEBUG_ASSERT(LWT_STATE_IS_ACTIVE(cur_team->ompt_serialized_team_info)
                          & LWT_STATE_LINKING);
   // unmask pointers in order to ease the access
@@ -681,12 +676,15 @@ static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr) {
   // execute this function again when ompt_get_task_info is called
   // multiple times while the signal handler processes the same
   // sample, set the following field to true.
-  cur_task->ompt_task_info->lwt_done_sh = 1;
+  lwt->ompt_info->ompt_task_info.lwt_done_sh = 1;
 }
 
-static void inline __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
-  char lwt_done_sh = PTR_GET_UNMASKED(thr->th.th_current_task->ompt_task_info,
-                                      ompt_task_info_t)->lwt_done_sh;
+static void inline __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr,
+                                                            ompt_lw_taskteam_t *lwt) {
+  // If there is ompt_info set, then check lwt_done_sh, otherwise the link
+  // hasn't happened yet.
+  char lwt_done_sh =
+      lwt->ompt_info ? lwt->ompt_info->ompt_task_info.lwt_done_sh : 0;
   switch (lwt_done_sh) {
     case 1:
       // The signal handler has already finished the linking process, so there's
@@ -702,7 +700,6 @@ static void inline __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
   // serve to ease the accesss
   kmp_base_team_t *cur_team = &thr->th.th_team->t;
   kmp_taskdata_t *cur_task = thr->th.th_current_task;
-  ompt_lw_taskteam_t *lwt = LWT_GET_UNMASKED(cur_team->ompt_serialized_team_info);
   KMP_DEBUG_ASSERT(LWT_STATE_IS_ACTIVE(cur_team->ompt_serialized_team_info)
                          & LWT_STATE_UNLINKING);
   ompt_team_info_t *lwt_team_info = &lwt->ompt_info->ompt_team_info;
@@ -749,7 +746,7 @@ static void inline __ompt_lw_taskteam_unlink_signal_handler(kmp_info_t *thr) {
   // execute this function again when ompt_get_task_info is called
   // multiple times while the signal handler processes the same
   // sample, set the following field to true.
-  cur_task->ompt_task_info->lwt_done_sh = 1;
+  lwt->ompt_info->ompt_task_info.lwt_done_sh = 1;
 }
 
 int __ompt_get_task_info_internal(int ancestor_level, int *type,
@@ -787,7 +784,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     int lwt_state = LWT_STATE_IS_ACTIVE(next_lwt);
     if (lwt_state == LWT_STATE_LINKING) {
       // linking
-      __ompt_lw_taskteam_link_signal_handler(thr);
+      __ompt_lw_taskteam_link_signal_handler(thr, LWT_GET_UNMASKED(next_lwt));
       if (ancestor_level == 0) {
         // The thread is in the middle of creating a new serialized parallel
         // region. The information is not fully available, so inform the tool,
@@ -801,7 +798,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       next_lwt = NULL;
     } else if (lwt_state == LWT_STATE_UNLINKING) {
       // unlinking
-      __ompt_lw_taskteam_unlink_signal_handler(thr);
+      __ompt_lw_taskteam_unlink_signal_handler(thr, LWT_GET_UNMASKED(next_lwt));
       if (ancestor_level == 0) {
         // The thread is in the middle of destroying the innermost serialized
         // parallel region. The information is not available at this moment,
