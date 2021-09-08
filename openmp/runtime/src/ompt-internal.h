@@ -77,12 +77,17 @@ typedef struct {
   char lwt_done_sh;
 } ompt_task_info_t;
 
+typedef struct end_team_info_s {
+  ompt_data_t old_parallel_data;
+  void *old_master_return_address;
+} end_team_info_t;
+
 typedef struct {
   ompt_data_t parallel_data;
   void *master_return_address;
   // used after unlinking of the corresponding lwt
-  ompt_data_t old_parallel_data;
-  void *old_master_return_address;
+  end_team_info_t *end_team_info;
+  end_team_info_t end_team_info_pair[2];
 } ompt_team_info_t;
 
 #include <utility>
