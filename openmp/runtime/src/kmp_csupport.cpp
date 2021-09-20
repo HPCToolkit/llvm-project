@@ -314,7 +314,9 @@ void __kmpc_fork_call(ident_t *loc, kmp_int32 argc, kmpc_micro microtask, ...) {
     va_end(ap);
 
 #if OMPT_SUPPORT
-    OMPT_FRAME_CLEAR(task_frame, enter);
+    if (ompt_enabled.enabled) {
+      OMPT_FRAME_CLEAR(task_frame, enter);
+    }
 #endif
   }
 
