@@ -828,8 +828,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     if (team == NULL)
       return 0;
     ompt_lw_taskteam_t *lwt = NULL,
-                       *next_lwt = LWT_FROM_TEAM(taskdata->td_team),
-                       *prev_lwt = NULL;
+                       *next_lwt = LWT_FROM_TEAM(taskdata->td_team);
 
     int lwt_state = LWT_STATE_IS_ACTIVE(next_lwt);
     if (lwt_state == LWT_STATE_LINKING) {
@@ -866,8 +865,6 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
     bool tasks_share_lwt = false;
 
     while (ancestor_level > 0) {
-      // needed for thread_num
-      prev_lwt = lwt;
       // Detect whether we need to access to the next lightweight team
       // or to share lwt->ompt_team_info among multiple tasks.
       if (lwt && !tasks_share_lwt) {
@@ -914,8 +911,6 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
             if (taskdata) {
               next_lwt = LWT_FROM_TEAM(taskdata->td_team);
             }
-            // invalidate prev_lwt, since the regular team has been updated
-            prev_lwt = NULL;
             // Since the new team is accessed, the tasks cannot share lwt.
             tasks_share_lwt = false;
           }
@@ -979,9 +974,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         // th_team->t.t_parent == taskdata->td_team, so the thread num
         // is stored inside th_team->t.t_master_tid.
         *thread_num = thr->th.th_team->t.t_master_tid;
-      } else if (prev_lwt)
-        *thread_num = 0; // encounter on outermost serialized parallel region
-      else if (lwt)
+      } else if (lwt)
         *thread_num = 0; // encounter on nested serialized parallel region
       else if(!prev_team) {
         // Since the prev_team is still NULL, this means that the thread is
