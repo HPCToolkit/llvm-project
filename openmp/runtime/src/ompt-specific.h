@@ -34,6 +34,7 @@ void __ompt_team_assign_id(kmp_team_t *team, ompt_data_t ompt_pid);
 
 void __ompt_thread_assign_wait_id(void *variable);
 
+#if 0
 void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
                              ompt_data_t *ompt_pid, void *codeptr);
 
@@ -41,6 +42,13 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always = false);
 
 void __ompt_lw_taskteam_unlink(kmp_info_t *thr);
+#else
+#define __ompt_lw_taskteam_init
+#define __ompt_lw_taskteam_link
+#define __ompt_lw_taskteam_unlink
+#endif
+
+
 
 ompt_team_info_t *__ompt_get_teaminfo(int depth, int *size);
 
