@@ -838,7 +838,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         // The thread is in the middle of creating a new serialized parallel
         // region. The information is not fully available, so inform the tool,
         // which may inquire the information about the task at higher levels.
-        return 1;
+        return 23;
       }
       // decrease the ancestor level
       ancestor_level--;
@@ -853,7 +853,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         // parallel region. The information is not available at this moment,
         // so inform the tool that it may inquire the information about the
         // task at higher levels.
-        return 1;
+        return 33;
       }
       // decrease the ancestor_level
       ancestor_level--;
