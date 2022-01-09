@@ -73,21 +73,12 @@ typedef struct {
   ompt_data_t task_data;
   struct kmp_taskdata *scheduling_parent;
   int thread_num;
-  // indicator whether the linking/unlinking has been finished by signal handler
-  char lwt_done_sh;
 } ompt_task_info_t;
 
-typedef struct end_team_info_s {
-  ompt_data_t old_parallel_data;
-  void *old_master_return_address;
-} end_team_info_t;
 
 typedef struct {
   ompt_data_t parallel_data;
   void *master_return_address;
-  // used after unlinking of the corresponding lwt
-  end_team_info_t *end_team_info;
-  end_team_info_t end_team_info_pair[2];
 } ompt_team_info_t;
 
 #include <utility>
@@ -98,24 +89,12 @@ typedef struct ompt_info_pair_s {
 } ompt_info_pair_t;
 
 typedef struct ompt_lw_taskteam_s {
-  // ompt_team_info and ompt_task_info represents the ompt information about
-  // the serialized parallel region and the corresponding implicit task.
-  // There are two copies of this pair (ompt_info_pair). The first one is
-  // maintained by the runtime during the linking phase __ompt_lw_taskteam_link,
-  // while the second one is maintained by the signal handler if needed
-  // (inside __ompt_get_task_info_internal).
-  // This is needed in order to resolve the pontential race condition during
-  // the linking phase of the new lightweight task.
-  ompt_info_pair_t ompt_info_pairs[2];
-  ompt_info_pair_t *ompt_info;
-  //ompt_team_info_t ompt_team_info;
-  //ompt_task_info_t ompt_task_info;
+  ompt_team_info_t ompt_team_info;
+  ompt_task_info_t ompt_task_info;
   int heap;
   struct ompt_lw_taskteam_s *parent;
-  // maybe we don't need all task flags
-  // FIXME VI3-NOW: Do we really need this?
-  kmp_tasking_flags_t td_flags_pair[2];
-  kmp_tasking_flags_t *td_flags;
+  // preserve td_flags of kmp_taskdata_t after linking happens
+  kmp_tasking_flags_t td_flags;
 } ompt_lw_taskteam_t;
 
 typedef struct {

@@ -485,9 +485,6 @@ void __kmp_push_current_task_to_thread(kmp_info_t *this_thr, kmp_team_t *team,
 
   KMP_DEBUG_ASSERT(this_thr != NULL);
 
-#if OMPT_SUPPORT
-  __ompt_task_info_initialize(&team->t.t_implicit_task_taskdata[tid]);
-#endif
 
   if (tid == 0) {
     if (this_thr->th.th_current_task != &team->t.t_implicit_task_taskdata[0]) {
@@ -547,7 +544,7 @@ static void __kmp_task_start(kmp_int32 gtid, kmp_task_t *task,
   // (maybe even recycled) reference to
   // scheduling_parent will be used and cause the tool to receive
   // the inconsistent information.
-  taskdata->ompt_task_info->scheduling_parent = current_task;
+  taskdata->ompt_task_info.scheduling_parent = current_task;
 #endif
   // mark starting task as executing and as current task
   thread->th.th_current_task = taskdata;
@@ -578,14 +575,12 @@ static void __kmp_task_start(kmp_int32 gtid, kmp_task_t *task,
 //   ompt_start_tool, so we already know whether ompt is enabled or not.
 
 static inline void __ompt_task_init(kmp_taskdata_t *task, int tid) {
-  // Initialize ompt_task_info if needed.
-  __ompt_task_info_initialize(task);
   // The calls to __ompt_task_init already have the ompt_enabled condition.
-  task->ompt_task_info->task_data.value = 0;
-  task->ompt_task_info->frame.exit_frame = ompt_data_none;
-  task->ompt_task_info->frame.enter_frame = ompt_data_none;
-  task->ompt_task_info->frame.exit_frame_flags = 0;
-  task->ompt_task_info->frame.enter_frame_flags = 0;
+  task->ompt_task_info.task_data.value = 0;
+  task->ompt_task_info.frame.exit_frame = ompt_data_none;
+  task->ompt_task_info.frame.enter_frame = ompt_data_none;
+  task->ompt_task_info.frame.exit_frame_flags = 0;
+  task->ompt_task_info.frame.enter_frame_flags = 0;
 }
 
 // __ompt_task_start:
@@ -602,13 +597,13 @@ static inline void __ompt_task_start(kmp_task_t *task,
   /* let OMPT know that we're about to run this task */
   if (ompt_enabled.ompt_callback_task_schedule) {
     ompt_callbacks.ompt_callback(ompt_callback_task_schedule)(
-        &(current_task->ompt_task_info->task_data), status,
-        &(taskdata->ompt_task_info->task_data));
+        &(current_task->ompt_task_info.task_data), status,
+        &(taskdata->ompt_task_info.task_data));
   }
   // FIXME: This is set inside __kmp_task_start before updating th_current_task.
   //  Is it safe to remove it from here? Or is it ok to call this function
   //  from __kmp_task_start?
-  taskdata->ompt_task_info->scheduling_parent = current_task;
+  taskdata->ompt_task_info.scheduling_parent = current_task;
 }
 
 // __ompt_task_finish:
@@ -625,8 +620,8 @@ static inline void __ompt_task_finish(kmp_task_t *task,
 
     /* let OMPT know that we're returning to the callee task */
     ompt_callbacks.ompt_callback(ompt_callback_task_schedule)(
-        &(taskdata->ompt_task_info->task_data), status,
-        (resumed_task ? &(resumed_task->ompt_task_info->task_data) : NULL));
+        &(taskdata->ompt_task_info.task_data), status,
+        (resumed_task ? &(resumed_task->ompt_task_info.task_data) : NULL));
   }
 }
 #endif
@@ -660,13 +655,13 @@ static void __kmpc_omp_task_begin_if0_template(ident_t *loc_ref, kmp_int32 gtid,
 
 #if OMPT_SUPPORT
   if (ompt) {
-    if (current_task->ompt_task_info->frame.enter_frame.ptr == NULL) {
-      current_task->ompt_task_info->frame.enter_frame.ptr = enter_frame_address;
-      taskdata->ompt_task_info->frame.exit_frame.ptr = exit_frame_address;
+    if (current_task->ompt_task_info.frame.enter_frame.ptr == NULL) {
+      current_task->ompt_task_info.frame.enter_frame.ptr = enter_frame_address;
+      taskdata->ompt_task_info.frame.exit_frame.ptr = exit_frame_address;
       // FIXME vi3-merge: whether ompt_frame_application can be used for enter_frame?
       //  Standardard isn't completely clear about this.
-      current_task->ompt_task_info->frame.enter_frame_flags =
-          taskdata->ompt_task_info->frame.exit_frame_flags = ompt_frame_application | OMPT_FRAME_POSITION_DEFAULT;
+      current_task->ompt_task_info.frame.enter_frame_flags =
+          taskdata->ompt_task_info.frame.exit_frame_flags = ompt_frame_application | OMPT_FRAME_POSITION_DEFAULT;
 #if 0
     //johnmc this is how flags are set up in main
           taskdata->ompt_task_info.frame.exit_frame_flags =
@@ -674,10 +669,10 @@ static void __kmpc_omp_task_begin_if0_template(ident_t *loc_ref, kmp_int32 gtid,
 #endif
     }
     if (ompt_enabled.ompt_callback_task_create) {
-      ompt_task_info_t *parent_info = (current_task->ompt_task_info);
+      ompt_task_info_t *parent_info = &(current_task->ompt_task_info);
       ompt_callbacks.ompt_callback(ompt_callback_task_create)(
           &(parent_info->task_data), &(parent_info->frame),
-          &(taskdata->ompt_task_info->task_data),
+          &(taskdata->ompt_task_info.task_data),
           ompt_task_explicit | TASK_TYPE_DETAILS_FORMAT(taskdata), 0,
           return_address);
     }
@@ -1099,6 +1094,22 @@ void __kmpc_omp_task_complete(ident_t *loc_ref, kmp_int32 gtid,
 }
 #endif // TASK_UNUSED
 
+void __kmp_init_implicit_task_flags(kmp_taskdata_t *task, kmp_team_t *team) {
+  task->td_flags.tiedness = TASK_TIED;
+  task->td_flags.tasktype = TASK_IMPLICIT;
+  task->td_flags.proxy = TASK_FULL;
+
+  // All implicit tasks are executed immediately, not deferred
+  task->td_flags.task_serial = 1;
+  task->td_flags.tasking_ser = (__kmp_tasking_mode == tskm_immediate_exec);
+  task->td_flags.team_serial = (team->t.t_serialized) ? 1 : 0;
+
+  task->td_flags.started = 1;
+  task->td_flags.executing = 1;
+  task->td_flags.complete = 0;
+  task->td_flags.freed = 0;
+}
+
 // __kmp_init_implicit_task: Initialize the appropriate fields in the implicit
 // task for a given thread
 //
@@ -1128,19 +1139,7 @@ void __kmp_init_implicit_task(ident_t *loc_ref, kmp_info_t *this_thr,
   task->td_taskwait_counter = 0;
   task->td_taskwait_thread = 0;
 
-  task->td_flags.tiedness = TASK_TIED;
-  task->td_flags.tasktype = TASK_IMPLICIT;
-  task->td_flags.proxy = TASK_FULL;
-
-  // All implicit tasks are executed immediately, not deferred
-  task->td_flags.task_serial = 1;
-  task->td_flags.tasking_ser = (__kmp_tasking_mode == tskm_immediate_exec);
-  task->td_flags.team_serial = (team->t.t_serialized) ? 1 : 0;
-
-  task->td_flags.started = 1;
-  task->td_flags.executing = 1;
-  task->td_flags.complete = 0;
-  task->td_flags.freed = 0;
+  __kmp_init_implicit_task_flags(task, team);
 
   task->td_depnode = NULL;
   task->td_last_tied = task;
@@ -1745,9 +1744,9 @@ kmp_int32 __kmpc_omp_task_parts(ident_t *loc_ref, kmp_int32 gtid,
     if (ompt_enabled.ompt_callback_task_create) {
       ompt_data_t task_data = ompt_data_none;
       ompt_callbacks.ompt_callback(ompt_callback_task_create)(
-          parent ? &(parent->ompt_task_info->task_data) : &task_data,
-          parent ? &(parent->ompt_task_info->frame) : NULL,
-          &(new_taskdata->ompt_task_info->task_data), ompt_task_explicit, 0,
+          parent ? &(parent->ompt_task_info.task_data) : &task_data,
+          parent ? &(parent->ompt_task_info.frame) : NULL,
+          &(new_taskdata->ompt_task_info.task_data), ompt_task_explicit, 0,
           OMPT_GET_RETURN_ADDRESS(0));
     }
   }
@@ -1772,7 +1771,7 @@ kmp_int32 __kmpc_omp_task_parts(ident_t *loc_ref, kmp_int32 gtid,
   ANNOTATE_HAPPENS_BEFORE(new_task);
 #if OMPT_SUPPORT
   if (UNLIKELY(ompt_enabled.enabled)) {
-    parent->ompt_task_info->frame.enter_frame = ompt_data_none;
+    parent->ompt_task_info.frame.enter_frame = ompt_data_none;
   }
 #endif
   return TASK_CURRENT_NOT_QUEUED;
@@ -1839,7 +1838,7 @@ kmp_int32 __kmpc_omp_task(ident_t *loc_ref, kmp_int32 gtid,
   bool set_parent_frame;
   if (UNLIKELY(ompt_enabled.enabled)) {
     parent = new_taskdata->td_parent;
-    parent_frame = &parent->ompt_task_info->frame;
+    parent_frame = &parent->ompt_task_info.frame;
     set_parent_frame = OMPT_FRAME_SET_P(parent_frame, enter);
     if (!new_taskdata->td_flags.started) {
       if (!set_parent_frame) {
@@ -1847,16 +1846,16 @@ kmp_int32 __kmpc_omp_task(ident_t *loc_ref, kmp_int32 gtid,
 		       (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
 	OMPT_STORE_RETURN_ADDRESS(gtid);
       }
-      child_frame = &new_taskdata->ompt_task_info->frame;
+      child_frame = &new_taskdata->ompt_task_info.frame;
       OMPT_FRAME_SET(child_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
 		     (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
       if (ompt_enabled.ompt_callback_task_create) {
         ompt_data_t task_data = ompt_data_none;
         void *codeptr = OMPT_CUR_TEAM_INFO(__kmp_threads[gtid])->master_return_address;
         ompt_callbacks.ompt_callback(ompt_callback_task_create)(
-            parent ? &(parent->ompt_task_info->task_data) : &task_data,
-            parent ? &(parent->ompt_task_info->frame) : NULL,
-            &(new_taskdata->ompt_task_info->task_data),
+            parent ? &(parent->ompt_task_info.task_data) : &task_data,
+            parent ? &(parent->ompt_task_info.frame) : NULL,
+            &(new_taskdata->ompt_task_info.task_data),
             ompt_task_explicit | TASK_TYPE_DETAILS_FORMAT(new_taskdata), 0,
             codeptr);
 	if (!set_parent_frame) {
@@ -1867,9 +1866,9 @@ kmp_int32 __kmpc_omp_task(ident_t *loc_ref, kmp_int32 gtid,
       // We are scheduling the continuation of an UNTIED task.
       // Scheduling back to the parent task.
       __ompt_task_finish(new_task,
-                         new_taskdata->ompt_task_info->scheduling_parent,
+                         new_taskdata->ompt_task_info.scheduling_parent,
                          ompt_task_switch);
-      child_frame = &new_taskdata->ompt_task_info->frame;
+      child_frame = &new_taskdata->ompt_task_info.frame;
       OMPT_FRAME_CLEAR(child_frame, exit);
     }
   }
@@ -1916,14 +1915,14 @@ kmp_int32 __kmp_omp_taskloop_task(ident_t *loc_ref, kmp_int32 gtid,
   kmp_taskdata_t *parent = NULL;
   if (UNLIKELY(ompt_enabled.enabled && !new_taskdata->td_flags.started)) {
     parent = new_taskdata->td_parent;
-    if (!parent->ompt_task_info->frame.enter_frame.ptr)
-      parent->ompt_task_info->frame.enter_frame.ptr = OMPT_GET_FRAME_ADDRESS(0);
+    if (!parent->ompt_task_info.frame.enter_frame.ptr)
+      parent->ompt_task_info.frame.enter_frame.ptr = OMPT_GET_FRAME_ADDRESS(0);
     if (ompt_enabled.ompt_callback_task_create) {
       ompt_data_t task_data = ompt_data_none;
       ompt_callbacks.ompt_callback(ompt_callback_task_create)(
-          parent ? &(parent->ompt_task_info->task_data) : &task_data,
-          parent ? &(parent->ompt_task_info->frame) : NULL,
-          &(new_taskdata->ompt_task_info->task_data),
+          parent ? &(parent->ompt_task_info.task_data) : &task_data,
+          parent ? &(parent->ompt_task_info.frame) : NULL,
+          &(new_taskdata->ompt_task_info.task_data),
           ompt_task_explicit | TASK_TYPE_DETAILS_FORMAT(new_taskdata), 0,
           codeptr_ra);
     }
@@ -1937,7 +1936,7 @@ kmp_int32 __kmp_omp_taskloop_task(ident_t *loc_ref, kmp_int32 gtid,
                 gtid, loc_ref, new_taskdata));
 #if OMPT_SUPPORT
   if (UNLIKELY(ompt_enabled.enabled && parent != NULL)) {
-    parent->ompt_task_info->frame.enter_frame = ompt_data_none;
+    parent->ompt_task_info.frame.enter_frame = ompt_data_none;
   }
 #endif
   return res;
@@ -1964,10 +1963,10 @@ static kmp_int32 __kmpc_omp_taskwait_template(ident_t *loc_ref, kmp_int32 gtid,
     ompt_data_t *my_parallel_data;
 
     if (ompt) {
-      my_task_data = &(taskdata->ompt_task_info->task_data);
+      my_task_data = &(taskdata->ompt_task_info.task_data);
       my_parallel_data = OMPT_CUR_TEAM_DATA(thread);
 
-      taskdata->ompt_task_info->frame.enter_frame.ptr = frame_address;
+      taskdata->ompt_task_info.frame.enter_frame.ptr = frame_address;
 
       if (ompt_enabled.ompt_callback_sync_region) {
         ompt_callbacks.ompt_callback(ompt_callback_sync_region)(
@@ -2042,7 +2041,7 @@ static kmp_int32 __kmpc_omp_taskwait_template(ident_t *loc_ref, kmp_int32 gtid,
             ompt_sync_region_taskwait, ompt_scope_end, my_parallel_data,
             my_task_data, return_address);
       }
-      taskdata->ompt_task_info->frame.enter_frame = ompt_data_none;
+      taskdata->ompt_task_info.frame.enter_frame = ompt_data_none;
     }
 #endif // OMPT_SUPPORT && OMPT_OPTIONAL
 
@@ -2583,9 +2582,9 @@ void __kmpc_taskgroup(ident_t *loc, int gtid) {
     if (!codeptr)
       codeptr = OMPT_GET_RETURN_ADDRESS(0);
     kmp_team_t *team = thread->th.th_team;
-    ompt_data_t my_task_data = taskdata->ompt_task_info->task_data;
+    ompt_data_t my_task_data = taskdata->ompt_task_info.task_data;
     // FIXME: I think this is wrong for lwt!
-    ompt_data_t my_parallel_data = team->t.ompt_team_info->parallel_data;
+    ompt_data_t my_parallel_data = team->t.ompt_team_info.parallel_data;
 
     ompt_callbacks.ompt_callback(ompt_callback_sync_region)(
         ompt_sync_region_taskgroup, ompt_scope_begin, &(my_parallel_data),
@@ -2610,9 +2609,9 @@ void __kmpc_end_taskgroup(ident_t *loc, int gtid) {
   void *codeptr;
   if (UNLIKELY(ompt_enabled.enabled)) {
     team = thread->th.th_team;
-    my_task_data = taskdata->ompt_task_info->task_data;
+    my_task_data = taskdata->ompt_task_info.task_data;
     // FIXME: I think this is wrong for lwt!
-    my_parallel_data = team->t.ompt_team_info->parallel_data;
+    my_parallel_data = team->t.ompt_team_info.parallel_data;
     codeptr = OMPT_LOAD_RETURN_ADDRESS(gtid);
     if (!codeptr)
       codeptr = OMPT_GET_RETURN_ADDRESS(0);

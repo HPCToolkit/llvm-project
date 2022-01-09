@@ -24,17 +24,10 @@ void __ompt_force_initialization();
 
 int __ompt_set_frame_enter_internal(void *addr, int flags, int state);
 
-void __ompt_team_info_initialize(kmp_team_t *team);
-
-void __ompt_task_info_initialize(kmp_taskdata_t *taskdata);
-
-void __ompt_lwt_initialize(ompt_lw_taskteam_t *lwt);
-
 void __ompt_team_assign_id(kmp_team_t *team, ompt_data_t ompt_pid);
 
 void __ompt_thread_assign_wait_id(void *variable);
 
-#if 0
 void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
                              ompt_data_t *ompt_pid, void *codeptr);
 
@@ -42,11 +35,6 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always = false);
 
 void __ompt_lw_taskteam_unlink(kmp_info_t *thr);
-#else
-#define __ompt_lw_taskteam_init
-#define __ompt_lw_taskteam_link
-#define __ompt_lw_taskteam_unlink
-#endif
 
 
 
@@ -76,12 +64,12 @@ ompt_sync_region_t __ompt_get_barrier_kind(enum barrier_type, kmp_info_t *);
  * macros
  ****************************************************************************/
 
-#define OMPT_CUR_TASK_INFO(thr) (((thr)->th.th_current_task->ompt_task_info))
+#define OMPT_CUR_TASK_INFO(thr) (&((thr)->th.th_current_task->ompt_task_info))
 #define OMPT_CUR_TASK_DATA(thr)                                                \
-  (&((thr)->th.th_current_task->ompt_task_info->task_data))
-#define OMPT_CUR_TEAM_INFO(thr) (((thr)->th.th_team->t.ompt_team_info))
+  (&((thr)->th.th_current_task->ompt_task_info.task_data))
+#define OMPT_CUR_TEAM_INFO(thr) (&((thr)->th.th_team->t.ompt_team_info))
 #define OMPT_CUR_TEAM_DATA(thr)                                                \
-  (&((thr)->th.th_team->t.ompt_team_info->parallel_data))
+  (&((thr)->th.th_team->t.ompt_team_info.parallel_data))
 
 #define OMPT_HAVE_WEAK_ATTRIBUTE KMP_HAVE_WEAK_ATTRIBUTE
 #define OMPT_HAVE_PSAPI KMP_HAVE_PSAPI

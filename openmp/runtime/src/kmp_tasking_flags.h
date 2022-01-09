@@ -1,15 +1,27 @@
+/*
+ * kmp_tasking_flags.h -- OpenMP task flags
+ */
+
+//===----------------------------------------------------------------------===//
 //
-// Created by vi3 on 7/9/21.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
+//===----------------------------------------------------------------------===//
 
 #ifndef KMP_TASKING_FLAGS_H
 #define KMP_TASKING_FLAGS_H
 
+// Set all tasking flags to zero, under assumption
+// that kmp_tasking_flags struct is exactly 32 bits long.
+#define TASKING_FLAGS_CLEAR(td_flags_ptr) *((uint32_t *)td_flags_ptr) = 0;
+
 // In order to avoid circular reference, declare the following data structure
-// here in order to be safely include in both ompt-internal.h and kmp.h.
-// Another solution would be to declare it inside ompt-internal.h.
-// However, it logically doesn't belong to only OMPT, so it should rather
-// remain in separate header file.
+// here in order to be safely included by both ompt-internal.h and kmp.h files.
+// It could be declared inside ompt-internal.h instead.
+// However, it's not only used by OMPT, so it is better to declare it
+// in a separate header file.
 typedef struct kmp_tasking_flags { /* Total struct must be exactly 32 bits */
   /* Compiler flags */ /* Total compiler flags must be 16 bits */
   unsigned tiedness : 1; /* task is either tied (1) or untied (0) */
@@ -44,4 +56,4 @@ typedef struct kmp_tasking_flags { /* Total struct must be exactly 32 bits */
 
 } kmp_tasking_flags_t;
 
-#endif //KMP_TASKING_FLAGS_H
+#endif // KMP_TASKING_FLAGS_H

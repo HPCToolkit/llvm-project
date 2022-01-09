@@ -231,12 +231,12 @@ static inline void __kmp_track_dependence(kmp_int32 gtid, kmp_depnode_t *source,
     kmp_taskdata_t *task_source = KMP_TASK_TO_TASKDATA(source->dn.task);
     ompt_data_t *sink_data;
     if (sink_task)
-      sink_data = &(KMP_TASK_TO_TASKDATA(sink_task)->ompt_task_info->task_data);
+      sink_data = &(KMP_TASK_TO_TASKDATA(sink_task)->ompt_task_info.task_data);
     else
       sink_data = &__kmp_threads[gtid]->th.ompt_thread_info.task_data;
 
     ompt_callbacks.ompt_callback(ompt_callback_task_dependence)(
-        &(task_source->ompt_task_info->task_data), sink_data);
+        &(task_source->ompt_task_info.task_data), sink_data);
   }
 #endif /* OMPT_SUPPORT && OMPT_OPTIONAL */
 }
@@ -525,14 +525,14 @@ kmp_int32 __kmpc_omp_task_with_deps(ident_t *loc_ref, kmp_int32 gtid,
 
 #if OMPT_SUPPORT
   if (ompt_enabled.enabled) {
-    if (!current_task->ompt_task_info->frame.enter_frame.ptr)
-      current_task->ompt_task_info->frame.enter_frame.ptr =
+    if (!current_task->ompt_task_info.frame.enter_frame.ptr)
+      current_task->ompt_task_info.frame.enter_frame.ptr =
           OMPT_GET_FRAME_ADDRESS(0);
     if (ompt_enabled.ompt_callback_task_create) {
       ompt_callbacks.ompt_callback(ompt_callback_task_create)(
-          &(current_task->ompt_task_info->task_data),
-          &(current_task->ompt_task_info->frame),
-          &(new_taskdata->ompt_task_info->task_data),
+          &(current_task->ompt_task_info.task_data),
+          &(current_task->ompt_task_info.frame),
+          &(new_taskdata->ompt_task_info.task_data),
           ompt_task_explicit | TASK_TYPE_DETAILS_FORMAT(new_taskdata), 1,
           OMPT_LOAD_OR_GET_RETURN_ADDRESS(gtid));
     }
@@ -575,7 +575,7 @@ kmp_int32 __kmpc_omp_task_with_deps(ident_t *loc_ref, kmp_int32 gtid,
             ompt_dependence_type_mutexinoutset;
     }
     ompt_callbacks.ompt_callback(ompt_callback_dependences)(
-        &(new_taskdata->ompt_task_info->task_data), ompt_deps, ompt_ndeps);
+        &(new_taskdata->ompt_task_info.task_data), ompt_deps, ompt_ndeps);
     /* We can now free the allocated memory for the dependences */
     /* For OMPD we might want to delay the free until end of this function */
     KMP_OMPT_DEPS_FREE(thread, ompt_deps);
@@ -616,7 +616,7 @@ kmp_int32 __kmpc_omp_task_with_deps(ident_t *loc_ref, kmp_int32 gtid,
                     gtid, loc_ref, new_taskdata));
 #if OMPT_SUPPORT
       if (ompt_enabled.enabled) {
-        current_task->ompt_task_info->frame.enter_frame = ompt_data_none;
+        current_task->ompt_task_info.frame.enter_frame = ompt_data_none;
       }
 #endif
       return TASK_CURRENT_NOT_QUEUED;
@@ -635,7 +635,7 @@ kmp_int32 __kmpc_omp_task_with_deps(ident_t *loc_ref, kmp_int32 gtid,
   kmp_int32 ret = __kmp_omp_task(gtid, new_task, true);
 #if OMPT_SUPPORT
   if (ompt_enabled.enabled) {
-    current_task->ompt_task_info->frame.enter_frame = ompt_data_none;
+    current_task->ompt_task_info.frame.enter_frame = ompt_data_none;
   }
 #endif
   return ret;
@@ -646,13 +646,13 @@ void __ompt_taskwait_dep_finish(kmp_taskdata_t *current_task,
                                 ompt_data_t *taskwait_task_data) {
   if (ompt_enabled.ompt_callback_task_schedule) {
     ompt_callbacks.ompt_callback(ompt_callback_task_schedule)(
-        &(current_task->ompt_task_info->task_data), ompt_task_switch,
+        &(current_task->ompt_task_info.task_data), ompt_task_switch,
         taskwait_task_data);
     ompt_callbacks.ompt_callback(ompt_callback_task_schedule)(
         taskwait_task_data, ompt_task_complete,
-        &(current_task->ompt_task_info->task_data));
+        &(current_task->ompt_task_info.task_data));
   }
-  current_task->ompt_task_info->frame.enter_frame.ptr = NULL;
+  current_task->ompt_task_info.frame.enter_frame.ptr = NULL;
   *taskwait_task_data = ompt_data_none;
 }
 #endif /* OMPT_SUPPORT */
@@ -692,13 +692,13 @@ void __kmpc_omp_wait_deps(ident_t *loc_ref, kmp_int32 gtid, kmp_int32 ndeps,
   ompt_data_t *taskwait_task_data = &thread->th.ompt_thread_info.task_data;
   KMP_ASSERT(taskwait_task_data->ptr == NULL);
   if (ompt_enabled.enabled) {
-    if (!current_task->ompt_task_info->frame.enter_frame.ptr)
-      current_task->ompt_task_info->frame.enter_frame.ptr =
+    if (!current_task->ompt_task_info.frame.enter_frame.ptr)
+      current_task->ompt_task_info.frame.enter_frame.ptr =
           OMPT_GET_FRAME_ADDRESS(0);
     if (ompt_enabled.ompt_callback_task_create) {
       ompt_callbacks.ompt_callback(ompt_callback_task_create)(
-          &(current_task->ompt_task_info->task_data),
-          &(current_task->ompt_task_info->frame), taskwait_task_data,
+          &(current_task->ompt_task_info.task_data),
+          &(current_task->ompt_task_info.frame), taskwait_task_data,
           ompt_task_explicit | ompt_task_undeferred | ompt_task_mergeable, 1,
           OMPT_LOAD_OR_GET_RETURN_ADDRESS(gtid));
     }

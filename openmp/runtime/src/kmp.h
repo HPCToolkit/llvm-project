@@ -2406,10 +2406,7 @@ struct kmp_taskdata { /* aligned during dynamic allocation       */
 #endif
   kmp_event_t td_allow_completion_event;
 #if OMPT_SUPPORT
-  //ompt_task_info_t ompt_task_info;
-  // This resolves the race condition when linking/unlinking lwt
-  ompt_task_info_t ompt_task_info_pair[2];
-  ompt_task_info_t *ompt_task_info;
+  ompt_task_info_t ompt_task_info;
 #endif
 }; // struct kmp_taskdata
 
@@ -2751,11 +2748,8 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
   launch_t t_invoke; // procedure to launch the microtask
 
 #if OMPT_SUPPORT
-  //ompt_team_info_t ompt_team_info;
+  ompt_team_info_t ompt_team_info;
   ompt_lw_taskteam_t *ompt_serialized_team_info;
-  // This resolves the race condition when linking/unlinking lwt
-  ompt_team_info_t ompt_team_info_pair[2];
-  ompt_team_info_t *ompt_team_info;
 #endif
 
 #if KMP_ARCH_X86 || KMP_ARCH_X86_64
@@ -3644,6 +3638,7 @@ extern kmp_task_t *__kmp_task_alloc(ident_t *loc_ref, kmp_int32 gtid,
                                     size_t sizeof_kmp_task_t,
                                     size_t sizeof_shareds,
                                     kmp_routine_entry_t task_entry);
+extern void __kmp_init_implicit_task_flags(kmp_taskdata_t *task, kmp_team_t *team);
 extern void __kmp_init_implicit_task(ident_t *loc_ref, kmp_info_t *this_thr,
                                      kmp_team_t *team, int tid,
                                      int set_curr_task);
