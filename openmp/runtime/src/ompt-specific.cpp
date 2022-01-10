@@ -422,8 +422,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       // Information about the current region is not available
       // at the moment.
       if (ancestor_level == 0 || ancestor_level == 1) {
-//        return taskdata->linking;
-        return 1;
+        return taskdata->linking;
       }
       // decrease the ancestor_level for the innermost region and its parent
       ancestor_level--;
