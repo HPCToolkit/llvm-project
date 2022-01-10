@@ -292,6 +292,8 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     }
     link_lwt->heap = on_heap;
 
+    thr->th.th_current_task->linking = 23;
+
     // would be swap in the (on_stack) case.
     ompt_team_info_t tmp_team = lwt->ompt_team_info;
     link_lwt->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
@@ -323,6 +325,8 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     // explicit tasks.
     __kmp_init_implicit_task_flags(cur_task, thr->th.th_team);
 
+    thr->th.th_current_task->linking = 0;
+
   } else {
     // this is the first serialized team, so we just store the values in the
     // team and drop the taskteam-object
@@ -334,6 +338,8 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   ompt_lw_taskteam_t *lwtask = thr->th.th_team->t.ompt_serialized_team_info;
   if (lwtask) {
+    thr->th.th_current_task->linking = 33;
+
     ompt_task_info_t tmp_task = lwtask->ompt_task_info;
     lwtask->ompt_task_info = *OMPT_CUR_TASK_INFO(thr);
     *OMPT_CUR_TASK_INFO(thr) = tmp_task;
@@ -349,6 +355,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     lwtask->ompt_team_info = *OMPT_CUR_TEAM_INFO(thr);
     *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
 
+    thr->th.th_current_task->linking = 0;
     if (lwtask->heap) {
       __kmp_free(lwtask);
       lwtask = NULL;
@@ -407,6 +414,18 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
       }
       // If the tool needs the information about the tasks at higher ancestor
       // levels, then decrease ancestor_level variable.
+      ancestor_level--;
+    }
+
+    if (taskdata->linking) {
+      // The thread is creating/destroying nested serialized region.
+      // Information about the current region is not available
+      // at the moment.
+      if (ancestor_level == 0 || ancestor_level == 1) {
+//        return taskdata->linking;
+        return 1;
+      }
+      // decrease the ancestor_level for the innermost region and its parent
       ancestor_level--;
     }
 

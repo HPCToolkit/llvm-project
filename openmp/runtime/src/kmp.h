@@ -2407,6 +2407,7 @@ struct kmp_taskdata { /* aligned during dynamic allocation       */
   kmp_event_t td_allow_completion_event;
 #if OMPT_SUPPORT
   ompt_task_info_t ompt_task_info;
+  char linking;
 #endif
 }; // struct kmp_taskdata
 

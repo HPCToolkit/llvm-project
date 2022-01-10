@@ -1139,6 +1139,8 @@ void __kmp_init_implicit_task(ident_t *loc_ref, kmp_info_t *this_thr,
   task->td_taskwait_counter = 0;
   task->td_taskwait_thread = 0;
 
+  // not (un)linking at the moment
+  task->linking = 0;
   __kmp_init_implicit_task_flags(task, team);
 
   task->td_depnode = NULL;
