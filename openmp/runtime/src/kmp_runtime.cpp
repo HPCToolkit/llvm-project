@@ -1590,8 +1590,8 @@ int __kmp_fork_call(ident_t *loc, int gtid,
     void *return_address = NULL;
 
     if (ompt_enabled.enabled) {
-      __ompt_get_task_info_internal(0, NULL, &parent_task_data, &ompt_frame,
-                                    NULL, NULL);
+      parent_task_data = &OMPT_CUR_TEAM_INFO(master_th)->parallel_data;
+      ompt_frame = &OMPT_CUR_TASK_INFO(master_th)->frame;
       return_address = OMPT_LOAD_RETURN_ADDRESS(gtid);
     }
 #endif
