@@ -263,7 +263,7 @@ int __ompt_get_parallel_info_internal(int ancestor_level,
 // lightweight task team support
 //----------------------------------------------------------
 
-
+#if 0
 void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
                              ompt_data_t *ompt_pid, void *codeptr) {
   // initialize parallel_data with input, return address to parallel_data on
@@ -363,7 +363,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   }
   //    return lwtask;
 }
-
+#endif
 
 #define OMPT_GET_TASK_FLAGS(task)                                              \
   (task->td_flags.tasktype ? ompt_task_explicit : ompt_task_implicit) |        \
