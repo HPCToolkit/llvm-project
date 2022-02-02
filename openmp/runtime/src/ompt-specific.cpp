@@ -356,8 +356,61 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
   memset(&lwt->td_flags_pair[1], 0, sizeof(kmp_tasking_flags_t));
 }
 
+
+//#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
+//  *ptr = new_value;
+
+//#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
+//  KMP_COMPARE_AND_STORE_PTR(ptr, old_value, new_value);
+
+//extern "C" kmp_int32 __kmp_compare_and_store64_vi3( volatile kmp_int64 *p, kmp_int64 cv, kmp_int64 sv );
+//
+//#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
+//  __kmp_compare_and_store64_vi3((volatile kmp_int64 *)ptr, \
+//          reinterpret_cast<kmp_int64>(old_value), \
+//          reinterpret_cast<kmp_int64>(new_value));
+
+//#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
+//  __sync_bool_compare_and_swap((void *volatile *)ptr, (void *)old_value, (void *)new_value);
+
+#define CAS_BODY                                                                    \
+  __asm__ __volatile__("\n"                                                         \
+                       "\tcmpxchgq %3, (%1)\n\t"                                    \
+                       : "=a" (prev) : "r" (ptr), "a" (oldval), "r" (newval) : "memory")
+
+#define CAS_BODY_LOCK                                                               \
+  __asm__ __volatile__("\n"                                                         \
+                       "\tlock; cmpxchgq %3, (%1)\n\t"                              \
+                       : "=a" (prev) : "r" (ptr), "a" (oldval), "r" (newval) : "memory")
+
+
+static inline char
+vi3_compare_and_swap(volatile void **ptr, void *oldval, void *newval)
+{
+  void  *prev;
+  CAS_BODY;
+//  CAS_BODY_LOCK;
+  return prev == oldval;
+}
+
+
+#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
+  vi3_compare_and_swap((volatile void **)ptr, (void *)old_value, (void *)new_value)
+
+
+//#include <atomic>
+//
+//#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
+//  std::atomic_compare_exchange_weak(ptr, old_value, new_value);
+
 void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always) {
+//  long long val = 3;
+//  long long old_val = 3;
+//  long long new_val = 3;
+//  KMP_COMPARE_AND_STORE_PTR_VI3(&val, old_val, new_val);
+//  printf("Hello: %lld\n", val);
+
   ompt_lw_taskteam_t *link_lwt = lwt;
   if (always ||
       thr->th.th_team->t.t_serialized >
@@ -431,7 +484,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
       // will succeed. This means that runtime has successfully initialized
       // the link_lwt.
       // FIXME VI3-NOW: Is it ok to use this operation?
-      KMP_COMPARE_AND_STORE_PTR(&link_lwt->ompt_info, old_ompt_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->ompt_info, old_ompt_info,
                                      &link_lwt->ompt_info_pairs[0]);
     }
 
@@ -444,7 +497,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
       // If the signal handler hasn't finished with copying the information by
       // this time point, the CAS will succeed as an indicator that the information
       // is successfully copied to cur_team.
-      KMP_COMPARE_AND_STORE_PTR(&cur_team->ompt_team_info, old_team_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&cur_team->ompt_team_info, old_team_info,
                                      &cur_team->ompt_team_info_pair[0]);
     }
 
@@ -453,7 +506,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     ompt_task_info_t *old_task_info = cur_task->ompt_task_info;
     if (PTR_HAS_MASKED_LOWER_BIT(old_task_info)) {
       cur_task->ompt_task_info_pair[0] = tmp_task;
-      KMP_COMPARE_AND_STORE_PTR(&cur_task->ompt_task_info, old_task_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&cur_task->ompt_task_info, old_task_info,
                                      &cur_task->ompt_task_info_pair[0]);
     }
 
@@ -466,7 +519,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     // Similar to copying the ompt_team_info and ompt_task_info.
     if (!old_td_flags_ptr) {
       link_lwt->td_flags_pair[0] = old_td_flags;
-      if (KMP_COMPARE_AND_STORE_PTR(&link_lwt->td_flags, old_td_flags_ptr,
+      if (KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->td_flags, old_td_flags_ptr,
                                      &link_lwt->td_flags_pair[0])){
         // Invalidate cur_task->td_flags if the update succeeded.
         // FIXME VI3-NOW: Should we invalidate only tasktype flag or all of them?
@@ -537,7 +590,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
           cur_team_info->parallel_data.ptr;
       lwt_team_info->end_team_info_pair[0].old_master_return_address =
           cur_team_info->master_return_address;
-      KMP_COMPARE_AND_STORE_PTR(&lwt_team_info->end_team_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&lwt_team_info->end_team_info,
                                 old_end_team_info,
                                 &lwt_team_info->end_team_info_pair[0]);
 
@@ -561,7 +614,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
           &dst->end_team_info_pair[0];
       // Try to mark that the information is successfully copied.
       // The CAS fails if the signal handler has done it in the meantime.
-      KMP_COMPARE_AND_STORE_PTR(&cur_team->ompt_team_info, old_ompt_team_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&cur_team->ompt_team_info, old_ompt_team_info,
                                 dst);
     }
 
@@ -569,7 +622,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     ompt_task_info_t *old_ompt_task_info = cur_task->ompt_task_info;
     if (PTR_HAS_MASKED_LOWER_BIT(old_ompt_task_info)) {
       cur_task->ompt_task_info_pair[0] = lwtask->ompt_info->ompt_task_info;
-      KMP_COMPARE_AND_STORE_PTR(&cur_task->ompt_task_info, old_ompt_task_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&cur_task->ompt_task_info, old_ompt_task_info,
                                 &cur_task->ompt_task_info_pair[0]);
     }
 
@@ -583,11 +636,11 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     if (LWT_STATE_IS_ACTIVE(old_first_lwt)) {
       // FIXME VI3-NOW: This should be regular statement.
       // The signal handler hasn't finished unlinking, so do that now.
-      if (!KMP_COMPARE_AND_STORE_PTR(&cur_team->ompt_serialized_team_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&cur_team->ompt_serialized_team_info,
                                 old_first_lwt,
-                                lwt_parent)){
-        KMP_DEBUG_ASSERT(false);
-      }
+                                lwt_parent);
+//        KMP_DEBUG_ASSERT(false);
+
     }
 
     // Since unlinking has been officially finished, invalidate the
@@ -838,7 +891,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         // The thread is in the middle of creating a new serialized parallel
         // region. The information is not fully available, so inform the tool,
         // which may inquire the information about the task at higher levels.
-        return 23;
+        return 1;
       }
       // decrease the ancestor level
       ancestor_level--;
@@ -853,7 +906,7 @@ int __ompt_get_task_info_internal(int ancestor_level, int *type,
         // parallel region. The information is not available at this moment,
         // so inform the tool that it may inquire the information about the
         // task at higher levels.
-        return 33;
+        return 1;
       }
       // decrease the ancestor_level
       ancestor_level--;
