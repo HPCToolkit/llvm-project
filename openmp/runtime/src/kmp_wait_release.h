@@ -156,7 +156,7 @@ static void __ompt_implicit_task_end(kmp_info_t *this_thr,
         ompt_frame_t *task_frame;
         // task might be NULL for a task that's ending
         if (task) {
-          task_frame = &task->ompt_task_info->frame;
+          task_frame = &task->ompt_task_info.frame;
           OMPT_FRAME_SET(task_frame, exit, OMPT_GET_FRAME_ADDRESS(0),
                          (ompt_frame_runtime | OMPT_FRAME_POSITION_DEFAULT));
         }
@@ -283,7 +283,7 @@ final_spin=FALSE)
       ompt_lw_taskteam_t *team =
           this_thr->th.th_team->t.ompt_serialized_team_info;
       if (team) {
-        tId = &(team->ompt_info->ompt_task_info.task_data);
+        tId = &(team->ompt_task_info.task_data);
       } else {
         tId = OMPT_CUR_TASK_DATA(this_thr);
       }
