@@ -350,10 +350,8 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
   __ompt_lw_copy_ompt_info_pair(&lwt->ompt_info_pairs[0], ompt_pid, codeptr);
   __ompt_lw_copy_ompt_info_pair(&lwt->ompt_info_pairs[1], ompt_pid, codeptr);
 
-  // FIXME VI3-NOW: Is this ok to do?
-  // invalidate all task flags
-  memset(&lwt->td_flags_pair[0], 0, sizeof(kmp_tasking_flags_t));
-  memset(&lwt->td_flags_pair[1], 0, sizeof(kmp_tasking_flags_t));
+  TASKING_FLAGS_CLEAR(&lwt->td_flags_pair[0]);
+  TASKING_FLAGS_CLEAR(&lwt->td_flags_pair[1]);
 }
 
 
@@ -431,21 +429,30 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 
     if (link_lwt != lwt) {
       // The reason to copy information to link_lwt is to be sure that the
-      // signal handler will ses those information if the sample is delivered
+      // signal handler will see this information if the sample is delivered
       // during the linking process.
-      link_lwt->ompt_info_pairs[0].ompt_team_info = lwt->ompt_info_pairs[0].ompt_team_info;
-      link_lwt->ompt_info_pairs[0].ompt_task_info = lwt->ompt_info_pairs[0].ompt_task_info;
+      link_lwt->ompt_info_pairs[0] = lwt->ompt_info_pairs[0];
       // NOTE: It may be possible to use only the first element of ompt_info_pair.
-      link_lwt->ompt_info_pairs[1].ompt_team_info = lwt->ompt_info_pairs[1].ompt_team_info;
-      link_lwt->ompt_info_pairs[1].ompt_task_info = lwt->ompt_info_pairs[1].ompt_task_info;
+      link_lwt->ompt_info_pairs[1] = lwt->ompt_info_pairs[1];
     }
 
+    // the following information may be eventually copied to
+    // cur_task and cur_team.
+    ompt_team_info_t tmp_team = link_lwt->ompt_info_pairs[0].ompt_team_info;
+    ompt_task_info_t tmp_task = link_lwt->ompt_info_pairs[0].ompt_task_info;
+
     kmp_base_team_t *cur_team = &thr->th.th_team->t;
-    kmp_taskdata_t *cur_task = thr->th.th_current_task;
+    ompt_team_info_t *cur_team_info = cur_team->ompt_team_info;
     // mark that ompt_team_info is going to be updated inside cur_team
     PTR_MASK_LOWER_BIT(cur_team->ompt_team_info, ompt_team_info_t);
+    // The pointers are unmasked in order to easier use them.
+    ompt_team_info_t *old_team_info = cur_team->ompt_team_info;
+
+    kmp_taskdata_t *cur_task = thr->th.th_current_task;
+    ompt_task_info_t *cur_task_info = cur_task->ompt_task_info;
     // mark that ompt_task_info is going to be updated inside cur_task
     PTR_MASK_LOWER_BIT(cur_task->ompt_task_info, ompt_task_info_t);
+    ompt_task_info_t *old_task_info = cur_task->ompt_task_info;
 
     // indicator that the link_lwt is not ready yet
     KMP_DEBUG_ASSERT(!link_lwt->ompt_info);
@@ -465,19 +472,8 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 
     // unmask link_lwt in order to use it
     LWT_UNMASK_STATE(link_lwt);
-    // The pointers are unmasked in order to easier use them.
-    ompt_team_info_t *cur_team_info =
-        PTR_GET_UNMASKED(cur_team->ompt_team_info, ompt_team_info_t);
-    ompt_task_info_t *cur_task_info =
-        PTR_GET_UNMASKED(cur_task->ompt_task_info, ompt_task_info_t);
 
-    // the following information may be eventually copied to
-    // cur_task and cur_team.
-    ompt_team_info_t tmp_team = link_lwt->ompt_info_pairs[0].ompt_team_info;
-    ompt_task_info_t tmp_task = link_lwt->ompt_info_pairs[0].ompt_task_info;
-
-    ompt_info_pair_t *old_ompt_info = link_lwt->ompt_info;
-    if (!old_ompt_info) {
+    // =========== Copying the information to the lwt
       // copy the information from cur_team and cur_task to link_lwt
       // Note that cur_team_info and cur_task_info may be outdated during copying
       // (if signal handler has finished the linking instead of the runtime).
@@ -488,14 +484,10 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
       // If the signal handler hasn't updated the link_lwt yet, then the CAS
       // will succeed. This means that runtime has successfully initialized
       // the link_lwt.
-      // FIXME VI3-NOW: Is it ok to use this operation?
-      KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->ompt_info, old_ompt_info,
+      KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->ompt_info, NULL,
                                      &link_lwt->ompt_info_pairs[0]);
-    }
 
-    // Copy the information to cur_team if needed
-    ompt_team_info_t *old_team_info = cur_team->ompt_team_info;
-    if (PTR_HAS_MASKED_LOWER_BIT(old_team_info)) {
+      // =================== Copying the information from lwt to team
       // The lower bit is still masked, which means that the signal handler
       // hasn't copied the information yet. Runtime will do that now.
       cur_team->ompt_team_info_pair[0] = tmp_team;
@@ -504,29 +496,19 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
       // is successfully copied to cur_team.
       KMP_COMPARE_AND_STORE_PTR_VI3(&cur_team->ompt_team_info, old_team_info,
                                      &cur_team->ompt_team_info_pair[0]);
-    }
-
+      // ================ Copying the information from the lwt to the task
     // Copy the information to cur_task if needed.
     // This works in the similar as copying of ompt_team_info to cur_team.
-    ompt_task_info_t *old_task_info = cur_task->ompt_task_info;
-    if (PTR_HAS_MASKED_LOWER_BIT(old_task_info)) {
       cur_task->ompt_task_info_pair[0] = tmp_task;
       KMP_COMPARE_AND_STORE_PTR_VI3(&cur_task->ompt_task_info, old_task_info,
                                      &cur_task->ompt_task_info_pair[0]);
-    }
 
-    // FIXME VI3-NOW: Something simpler may be potentially implemented if we could cast
-    //  kmp_tasking_flags_t to uint32_t.
-    // cur_task->td_flags may be overridden by signal handler while
-    // executing the if-branch, so memoize the value now.
-    kmp_tasking_flags_t old_td_flags = cur_task->td_flags;
-    kmp_tasking_flags_t *old_td_flags_ptr = link_lwt->td_flags;
     // Similar to copying the ompt_team_info and ompt_task_info.
-    if (!old_td_flags_ptr) {
-      link_lwt->td_flags_pair[0] = old_td_flags;
+      // If the old_td_flags are outdated, then the following CAS will surely fail.
+      link_lwt->td_flags_pair[0] = cur_task->td_flags;
       // linked task isn't executing at the moment
       link_lwt->td_flags_pair[0].executing = 0;
-      if (KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->td_flags, old_td_flags_ptr,
+      if (KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->td_flags, NULL,
                                      &link_lwt->td_flags_pair[0])){
         // clear td_flags of cur_task
         TASKING_FLAGS_CLEAR(&cur_task->td_flags);
@@ -540,7 +522,6 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
         // Instead, previous macro is used.
         // __kmp_init_implicit_task_flags(cur_task, thr->th.th_team);
       }
-    }
 
     // Mark that linking process has been successfully finished.
     // NOTE: Race condition may appear here, but both runtime and signal handler
@@ -572,15 +553,17 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
 
     // the following variables should ease the access
     kmp_base_team_t *cur_team = &thr->th.th_team->t;
-    kmp_taskdata_t *cur_task = thr->th.th_current_task;
-    // store pointers before masking them
     ompt_team_info_t *cur_team_info = cur_team->ompt_team_info;
-    ompt_team_info_t *lwt_team_info = &lwtask->ompt_info->ompt_team_info;
-
     // mark that ompt_team_info and ompt_task_info should be copied
     PTR_MASK_LOWER_BIT(cur_team->ompt_team_info, ompt_team_info_t);
-    PTR_MASK_LOWER_BIT(cur_task->ompt_task_info, ompt_task_info_t);
+    ompt_team_info_t *old_ompt_team_info = cur_team->ompt_team_info;
 
+    kmp_taskdata_t *cur_task = thr->th.th_current_task;
+    PTR_MASK_LOWER_BIT(cur_task->ompt_task_info, ompt_task_info_t);
+    ompt_task_info_t *old_ompt_task_info = cur_task->ompt_task_info;
+
+    // store pointers before masking them
+    ompt_team_info_t *lwt_team_info = &lwtask->ompt_info->ompt_team_info;
     // ensure that old_parallel_data and old_master_return_address are marked
     // as non-initialized.
     lwt_team_info->end_team_info = NULL;
@@ -591,9 +574,9 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     // From this point, runtime (this function) and signal handler
     // (__ompt_get_task_info_internal) may interleave.
 
-    void *old_end_team_info = lwt_team_info->end_team_info;
-    if (!old_end_team_info) {
-      // Try to atomically copy parallel_data content and master_return_address,
+    ompt_lw_taskteam_t *old_first_lwt = cur_team->ompt_serialized_team_info;
+
+    // Try to atomically copy parallel_data content and master_return_address,
       // if the signal handler hasn't done it yet.
       // Note that cur_team_info may be outdated. If so, the signal handler
       // has finished the unlinking process, so the CAS fails anyway.
@@ -602,13 +585,10 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
       lwt_team_info->end_team_info_pair[0].old_master_return_address =
           cur_team_info->master_return_address;
       KMP_COMPARE_AND_STORE_PTR_VI3(&lwt_team_info->end_team_info,
-                                old_end_team_info,
+                                NULL,
                                 &lwt_team_info->end_team_info_pair[0]);
 
-    }
     // copy ompt_team_info
-    ompt_team_info_t *old_ompt_team_info = cur_team->ompt_team_info;
-    if (PTR_HAS_MASKED_LOWER_BIT(old_ompt_team_info)) {
       // The signal handler hasn't copied the information from lwtask to
       // cur_team, let's do it now.
       ompt_team_info_t *dst = &cur_team->ompt_team_info_pair[0];
@@ -627,15 +607,11 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
       // The CAS fails if the signal handler has done it in the meantime.
       KMP_COMPARE_AND_STORE_PTR_VI3(&cur_team->ompt_team_info, old_ompt_team_info,
                                 dst);
-    }
 
     // copy_ompt_task_info on similar way
-    ompt_task_info_t *old_ompt_task_info = cur_task->ompt_task_info;
-    if (PTR_HAS_MASKED_LOWER_BIT(old_ompt_task_info)) {
       cur_task->ompt_task_info_pair[0] = lwtask->ompt_info->ompt_task_info;
       KMP_COMPARE_AND_STORE_PTR_VI3(&cur_task->ompt_task_info, old_ompt_task_info,
                                 &cur_task->ompt_task_info_pair[0]);
-    }
 
     // Copy td_flags.
     // Note that there is a race condition. However, both runtime and signal
@@ -643,15 +619,12 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     cur_task->td_flags = *lwtask->td_flags;
 
     // Pop the lwtask from the list of lwts.
-    ompt_lw_taskteam_t *old_first_lwt = cur_team->ompt_serialized_team_info;
     if (LWT_STATE_IS_ACTIVE(old_first_lwt)) {
-      // FIXME VI3-NOW: This should be regular statement.
+      // NOTE: This if condition needs to stay.
       // The signal handler hasn't finished unlinking, so do that now.
       KMP_COMPARE_AND_STORE_PTR_VI3(&cur_team->ompt_serialized_team_info,
                                 old_first_lwt,
                                 lwt_parent);
-//        KMP_DEBUG_ASSERT(false);
-
     }
 
     // Since unlinking has been officially finished, invalidate the
