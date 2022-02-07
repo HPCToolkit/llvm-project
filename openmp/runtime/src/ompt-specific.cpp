@@ -403,6 +403,11 @@ vi3_compare_and_swap(volatile void **ptr, void *oldval, void *newval)
 //#define KMP_COMPARE_AND_STORE_PTR_VI3(ptr, old_value, new_value) \
 //  std::atomic_compare_exchange_weak(ptr, old_value, new_value);
 
+// I think that setting tasktype is enough. Other flags are inherited
+// from the enclosing task.
+#define VI3_KMP_INIT_IMPLICIT_TASK_FLAGS(task) \
+    task->td_flags.tasktype = TASK_IMPLICIT;
+
 void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always) {
 //  long long val = 3;
@@ -519,15 +524,21 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     // Similar to copying the ompt_team_info and ompt_task_info.
     if (!old_td_flags_ptr) {
       link_lwt->td_flags_pair[0] = old_td_flags;
+      // linked task isn't executing at the moment
+      link_lwt->td_flags_pair[0].executing = 0;
       if (KMP_COMPARE_AND_STORE_PTR_VI3(&link_lwt->td_flags, old_td_flags_ptr,
                                      &link_lwt->td_flags_pair[0])){
-        // Invalidate cur_task->td_flags if the update succeeded.
-        // FIXME VI3-NOW: Should we invalidate only tasktype flag or all of them?
-        // NOTE: Even though a race condition may appear on these two lines,
-        // both runtime and signal handler will write the same value (0),
-        // so the final result is the same.
-        cur_task->td_flags.tasktype = 0; // this line may be redundant.
-        memset(&cur_task->td_flags, 0, sizeof(kmp_tasking_flags_t));
+        // clear td_flags of cur_task
+        TASKING_FLAGS_CLEAR(&cur_task->td_flags);
+        // Since cur_task now represents an implicit task of the serialized
+        // parallel region, initialize tasking flags (of cur_task) the same way
+        // it is done for implicit tasks of regular regions.
+        // Otherwise, td_flags may be inherited from previously linked
+        // explicit tasks.
+        VI3_KMP_INIT_IMPLICIT_TASK_FLAGS(cur_task);
+        // I think calling this function might introduce a significant overhead.
+        // Instead, previous macro is used.
+        // __kmp_init_implicit_task_flags(cur_task, thr->th.th_team);
       }
     }
 
@@ -727,6 +738,7 @@ static void inline __ompt_lw_taskteam_link_signal_handler(kmp_info_t *thr,
   }
 
   if (!lwt->td_flags) {
+    // TODO vi3: init implicit task flags
     // Copy the td_flags to lwt
     lwt->td_flags_pair[1] = cur_task->td_flags;
     // Mark that the information is copied, so that the runtime won't do that.

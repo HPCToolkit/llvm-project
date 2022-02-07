@@ -1099,6 +1099,24 @@ void __kmpc_omp_task_complete(ident_t *loc_ref, kmp_int32 gtid,
 }
 #endif // TASK_UNUSED
 
+
+void __kmp_init_implicit_task_flags(kmp_taskdata_t *task, kmp_team_t *team) {
+  task->td_flags.tiedness = TASK_TIED;
+  task->td_flags.tasktype = TASK_IMPLICIT;
+  task->td_flags.proxy = TASK_FULL;
+
+  // All implicit tasks are executed immediately, not deferred
+  task->td_flags.task_serial = 1;
+  task->td_flags.tasking_ser = (__kmp_tasking_mode == tskm_immediate_exec);
+  task->td_flags.team_serial = (team->t.t_serialized) ? 1 : 0;
+
+  task->td_flags.started = 1;
+  task->td_flags.executing = 1;
+  task->td_flags.complete = 0;
+  task->td_flags.freed = 0;
+}
+
+
 // __kmp_init_implicit_task: Initialize the appropriate fields in the implicit
 // task for a given thread
 //
@@ -1128,19 +1146,7 @@ void __kmp_init_implicit_task(ident_t *loc_ref, kmp_info_t *this_thr,
   task->td_taskwait_counter = 0;
   task->td_taskwait_thread = 0;
 
-  task->td_flags.tiedness = TASK_TIED;
-  task->td_flags.tasktype = TASK_IMPLICIT;
-  task->td_flags.proxy = TASK_FULL;
-
-  // All implicit tasks are executed immediately, not deferred
-  task->td_flags.task_serial = 1;
-  task->td_flags.tasking_ser = (__kmp_tasking_mode == tskm_immediate_exec);
-  task->td_flags.team_serial = (team->t.t_serialized) ? 1 : 0;
-
-  task->td_flags.started = 1;
-  task->td_flags.executing = 1;
-  task->td_flags.complete = 0;
-  task->td_flags.freed = 0;
+  __kmp_init_implicit_task_flags(task, team);
 
   task->td_depnode = NULL;
   task->td_last_tied = task;

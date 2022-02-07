@@ -10,6 +10,12 @@
 // Another solution would be to declare it inside ompt-internal.h.
 // However, it logically doesn't belong to only OMPT, so it should rather
 // remain in separate header file.
+
+// Set all tasking flags to zero, under assumption
+// that kmp_tasking_flags struct is exactly 32 bits long.
+#define TASKING_FLAGS_CLEAR(td_flags_ptr) *((uint32_t *)td_flags_ptr) = 0;
+
+
 typedef struct kmp_tasking_flags { /* Total struct must be exactly 32 bits */
   /* Compiler flags */ /* Total compiler flags must be 16 bits */
   unsigned tiedness : 1; /* task is either tied (1) or untied (0) */
