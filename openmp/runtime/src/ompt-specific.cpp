@@ -280,6 +280,12 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
   TASKING_FLAGS_CLEAR(&lwt->td_flags);
 }
 
+// I think that setting tasktype is enough. Other flags are inherited
+// from the enclosing task.
+#define VI3_KMP_INIT_IMPLICIT_TASK_FLAGS(task) \
+    task->td_flags.tasktype = TASK_IMPLICIT;
+
+
 void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always) {
   ompt_lw_taskteam_t *link_lwt = lwt;
@@ -318,12 +324,15 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     link_lwt->td_flags.executing = 0;
     // clear td_flags of cur_task
     TASKING_FLAGS_CLEAR(&cur_task->td_flags);
+    VI3_KMP_INIT_IMPLICIT_TASK_FLAGS(cur_task);
     // Since cur_task now represents an implicit task of the serialized
     // parallel region, initialize tasking flags (of cur_task) the same way
     // it is done for implicit tasks of regular regions.
     // Otherwise, td_flags may be inherited from previously linked
     // explicit tasks.
-    __kmp_init_implicit_task_flags(cur_task, thr->th.th_team);
+    // Calling this function might introduce a significant overhead.
+    // Instead, use the previous macro.
+    // __kmp_init_implicit_task_flags(cur_task, thr->th.th_team);
 
     thr->th.th_current_task->linking = 0;
 
