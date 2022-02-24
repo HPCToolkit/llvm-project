@@ -1151,7 +1151,7 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
   }
 #endif // OMPT_SUPPORT
 
-  if (this_thr->th.th_team != serial_team) {
+  if (this_thr->th.th_team != serial_team || true) {
     // Nested level will be an index in the nested nthreads array
     int level = this_thr->th.th_team->t.t_level;
 
@@ -1451,6 +1451,10 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
     // ompt_get_task_info to work.
     this_thr->th.th_info.ds.ds_tid = serial_team->t.t_master_tid;
     this_thr->th.th_team = serial_team->t.t_parent;
+    // If the parent of serial team is another serialized region, then update the
+    // th_serial_team.
+    if (serial_team->t.t_parent->t.t_serialized)
+      this_thr->th.th_serial_team = serial_team->t.t_parent;
 
     /* restore values cached in the thread */
     this_thr->th.th_team_nproc = serial_team->t.t_parent->t.t_nproc; /*  JPH */
@@ -2510,6 +2514,9 @@ void __kmp_join_call(ident_t *loc, int gtid
       __kmp_join_restore_state(master_th, parent_team);
     }
 #endif
+
+    // NOTE-VI3: Free the serialized team.
+    __kmp_free_team(root, team, NULL);
 
     return;
   }
@@ -6320,6 +6327,8 @@ static void __kmp_internal_end(void) {
 
     // Reap teams.
     while (__kmp_team_pool != NULL) { // Loop thru all the teams in the pool.
+      // NOTE-VI3: There was a problem freeing already freed team, so skip this for now.
+      break;
       // Get the next team from the pool.
       kmp_team_t *team = CCAST(kmp_team_t *, __kmp_team_pool);
       __kmp_team_pool = team->t.t_next_pool;
