@@ -2750,7 +2750,6 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
 
 #if OMPT_SUPPORT
   ompt_team_info_t ompt_team_info;
-  ompt_lw_taskteam_t *ompt_serialized_team_info;
 #endif
 
 #if KMP_ARCH_X86 || KMP_ARCH_X86_64
