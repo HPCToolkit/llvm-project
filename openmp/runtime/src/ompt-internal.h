@@ -83,19 +83,6 @@ typedef struct {
 
 #include <utility>
 
-typedef struct ompt_info_pair_s {
-  ompt_team_info_t ompt_team_info;
-  ompt_task_info_t ompt_task_info;
-} ompt_info_pair_t;
-
-typedef struct ompt_lw_taskteam_s {
-  ompt_team_info_t ompt_team_info;
-  ompt_task_info_t ompt_task_info;
-  int heap;
-  struct ompt_lw_taskteam_s *parent;
-  // preserve td_flags of kmp_taskdata_t after linking happens
-  kmp_tasking_flags_t td_flags;
-} ompt_lw_taskteam_t;
 
 typedef struct {
   ompt_data_t thread_data;

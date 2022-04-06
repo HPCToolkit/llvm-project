@@ -1315,18 +1315,8 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
   if (__kmp_env_consistency_check)
     __kmp_push_parallel(global_tid, NULL);
 #if OMPT_SUPPORT
-  // master_return_address is going to be set inside
-  // __ompt_lw_taskteam_link function.
   if (ompt_enabled.enabled &&
       this_thr->th.ompt_thread_info.state != ompt_state_overhead) {
-
-    ompt_lw_taskteam_t lw_taskteam;
-    __ompt_lw_taskteam_init(&lw_taskteam, this_thr, global_tid,
-                            &ompt_parallel_data, codeptr);
-
-    __ompt_lw_taskteam_link(&lw_taskteam, this_thr, 1);
-    // don't use lw_taskteam after linking. content was swaped
-
     /* OMPT implicit task begin */
     implicit_task_data = OMPT_CUR_TASK_DATA(this_thr);
     if (ompt_enabled.ompt_callback_implicit_task) {
@@ -1403,8 +1393,6 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
           ompt_scope_end, NULL, OMPT_CUR_TASK_DATA(this_thr), 1,
           task_info->thread_num, ompt_task_implicit);
     }
-
-    __ompt_lw_taskteam_unlink(this_thr);
     this_thr->th.ompt_thread_info.state = ompt_state_overhead;
   }
 #endif
@@ -1649,16 +1637,8 @@ int __kmp_fork_call(ident_t *loc, int gtid,
         void *dummy;
         void **exit_frame_p;
 
-        ompt_lw_taskteam_t lw_taskteam;
-
         if (ompt_enabled.enabled) {
-          __ompt_lw_taskteam_init(&lw_taskteam, master_th, gtid,
-                                  &ompt_parallel_data, return_address);
-
-          __ompt_lw_taskteam_link(&lw_taskteam, master_th, 0);
-
           exit_frame_p = &(OMPT_CUR_TASK_INFO(master_th)->frame.exit_frame.ptr);
-          // don't use lw_taskteam after linking. content was swaped
 
           /* OMPT implicit task begin */
           implicit_task_data = OMPT_CUR_TASK_DATA(master_th);
@@ -1705,7 +1685,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
             *exit_frame_p = NULL;
           }
           ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
-          __ompt_lw_taskteam_unlink(master_th);
           master_th->th.ompt_thread_info.state = ompt_state_overhead;
         }
 #endif
@@ -1718,15 +1697,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
       parent_team->t.t_active_level++;
       parent_team->t.t_level++;
       parent_team->t.t_def_allocator = master_th->th.th_def_allocator; // save
-
-#if OMPT_SUPPORT
-      if (ompt_enabled.enabled) {
-        ompt_lw_taskteam_t lw_taskteam;
-        __ompt_lw_taskteam_init(&lw_taskteam, master_th, gtid,
-                                &ompt_parallel_data, return_address);
-        __ompt_lw_taskteam_link(&lw_taskteam, master_th, 1, true);
-      }
-#endif
 
       /* Change number of threads in the team if requested */
       if (master_set_numthreads) { // The parallel has num_threads clause
@@ -1902,15 +1872,7 @@ int __kmp_fork_call(ident_t *loc, int gtid,
           void **exit_frame_p;
           ompt_task_info_t *task_info;
 
-          ompt_lw_taskteam_t lw_taskteam;
-
           if (ompt_enabled.enabled) {
-            __ompt_lw_taskteam_init(&lw_taskteam, master_th, gtid,
-                                    &ompt_parallel_data, return_address);
-
-            __ompt_lw_taskteam_link(&lw_taskteam, master_th, 0);
-            // don't use lw_taskteam after linking. content was swaped
-
             task_info = OMPT_CUR_TASK_INFO(master_th);
             exit_frame_p = &(task_info->frame.exit_frame.ptr);
             if (ompt_enabled.ompt_callback_implicit_task) {
@@ -1953,7 +1915,6 @@ int __kmp_fork_call(ident_t *loc, int gtid,
                   ompt_task_implicit);
             }
             ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
-            __ompt_lw_taskteam_unlink(master_th);
             master_th->th.ompt_thread_info.state = ompt_state_overhead;
           }
 #endif
@@ -2007,13 +1968,8 @@ int __kmp_fork_call(ident_t *loc, int gtid,
           void **exit_frame_p;
           ompt_task_info_t *task_info;
 
-          ompt_lw_taskteam_t lw_taskteam;
           // NOTE: Previous two branches haven't been tested, only this one has.
           if (ompt_enabled.enabled) {
-            __ompt_lw_taskteam_init(&lw_taskteam, master_th, gtid,
-                                    &ompt_parallel_data, return_address);
-            __ompt_lw_taskteam_link(&lw_taskteam, master_th, 0);
-            // don't use lw_taskteam after linking. content was swaped
             task_info = OMPT_CUR_TASK_INFO(master_th);
             exit_frame_p = &(task_info->frame.exit_frame.ptr);
 
@@ -2065,24 +2021,11 @@ int __kmp_fork_call(ident_t *loc, int gtid,
             }
 
             ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
-            __ompt_lw_taskteam_unlink(master_th);
             master_th->th.ompt_thread_info.state = ompt_state_overhead;
           }
 #endif
         }
       } else if (call_context == fork_context_gnu) {
-#if OMPT_SUPPORT
-        ompt_lw_taskteam_t lwt;
-        __ompt_lw_taskteam_init(&lwt, master_th, gtid, &ompt_parallel_data,
-                                return_address);
-        // No need to clear task_frame, since lwt is invalidated, so the
-        // task_frame is NULL (cleared).
-//	ompt_frame_t *task_frame = &lwt.ompt_info->ompt_task_info.frame;
-//	OMPT_FRAME_CLEAR(task_frame, exit);
-        __ompt_lw_taskteam_link(&lwt, master_th, 1);
-// don't use lw_taskteam after linking. content was swaped
-#endif
-
         // we were called from GNU native code
         KA_TRACE(20, ("__kmp_fork_call: T#%d serial exit\n", gtid));
         return FALSE;
@@ -2595,7 +2538,6 @@ void __kmp_join_call(ident_t *loc, int gtid
       task_info->frame.exit_frame = ompt_data_none;
       task_info->task_data = ompt_data_none;
       ompt_parallel_data = *OMPT_CUR_TEAM_DATA(master_th);
-      __ompt_lw_taskteam_unlink(master_th);
     }
 #endif
     /* Decrement our nested depth level */
@@ -5647,7 +5589,6 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
 
 #if OMPT_SUPPORT
   __ompt_team_assign_id(team, ompt_parallel_data);
-  team->t.ompt_serialized_team_info = NULL;
 #endif
 
   KMP_MB();

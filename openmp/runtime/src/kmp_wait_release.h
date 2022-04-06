@@ -280,13 +280,7 @@ final_spin=FALSE)
     ompt_entry_state = this_thr->th.ompt_thread_info.state;
     if (!final_spin || ompt_entry_state != ompt_state_wait_barrier_implicit ||
         KMP_MASTER_TID(this_thr->th.th_info.ds.ds_tid)) {
-      ompt_lw_taskteam_t *team =
-          this_thr->th.th_team->t.ompt_serialized_team_info;
-      if (team) {
-        tId = &(team->ompt_task_info.task_data);
-      } else {
-        tId = OMPT_CUR_TASK_DATA(this_thr);
-      }
+      tId = OMPT_CUR_TASK_DATA(this_thr);
     } else {
       tId = &(this_thr->th.ompt_thread_info.task_data);
     }
