@@ -2459,7 +2459,8 @@ void __kmp_join_call(ident_t *loc, int gtid
 #endif
 
     // NOTE-VI3: Free the serialized team.
-    __kmp_free_team(root, team, NULL);
+    if (team->t.t_parent->t.t_serialized)
+      __kmp_free_team(root, team, NULL);
 
     return;
   }
