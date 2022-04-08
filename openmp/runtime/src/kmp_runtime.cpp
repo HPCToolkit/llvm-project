@@ -1217,7 +1217,7 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
     serial_team->t.ompt_team_info.parallel_data = ompt_parallel_data;
 #endif
     __kmp_push_current_task_to_thread(this_thr, serial_team, 0);
-
+    this_thr->th.th_current_task->td_flags.executing = 1;
     /* TODO: GEH: do ICVs work for nested serialized teams? Don't we need an
        implicit task for each serialized task represented by
        team->t.t_serialized? */
