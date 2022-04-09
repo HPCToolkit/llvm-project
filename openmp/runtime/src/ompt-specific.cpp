@@ -1131,7 +1131,6 @@ void __ompt_team_info_initialize(kmp_team_t *team) {
 }
 
 void __ompt_task_info_initialize(kmp_taskdata_t *taskdata) {
-  printf("This is problematic\n");
   if (!taskdata->ompt_task_info ||
       (taskdata->ompt_task_info != &taskdata->ompt_task_info_pair[0])) {
     // If ompt_task_info is NULL, it means that the taskdata has been recently

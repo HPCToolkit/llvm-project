@@ -486,7 +486,8 @@ void __kmp_push_current_task_to_thread(kmp_info_t *this_thr, kmp_team_t *team,
   KMP_DEBUG_ASSERT(this_thr != NULL);
 
 #if OMPT_SUPPORT
-  __ompt_task_info_initialize(&team->t.t_implicit_task_taskdata[tid]);
+  if (ompt_enabled.enabled || !team->t.t_parent)
+    __ompt_task_info_initialize(&team->t.t_implicit_task_taskdata[tid]);
 #endif
 
   if (tid == 0) {
