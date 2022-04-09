@@ -553,7 +553,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 
   } else {
     // initialize ompt_info if needed
-    __ompt_lwt_initialize(lwt);
+    lwt->ompt_info = &lwt->ompt_info_pairs[0];
     // Must not copy parallel_data from lwt or the content
     // potentially stored inside signal handler after the
     // moment of dispatching the ompt_callback_parallel_end may be lost.
@@ -1120,41 +1120,10 @@ __ompt_set_frame_enter_internal
 //----------------------------------------------------------
 // team support
 //----------------------------------------------------------
-void __ompt_team_info_initialize(kmp_team_t *team) {
-  if (!team->t.ompt_team_info) {
-    // NOTE VI3-NOW: It is possible that the tam may be duplicated.
-    // See the __ompt_task_info_initialize function.
-    // initialize the ompt_team_info ptr if not
-    team->t.ompt_team_info = &team->t.ompt_team_info_pair[0];
-  }
-  // TODO VI3-NOW: Check whether this may already have been initialized.
-}
-
-void __ompt_task_info_initialize(kmp_taskdata_t *taskdata) {
-  if (!taskdata->ompt_task_info ||
-      (taskdata->ompt_task_info != &taskdata->ompt_task_info_pair[0])) {
-    // If ompt_task_info is NULL, it means that the taskdata has been recently
-    // allocated.
-    // If ompt_task_info doesn't point to the first element in omp_task_info_pair,
-    // it means that the taskdata has been created by duplicating another
-    // taskdata (so the ompt_task_info points to another taskdata struct).
-    // In both cases, ompt_task_info needs to be properly initialized.
-    taskdata->ompt_task_info = &taskdata->ompt_task_info_pair[0];
-  }
-  // TODO VI3-NOW: Check whether this may already have been initialized.
-}
-
-void __ompt_lwt_initialize(ompt_lw_taskteam_t *lwt) {
-  if (!lwt->ompt_info) {
-    // initialized ompt_info ptr if not
-    lwt->ompt_info = &lwt->ompt_info_pairs[0];
-  }
-}
-
 
 void __ompt_team_assign_id(kmp_team_t *team, ompt_data_t ompt_pid) {
   // before initializing parallel_data, need to initialize ompt_team_info first.
-  __ompt_team_info_initialize(team);
+  team->t.ompt_team_info = &team->t.ompt_team_info_pair[0];
   team->t.ompt_team_info->parallel_data = ompt_pid;
 }
 

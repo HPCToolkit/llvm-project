@@ -24,12 +24,6 @@ void __ompt_force_initialization();
 
 int __ompt_set_frame_enter_internal(void *addr, int flags, int state);
 
-void __ompt_team_info_initialize(kmp_team_t *team);
-
-void __ompt_task_info_initialize(kmp_taskdata_t *taskdata);
-
-void __ompt_lwt_initialize(ompt_lw_taskteam_t *lwt);
-
 void __ompt_team_assign_id(kmp_team_t *team, ompt_data_t ompt_pid);
 
 void __ompt_thread_assign_wait_id(void *variable);

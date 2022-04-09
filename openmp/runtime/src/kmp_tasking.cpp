@@ -486,7 +486,10 @@ void __kmp_push_current_task_to_thread(kmp_info_t *this_thr, kmp_team_t *team,
   KMP_DEBUG_ASSERT(this_thr != NULL);
 
 #if OMPT_SUPPORT
-  __ompt_task_info_initialize(&team->t.t_implicit_task_taskdata[tid]);
+  if (ompt_enabled.enabled) {
+    kmp_taskdata_t *curr_taskdata = &team->t.t_implicit_task_taskdata[tid];
+    curr_taskdata->ompt_task_info = &curr_taskdata->ompt_task_info_pair[0];
+  }
 #endif
 
   if (tid == 0) {
@@ -578,8 +581,7 @@ static void __kmp_task_start(kmp_int32 gtid, kmp_task_t *task,
 //   ompt_start_tool, so we already know whether ompt is enabled or not.
 
 static inline void __ompt_task_init(kmp_taskdata_t *task, int tid) {
-  // Initialize ompt_task_info if needed.
-  __ompt_task_info_initialize(task);
+  task->ompt_task_info = &task->ompt_task_info_pair[0];
   // The calls to __ompt_task_init already have the ompt_enabled condition.
   task->ompt_task_info->task_data.value = 0;
   task->ompt_task_info->frame.exit_frame = ompt_data_none;
