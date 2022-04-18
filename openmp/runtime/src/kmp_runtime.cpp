@@ -1497,9 +1497,8 @@ void __kmp_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
       // Parent task of the previously finished implicit task is the new
       // current implicit task. This is the reason why 0 is used as the
       // ancestor_level.
-      ompt_data_t *parent_task_data;
+      ompt_data_t *parent_task_data = &this_thr->th.th_current_task->ompt_task_info.task_data;
       // reset clear the task id only after unlinking the task
-      __ompt_get_task_info_internal(0, NULL, &parent_task_data, NULL, NULL, NULL);
       int invoker = (loc ? ompt_parallel_invoker_runtime : ompt_parallel_invoker_program);
       ompt_callbacks.ompt_callback(ompt_callback_parallel_end)(
           &(serial_team->t.ompt_team_info.parallel_data),
