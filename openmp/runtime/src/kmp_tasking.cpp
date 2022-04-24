@@ -486,7 +486,7 @@ void __kmp_push_current_task_to_thread(kmp_info_t *this_thr, kmp_team_t *team,
   KMP_DEBUG_ASSERT(this_thr != NULL);
 
 #if OMPT_SUPPORT
-  if (ompt_enabled.enabled || !team->t.t_parent) {
+  if (ompt_enabled.enabled && !team->t.t_parent) {
     kmp_taskdata_t *curr_taskdata = &team->t.t_implicit_task_taskdata[tid];
     curr_taskdata->ompt_task_info = &curr_taskdata->ompt_task_info_pair[0];
   }
@@ -550,7 +550,8 @@ static void __kmp_task_start(kmp_int32 gtid, kmp_task_t *task,
   // (maybe even recycled) reference to
   // scheduling_parent will be used and cause the tool to receive
   // the inconsistent information.
-  taskdata->ompt_task_info->scheduling_parent = current_task;
+  if (ompt_enabled.enabled)
+    taskdata->ompt_task_info->scheduling_parent = current_task;
 #endif
   // mark starting task as executing and as current task
   thread->th.th_current_task = taskdata;
@@ -607,10 +608,6 @@ static inline void __ompt_task_start(kmp_task_t *task,
         &(current_task->ompt_task_info->task_data), status,
         &(taskdata->ompt_task_info->task_data));
   }
-  // FIXME: This is set inside __kmp_task_start before updating th_current_task.
-  //  Is it safe to remove it from here? Or is it ok to call this function
-  //  from __kmp_task_start?
-  taskdata->ompt_task_info->scheduling_parent = current_task;
 }
 
 // __ompt_task_finish:
