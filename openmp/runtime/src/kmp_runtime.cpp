@@ -1214,7 +1214,8 @@ void __kmp_serialized_parallel(ident_t *loc, kmp_int32 global_tid,
 
 #if OMPT_SUPPORT
     // copy the parallel_data content stored inside ompt_callback_parallel_end
-    serial_team->t.ompt_team_info.parallel_data = ompt_parallel_data;
+    if (ompt_enabled.enabled)
+      serial_team->t.ompt_team_info.parallel_data = ompt_parallel_data;
 #endif
     __kmp_push_current_task_to_thread(this_thr, serial_team, 0);
 
@@ -2488,8 +2489,12 @@ void __kmp_join_call(ident_t *loc, int gtid
   KMP_MB();
 
 #if OMPT_SUPPORT
-  ompt_data_t *parallel_data = &(team->t.ompt_team_info.parallel_data);
-  void *codeptr = team->t.ompt_team_info.master_return_address;
+  ompt_data_t *parallel_data;
+  void *codeptr;
+  if (ompt_enabled.enabled) {
+    parallel_data = &(team->t.ompt_team_info.parallel_data);
+    codeptr = team->t.ompt_team_info.master_return_address;
+  }
 #endif
 
 #if USE_ITT_BUILD
@@ -2649,7 +2654,11 @@ void __kmp_join_call(ident_t *loc, int gtid
   // Since, ompt_callback_parallel_end is called after the team has been freed,
   // it is possible that pointer to parallel_data points to a parallel_data
   // of a new (recycled) team at the moment of dispatching the callback.
-  ompt_data_t old_parallel_data = *parallel_data;
+  ompt_data_t old_parallel_data;
+  if (parallel_data)
+    old_parallel_data = *parallel_data;
+  else
+    old_parallel_data = ompt_data_none;
   __kmp_free_team(root, team USE_NESTED_HOT_ARG(
                             master_th)); // this will free worker threads
 

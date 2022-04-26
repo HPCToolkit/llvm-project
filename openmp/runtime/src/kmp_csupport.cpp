@@ -497,6 +497,7 @@ void __kmpc_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   // each case.
   __kmp_assert_valid_gtid(global_tid);
 #if OMPT_SUPPORT
+  if (ompt_enabled.enabled) {
   // The call to this function may be generated only by the compiler
   // and made from the user code.
   ompt_frame_t *parent_frame;
@@ -504,10 +505,12 @@ void __kmpc_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   OMPT_FRAME_SET(parent_frame, enter, OMPT_GET_FRAME_ADDRESS(1),
                  (ompt_frame_application | OMPT_FRAME_POSITION_DEFAULT));
   OMPT_STORE_RETURN_ADDRESS(global_tid);
+  }
 #endif
   __kmp_serialized_parallel(loc, global_tid, ompt_data_none,
                             __kmp_threads[global_tid]->th.ompt_thread_info.return_address);
 #if OMPT_SUPPORT
+  if (ompt_enabled.enabled) {
   // Implicit task wrapper (.omp_outlined..) is called directly from the
   // user code immediately after this function returns.
   ompt_frame_t *child_frame;
@@ -521,6 +524,7 @@ void __kmpc_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
   // NOTE : Possible problem happens if the tool takes a sample after
   //  this, but before starting to execute implicit task wrapper.
   //  We cannot be more precise than this, unless writing some assemlby code.
+  }
 #endif
 
 }
@@ -535,18 +539,24 @@ Leave a serialized parallel construct.
 */
 void __kmpc_end_serialized_parallel(ident_t *loc, kmp_int32 global_tid) {
 #if OMPT_SUPPORT
-  kmp_info_t *this_thr = __kmp_threads[global_tid];
-  ompt_frame_t *task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
+  ompt_frame_t *task_frame;
+  kmp_info_t *this_thr;
+  if (ompt_enabled.enabled) {
+  this_thr = __kmp_threads[global_tid];
+  task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
   // clear exit frame set inside __kmpc_serialized_parallel
   OMPT_FRAME_CLEAR(task_frame, exit);
+  }
 #endif
   // FIXME VI3-NOW: How about clearing exit_frames.
   __kmp_end_serialized_parallel(loc, global_tid);
 #if OMPT_SUPPORT
+  if (ompt_enabled.enabled) {
   task_frame = &OMPT_CUR_TASK_INFO(this_thr)->frame;
   // clear enter frame of parent set inside __kmpc_serialized_parallel
   // Note: task_frame changed after __kmp_end_serialized_parallel finished.
   OMPT_FRAME_CLEAR(task_frame, enter);
+  }
 #endif
 }
 
