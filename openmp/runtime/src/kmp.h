@@ -2748,11 +2748,6 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
   microtask_t t_pkfn;
   launch_t t_invoke; // procedure to launch the microtask
 
-#if OMPT_SUPPORT
-  ompt_team_info_t ompt_team_info;
-  ompt_lw_taskteam_t *ompt_serialized_team_info;
-#endif
-
 #if KMP_ARCH_X86 || KMP_ARCH_X86_64
   kmp_int8 t_fp_control_saved;
   kmp_int8 t_pad2b;
@@ -2804,6 +2799,11 @@ typedef struct KMP_ALIGN_CACHE kmp_base_team {
 #if USE_ITT_BUILD
   void *t_stack_id; // team specific stack stitching id (for ittnotify)
 #endif /* USE_ITT_BUILD */
+
+#if OMPT_SUPPORT
+  ompt_team_info_t ompt_team_info;
+  ompt_lw_taskteam_t *ompt_serialized_team_info;
+#endif
 } kmp_base_team_t;
 
 union KMP_ALIGN_CACHE kmp_team {

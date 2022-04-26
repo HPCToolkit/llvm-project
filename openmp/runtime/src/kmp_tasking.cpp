@@ -544,7 +544,8 @@ static void __kmp_task_start(kmp_int32 gtid, kmp_task_t *task,
   // (maybe even recycled) reference to
   // scheduling_parent will be used and cause the tool to receive
   // the inconsistent information.
-  taskdata->ompt_task_info.scheduling_parent = current_task;
+  if (ompt_enabled.enabled)
+    taskdata->ompt_task_info.scheduling_parent = current_task;
 #endif
   // mark starting task as executing and as current task
   thread->th.th_current_task = taskdata;
@@ -600,10 +601,6 @@ static inline void __ompt_task_start(kmp_task_t *task,
         &(current_task->ompt_task_info.task_data), status,
         &(taskdata->ompt_task_info.task_data));
   }
-  // FIXME: This is set inside __kmp_task_start before updating th_current_task.
-  //  Is it safe to remove it from here? Or is it ok to call this function
-  //  from __kmp_task_start?
-  taskdata->ompt_task_info.scheduling_parent = current_task;
 }
 
 // __ompt_task_finish:
