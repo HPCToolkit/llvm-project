@@ -2657,8 +2657,6 @@ void __kmp_join_call(ident_t *loc, int gtid
   ompt_data_t old_parallel_data;
   if (parallel_data)
     old_parallel_data = *parallel_data;
-  else
-    old_parallel_data = ompt_data_none;
   __kmp_free_team(root, team USE_NESTED_HOT_ARG(
                             master_th)); // this will free worker threads
 
