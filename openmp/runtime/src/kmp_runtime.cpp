@@ -2665,7 +2665,7 @@ void __kmp_join_call(ident_t *loc, int gtid
   // of a new (recycled) team at the moment of dispatching the callback.
   ompt_data_t old_parallel_data;
   if (parallel_data)
-    *parallel_data;
+    old_parallel_data = *parallel_data;
   __kmp_free_team(root, team USE_NESTED_HOT_ARG(
                             master_th)); // this will free worker threads
 
