@@ -2068,6 +2068,7 @@ int __kmp_fork_call(ident_t *loc, int gtid,
         }
       } else if (call_context == fork_context_gnu) {
 #if OMPT_SUPPORT
+        if (ompt_enabled) {
         ompt_lw_taskteam_t lwt;
         __ompt_lw_taskteam_init(&lwt, master_th, gtid, &ompt_parallel_data,
                                 return_address);
@@ -2077,6 +2078,7 @@ int __kmp_fork_call(ident_t *loc, int gtid,
 //	OMPT_FRAME_CLEAR(task_frame, exit);
         __ompt_lw_taskteam_link(&lwt, master_th, 1);
 // don't use lw_taskteam after linking. content was swaped
+        }
 #endif
 
         // we were called from GNU native code
