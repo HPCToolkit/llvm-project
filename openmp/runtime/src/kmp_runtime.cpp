@@ -2068,7 +2068,7 @@ int __kmp_fork_call(ident_t *loc, int gtid,
         }
       } else if (call_context == fork_context_gnu) {
 #if OMPT_SUPPORT
-        if (ompt_enabled) {
+        if (ompt_enabled.enabled) {
         ompt_lw_taskteam_t lwt;
         __ompt_lw_taskteam_init(&lwt, master_th, gtid, &ompt_parallel_data,
                                 return_address);
