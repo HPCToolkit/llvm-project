@@ -5537,6 +5537,7 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
 #endif
 
 #if OMPT_SUPPORT
+  if (UNLIKELY(ompt_enabled.enabled))
     __ompt_team_assign_id(team, ompt_parallel_data);
 #endif
 
@@ -5587,7 +5588,8 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
                     team->t.t_id));
 
 #if OMPT_SUPPORT
-      __ompt_team_assign_id(team, ompt_parallel_data);
+     if (UNLIKELY(ompt_enabled.enabled))
+       __ompt_team_assign_id(team, ompt_parallel_data);
 #endif
 
       KMP_MB();
@@ -5649,8 +5651,10 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
   team->t.t_proc_bind = new_proc_bind;
 
 #if OMPT_SUPPORT
+  if (UNLIKELY(ompt_enabled.enabled)) {
   __ompt_team_assign_id(team, ompt_parallel_data);
   team->t.ompt_serialized_team_info = NULL;
+  }
 #endif
 
   KMP_MB();
