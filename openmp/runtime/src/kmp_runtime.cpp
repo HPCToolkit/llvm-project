@@ -2186,8 +2186,10 @@ int __kmp_fork_call(ident_t *loc, int gtid,
     KMP_CHECK_UPDATE(team->t.t_parent, parent_team);
     KMP_CHECK_UPDATE_SYNC(team->t.t_pkfn, microtask);
 #if OMPT_SUPPORT
-    KMP_CHECK_UPDATE_SYNC(team->t.ompt_team_info.master_return_address,
-                          return_address);
+    if (ompt_enabled.enabled) {
+      KMP_CHECK_UPDATE_SYNC(team->t.ompt_team_info.master_return_address,
+                            return_address);
+    }
 #endif
     KMP_CHECK_UPDATE(team->t.t_invoke, invoker); // TODO move to root, maybe
     // TODO: parent_team->t.t_level == INT_MAX ???
