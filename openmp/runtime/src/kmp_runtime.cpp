@@ -7531,10 +7531,11 @@ int __kmp_invoke_task_func(int gtid) {
     exit_frame_p = &dummy;
   }
 
-  my_task_data =
-      &(team->t.t_implicit_task_taskdata[tid].ompt_task_info->task_data);
-  my_parallel_data = &(team->t.ompt_team_info->parallel_data);
   if (ompt_enabled.ompt_callback_implicit_task) {
+    // PLEAS-VI3-FIXME
+    my_task_data =
+        &(team->t.t_implicit_task_taskdata[tid].ompt_task_info->task_data);
+    my_parallel_data = &(team->t.ompt_team_info->parallel_data);
     ompt_team_size = team->t.t_nproc;
     ompt_callbacks.ompt_callback(ompt_callback_implicit_task)(
         ompt_scope_begin, my_parallel_data, my_task_data, ompt_team_size,
