@@ -285,6 +285,8 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
 #define VI3_KMP_INIT_IMPLICIT_TASK_FLAGS(task) \
     task->td_flags.tasktype = TASK_IMPLICIT;
 
+#define errExit(msg)    do { perror(msg); exit(EXIT_FAILURE); \
+                               } while (0)
 
 void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always) {
@@ -297,6 +299,13 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
           (ompt_lw_taskteam_t *)__kmp_allocate(sizeof(ompt_lw_taskteam_t));
     }
     link_lwt->heap = on_heap;
+
+    sigset_t rt_mask;
+    // Initialize full set of signals that will be blocked all at the same time
+    sigfillset(&rt_mask);
+    // Block signals before the critical section begins.
+    if (sigprocmask(SIG_BLOCK, &rt_mask, NULL) == -1)
+      errExit("sigprocmask");
 
     thr->th.th_current_task->linking = 23;
 
@@ -336,6 +345,10 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 
     thr->th.th_current_task->linking = 0;
 
+    // Unblock signals after critical section finished.
+    if (sigprocmask(SIG_UNBLOCK, &rt_mask, NULL) == -1)
+      errExit("sigprocmask");
+
   } else {
     // this is the first serialized team, so we just store the values in the
     // team and drop the taskteam-object
@@ -347,6 +360,14 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
 void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   ompt_lw_taskteam_t *lwtask = thr->th.th_team->t.ompt_serialized_team_info;
   if (lwtask) {
+
+    sigset_t rt_mask;
+    // Initialize full set of signals that will be blocked all at the same time
+    sigfillset(&rt_mask);
+    // Block signals before the beginning of the critical section.
+    if (sigprocmask(SIG_BLOCK, &rt_mask, NULL) == -1)
+      errExit("sigprocmask");
+
     thr->th.th_current_task->linking = 33;
 
     ompt_task_info_t tmp_task = lwtask->ompt_task_info;
@@ -365,6 +386,11 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     *OMPT_CUR_TEAM_INFO(thr) = tmp_team;
 
     thr->th.th_current_task->linking = 0;
+
+    // Unblock signals after critical section finished.
+    if (sigprocmask(SIG_UNBLOCK, &rt_mask, NULL) == -1)
+      errExit("sigprocmask");
+
     if (lwtask->heap) {
       __kmp_free(lwtask);
       lwtask = NULL;
