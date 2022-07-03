@@ -285,8 +285,6 @@ void __ompt_lw_taskteam_init(ompt_lw_taskteam_t *lwt, kmp_info_t *thr, int gtid,
 #define VI3_KMP_INIT_IMPLICIT_TASK_FLAGS(task) \
     task->td_flags.tasktype = TASK_IMPLICIT;
 
-#define errExit(msg)    do { perror(msg); exit(EXIT_FAILURE); \
-                               } while (0)
 
 void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
                              int on_heap, bool always) {
@@ -304,8 +302,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     // Initialize full set of signals that will be blocked all at the same time
     sigfillset(&rt_mask);
     // Block signals before the critical section begins.
-    if (sigprocmask(SIG_BLOCK, &rt_mask, NULL) == -1)
-      errExit("sigprocmask");
+    sigprocmask(SIG_BLOCK, &rt_mask, NULL);
 
     thr->th.th_current_task->linking = 23;
 
@@ -346,8 +343,7 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     thr->th.th_current_task->linking = 0;
 
     // Unblock signals after critical section finished.
-    if (sigprocmask(SIG_UNBLOCK, &rt_mask, NULL) == -1)
-      errExit("sigprocmask");
+    sigprocmask(SIG_UNBLOCK, &rt_mask, NULL);
 
   } else {
     // this is the first serialized team, so we just store the values in the
@@ -365,8 +361,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     // Initialize full set of signals that will be blocked all at the same time
     sigfillset(&rt_mask);
     // Block signals before the beginning of the critical section.
-    if (sigprocmask(SIG_BLOCK, &rt_mask, NULL) == -1)
-      errExit("sigprocmask");
+    sigprocmask(SIG_BLOCK, &rt_mask, NULL);
 
     thr->th.th_current_task->linking = 33;
 
@@ -388,8 +383,7 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
     thr->th.th_current_task->linking = 0;
 
     // Unblock signals after critical section finished.
-    if (sigprocmask(SIG_UNBLOCK, &rt_mask, NULL) == -1)
-      errExit("sigprocmask");
+    sigprocmask(SIG_UNBLOCK, &rt_mask, NULL);
 
     if (lwtask->heap) {
       __kmp_free(lwtask);
