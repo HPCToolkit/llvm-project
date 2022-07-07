@@ -298,9 +298,6 @@ void __ompt_lw_taskteam_link(ompt_lw_taskteam_t *lwt, kmp_info_t *thr,
     }
     link_lwt->heap = on_heap;
 
-    sigset_t rt_mask;
-    // Initialize full set of signals that will be blocked all at the same time
-    sigfillset(&rt_mask);
     // Block signals before the critical section begins.
     sigprocmask(SIG_BLOCK, &rt_mask, NULL);
 
@@ -357,9 +354,6 @@ void __ompt_lw_taskteam_unlink(kmp_info_t *thr) {
   ompt_lw_taskteam_t *lwtask = thr->th.th_team->t.ompt_serialized_team_info;
   if (lwtask) {
 
-    sigset_t rt_mask;
-    // Initialize full set of signals that will be blocked all at the same time
-    sigfillset(&rt_mask);
     // Block signals before the beginning of the critical section.
     sigprocmask(SIG_BLOCK, &rt_mask, NULL);
 

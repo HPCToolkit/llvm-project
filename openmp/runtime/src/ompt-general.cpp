@@ -86,6 +86,9 @@ enum tool_setting_e {
 
 ompt_callbacks_active_t ompt_enabled;
 
+// Set of signals to block when creating a nested serialized region.
+sigset_t rt_mask;
+
 ompt_state_info_t ompt_state_info[] = {
 #define ompt_state_macro(state, code) {#state, state},
     FOREACH_OMPT_STATE(ompt_state_macro)

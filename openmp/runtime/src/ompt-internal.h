@@ -153,6 +153,9 @@ int __kmp_control_tool(uint64_t command, uint64_t modifier, void *arg);
 
 extern ompt_callbacks_active_t ompt_enabled;
 
+// Set of signals to block when creating a nested serialized region.
+extern sigset_t rt_mask;
+
 #if KMP_OS_WINDOWS
 #define UNLIKELY(x) (x)
 #define OMPT_NOINLINE __declspec(noinline)
