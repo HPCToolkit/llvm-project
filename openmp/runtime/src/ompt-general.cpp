@@ -478,6 +478,10 @@ void ompt_post_init() {
 
     ompt_set_thread_state(root_thread, ompt_state_overhead);
 
+    // Initialize full set of signals to block during creation of nested serialized regions
+    // only if the tool has been attached.
+    sigfillset(&rt_mask);
+
     if (ompt_enabled.ompt_callback_thread_begin) {
       ompt_callbacks.ompt_callback(ompt_callback_thread_begin)(
           ompt_thread_initial, __ompt_get_thread_data_internal());

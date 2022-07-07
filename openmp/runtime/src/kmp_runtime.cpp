@@ -3472,8 +3472,6 @@ static void __kmp_initialize_root(kmp_root_t *root) {
   hot_team->t.t_sched.sched = r_sched.sched;
   hot_team->t.t_size_changed = 0;
 
-  // Initialize full set of signals to block during creation of nested serialized regions.
-  sigfillset(&rt_mask);
 }
 
 #ifdef KMP_DEBUG
