@@ -2712,13 +2712,15 @@ void __kmp_join_call(ident_t *loc, int gtid
   if (root->r.r_active != master_active)
     root->r.r_active = master_active;
 
+#if OMPT_SUPPORT
   // Read value of parallel_data before freeing the team.
   // Since, ompt_callback_parallel_end is called after the team has been freed,
   // it is possible that pointer to parallel_data points to a parallel_data
   // of a new (recycled) team at the moment of dispatching the callback.
   ompt_data_t old_parallel_data;
-  if (parallel_data)
+  if (ompt_enabled.enabled && parallel_data)
     old_parallel_data = *parallel_data;
+#endif
   __kmp_free_team(root, team USE_NESTED_HOT_ARG(
                             master_th)); // this will free worker threads
 
